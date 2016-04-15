@@ -1,0 +1,78 @@
+.gantt-task-progress {
+    top: 0;
+    bottom: 0;
+    height: auto !important;
+    background-color: #4B6A85 !important;
+}
+
+.gantt-task-group, .gantt-task-group-left-main, .gantt-task-group-right-main {
+    background-color: #34D075;
+}
+
+.gantt-task-group-left-symbol, .gantt-task-group-right-symbol {
+    border-top: 12px solid #34D075 !important;
+}
+
+.gantt-task {
+    height: 60%;
+}
+
+.gantt-row-height {
+    height: 2.5em;
+}
+
+.task-progress-text {
+    font-size: .9em;
+    color: #fff;
+    top: .2em;
+    position: absolute;
+    left: 0;
+}
+
+.gantt-row-even > .gantt-row-background {
+    background-color: #fff;
+}
+
+.gantt-column.gantt-foreground-col {
+    border: none;
+}
+
+.planned-task {
+    background-color: red !important;
+}
+
+.text-bold{
+    font-weight: bold;
+}
+
+.gantt-tree-handle.fa{
+    box-shadow: -1px 1px 10px #5FA2DD;
+    color: #5FA2DD;
+    font-size: 1.05em;
+}
+
+.gantt-task-background {
+    background-color: rgb(95, 162, 221);
+}
+
+.task-is-milestone  .gantt-task-background {
+     width: 12px;
+     height: 12px;
+     background: #bec938;
+     -webkit-transform: rotate(45deg);
+     -moz-transform: rotate(45deg);
+     -ms-transform: rotate(45deg);
+     -o-transform: rotate(45deg);
+     transform: rotate(45deg);
+}
+
+.gantt .gantt-endpoint.target-endpoint svg *,
+.gantt .gantt-endpoint.source-endpoint svg * {
+    fill: rgb(217, 217, 217);
+}
+
+
+.gantt .gantt-endpoint-overlay.arrow-right.start-endpoint,
+.gantt .gantt-endpoint-overlay.arrow-right.end-endpoint {
+    border-left-color: rgb(176, 176, 188);
+}

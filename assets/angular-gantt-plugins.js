@@ -3600,6 +3600,15 @@ angular.module('gantt.labels.templates', []).run(['$templateCache', function($te
         '');
 }]);
 
+angular.module('gantt.line.templates', []).run(['$templateCache', function($templateCache) {
+    $templateCache.put('plugins/line/taskLine.tmpl.html',
+        '<section class="gantt-task-line" ng-controller="TaskLineController">\n' +
+        '    <div class="gantt-task-line-item" ng-if="taskLine.model"\n' +
+        '        ng-style="{\'left\': taskLine.left + \'px\', \'width\': taskLine.width + \'px\', \'top\': taskLine.top}"></div>\n' +
+        '</section>\n' +
+        '');
+}]);
+
 angular.module('gantt.movable.templates', []).run(['$templateCache', function($templateCache) {
 
 }]);

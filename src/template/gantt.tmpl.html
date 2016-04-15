@@ -149,7 +149,10 @@
 
     <!-- Task content template -->
     <script type="text/ng-template" id="template/ganttTaskContent.tmpl.html">
-        <div class="gantt-task-content" unselectable="on"><span unselectable="on" gantt-bind-compile-html="getTaskContent()"/></div>
+        <div class="gantt-task-content" unselectable="on">
+            <span ng-show="!task.model.isMilestone" unselectable="on" class="task-progress-text">
+                {{(task.model.progress)? task.model.progress: 0 }}%
+            </span></div>
     </script>
 
 

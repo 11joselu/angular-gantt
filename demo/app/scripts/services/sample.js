@@ -12,82 +12,226 @@ angular.module('angularGanttDemoApp')
         return {
             getSampleData: function() {
                 return [
-                        // Order is optional. If not specified it will be assigned automatically
-                        {name: 'Milestones', height: '3em', sortable: false, drawTask: false, classes: 'gantt-row-milestone', color: '#45607D', tasks: [
-                            // Dates can be specified as string, timestamp or javascript date object. The data attribute can be used to attach a custom object
-                            {name: 'Kickoff', color: '#93C47D', from: '2013-10-07T09:00:00', to: '2013-10-07T10:00:00', data: 'Can contain any custom data or object'},
-                            {name: 'Concept approval', color: '#93C47D', from: new Date(2013, 9, 18, 18, 0, 0), to: new Date(2013, 9, 18, 18, 0, 0), est: new Date(2013, 9, 16, 7, 0, 0), lct: new Date(2013, 9, 19, 0, 0, 0)},
-                            {name: 'Development finished', color: '#93C47D', from: new Date(2013, 10, 15, 18, 0, 0), to: new Date(2013, 10, 15, 18, 0, 0)},
-                            {name: 'Shop is running', color: '#93C47D', from: new Date(2013, 10, 22, 12, 0, 0), to: new Date(2013, 10, 22, 12, 0, 0)},
-                            {name: 'Go-live', color: '#93C47D', from: new Date(2013, 10, 29, 16, 0, 0), to: new Date(2013, 10, 29, 16, 0, 0)}
-                        ], data: 'Can contain any custom data or object'},
-                        {name: 'Status meetings', tasks: [
-                            {name: 'Demo #1', color: '#9FC5F8', from: new Date(2013, 9, 25, 15, 0, 0), to: new Date(2013, 9, 25, 18, 30, 0)},
-                            {name: 'Demo #2', color: '#9FC5F8', from: new Date(2013, 10, 1, 15, 0, 0), to: new Date(2013, 10, 1, 18, 0, 0)},
-                            {name: 'Demo #3', color: '#9FC5F8', from: new Date(2013, 10, 8, 15, 0, 0), to: new Date(2013, 10, 8, 18, 0, 0)},
-                            {name: 'Demo #4', color: '#9FC5F8', from: new Date(2013, 10, 15, 15, 0, 0), to: new Date(2013, 10, 15, 18, 0, 0)},
-                            {name: 'Demo #5', color: '#9FC5F8', from: new Date(2013, 10, 24, 9, 0, 0), to: new Date(2013, 10, 24, 10, 0, 0)}
-                        ]},
-                        {name: 'Kickoff', movable: {allowResizing: false}, tasks: [
-                            {name: 'Day 1', color: '#9FC5F8', from: new Date(2013, 9, 7, 9, 0, 0), to: new Date(2013, 9, 7, 17, 0, 0),
-                                progress: {percent: 100, color: '#3C8CF8'}, movable: false},
-                            {name: 'Day 2', color: '#9FC5F8', from: new Date(2013, 9, 8, 9, 0, 0), to: new Date(2013, 9, 8, 17, 0, 0),
-                                progress: {percent: 100, color: '#3C8CF8'}},
-                            {name: 'Day 3', color: '#9FC5F8', from: new Date(2013, 9, 9, 8, 30, 0), to: new Date(2013, 9, 9, 12, 0, 0),
-                                progress: {percent: 100, color: '#3C8CF8'}}
-                        ]},
-                        {name: 'Create concept', tasks: [
-                            {name: 'Create concept', priority: 20, content: '<i class="fa fa-cog" ng-click="scope.handleTaskIconClick(task.model)"></i> {{task.model.name}}', color: '#F1C232', from: new Date(2013, 9, 10, 8, 0, 0), to: new Date(2013, 9, 16, 18, 0, 0), est: new Date(2013, 9, 8, 8, 0, 0), lct: new Date(2013, 9, 18, 20, 0, 0),
-                                progress: 100}
-                        ]},
-                        {name: 'Finalize concept', tasks: [
-                            {id: 'Finalize concept', name: 'Finalize concept', priority: 10, color: '#F1C232', from: new Date(2013, 9, 17, 8, 0, 0), to: new Date(2013, 9, 18, 18, 0, 0),
-                                progress: 100}
-                        ]},
-                        {name: 'Development', children: ['Sprint 1', 'Sprint 2', 'Sprint 3', 'Sprint 4'], content: '<i class="fa fa-file-code-o" ng-click="scope.handleRowIconClick(row.model)"></i> {{row.model.name}}'},
-                        {name: 'Sprint 1', tooltips: false, tasks: [
-                            {id: 'Product list view', name: 'Product list view', color: '#F1C232', from: new Date(2013, 9, 21, 8, 0, 0), to: new Date(2013, 9, 25, 15, 0, 0),
-                                progress: 25, dependencies: [{to: 'Order basket'}, {from: 'Finalize concept'}]}
-                        ]},
-                        {name: 'Sprint 2', tasks: [
-                            {id: 'Order basket', name: 'Order basket', color: '#F1C232', from: new Date(2013, 9, 28, 8, 0, 0), to: new Date(2013, 10, 1, 15, 0, 0),
-                                dependencies: {to: 'Checkout'}}
-                        ]},
-                        {name: 'Sprint 3', tasks: [
-                            {id: 'Checkout', name: 'Checkout', color: '#F1C232', from: new Date(2013, 10, 4, 8, 0, 0), to: new Date(2013, 10, 8, 15, 0, 0),
-                                dependencies: {to: 'Login & Signup & Admin Views'}}
-                        ]},
-                        {name: 'Sprint 4', tasks: [
-                            {id: 'Login & Signup & Admin Views', name: 'Login & Signup & Admin Views', color: '#F1C232', from: new Date(2013, 10, 11, 8, 0, 0), to: new Date(2013, 10, 15, 15, 0, 0),
-                                dependencies: [{to: 'HW'}, {to: 'SW / DNS/ Backups'}]}
-                        ]},
-                        {name: 'Hosting'},
-                        {name: 'Setup', tasks: [
-                            {id: 'HW', name: 'HW', color: '#F1C232', from: new Date(2013, 10, 18, 8, 0, 0), to: new Date(2013, 10, 18, 12, 0, 0)}
-                        ]},
-                        {name: 'Config', tasks: [
-                            {id: 'SW / DNS/ Backups', name: 'SW / DNS/ Backups', color: '#F1C232', from: new Date(2013, 10, 18, 12, 0, 0), to: new Date(2013, 10, 21, 18, 0, 0)}
-                        ]},
-                        {name: 'Server', parent: 'Hosting', children: ['Setup', 'Config']},
-                        {name: 'Deployment', parent: 'Hosting', tasks: [
-                            {name: 'Depl. & Final testing', color: '#F1C232', from: new Date(2013, 10, 21, 8, 0, 0), to: new Date(2013, 10, 22, 12, 0, 0), 'classes': 'gantt-task-deployment'}
-                        ]},
-                        {name: 'Workshop', tasks: [
-                            {name: 'On-side education', color: '#F1C232', from: new Date(2013, 10, 24, 9, 0, 0), to: new Date(2013, 10, 25, 15, 0, 0)}
-                        ]},
-                        {name: 'Content', tasks: [
-                            {name: 'Supervise content creation', color: '#F1C232', from: new Date(2013, 10, 26, 9, 0, 0), to: new Date(2013, 10, 29, 16, 0, 0)}
-                        ]},
-                        {name: 'Documentation', tasks: [
-                            {name: 'Technical/User documentation', color: '#F1C232', from: new Date(2013, 10, 26, 8, 0, 0), to: new Date(2013, 10, 28, 18, 0, 0)}
-                        ]}
+                        // this is a project
+                        {
+                            name: 'Development',
+                            children: [
+                                'Milestone',
+                                'Node 1',
+                                'Control account 3',
+                                'Node 2'
+                            ]
+                        },
+
+                        // this is a milestone
+                        {
+                            name: 'Milestone',
+                            tasks: [
+                                {
+                                    name: "Milestone",
+                                    id: "Milestone",
+                                    from: new Date(2016, 3, 2, 8, 0, 0),
+                                    to: new Date(2016, 3, 2, 8, 0, 0),
+                                    isMilestone: true,
+                                    classes: ['task-is-milestone'],
+                                    movable: {
+                                        'allowResizing': false,
+                                        'allowRowSwitching': false
+                                    }
+                                }
+                            ]
+                        },
+
+                        // this is a summary task
+                        {
+                            name: 'Node 1',
+                            children: [
+                                'Milestone 2',
+                                'Control account 1',
+                                'Control account 2',
+                            ],
+                        },
+
+                        // summary task milestone
+                        {
+                            name: 'Milestone 2',
+                            tasks: [
+                                {
+                                    name: "Milestone 2",
+                                    id: "Milestone 2",
+                                    from: new Date(2016, 3, 9, 8, 0, 0),
+                                    to: new Date(2016, 3, 9, 8, 0, 0),
+                                    isMilestone: true,
+                                    classes: ['task-is-milestone'],
+                                    movable: {
+                                        'allowResizing': false,
+                                        'allowRowSwitching': false
+                                    }
+                                }
+                            ]
+                        },
+
+                        {
+                            name: 'Control account 1',
+                            children: [
+                                'Milestone 3',
+                                'Work package 1',
+                                'Work package 2'
+                            ]
+                        },
+
+                       {
+                            name: 'Milestone 3',
+                            tasks: [
+                                {
+                                    name: "Milestone 3",
+                                    id: "Milestone 3",
+                                    from: new Date(2016, 3, 10, 8, 0, 0),
+                                    to: new Date(2016, 3, 10, 8, 0, 0),
+                                    isMilestone: true,
+                                    classes: ['task-is-milestone'],
+                                    movable: {
+                                        'allowResizing': false,
+                                        'allowRowSwitching': false
+                                    }
+                                }
+                            ]
+                        },
+
+                        {
+                            name: 'Work package 1',
+                            children: [
+                                'Milestone 4',
+                                'Activity 1',
+                                'Activity 2',
+                            ]
+                        },
+
+                        {
+                            name: 'Milestone 4',
+                            tasks: [
+                                {
+                                    name: "Milestone 4",
+                                    id: "Milestone 4",
+                                    from: new Date(2016, 3, 3, 8, 0, 0),
+                                    to: new Date(2016, 3, 3, 8, 0, 0),
+                                    isMilestone: true,
+                                    classes: ['task-is-milestone'],
+                                    movable: {
+                                        'allowResizing': false,
+                                        'allowRowSwitching': false
+                                    }
+                                }
+                            ]
+                        },
+
+                        {
+                            name: 'Activity 1',
+                            tasks: [
+                                {
+                                    name: "Activity 1",
+                                    id: "Activity 1",
+                                    from: new Date(2016, 3, 2, 8, 0, 0),
+                                    to: new Date(2016, 3, 4, 8, 0, 0),
+                                    progress: 100
+                                }
+                            ]
+                        },
+
+                        {
+                            name: 'Activity 2',
+                            tasks: [
+                                {
+                                    name: "Activity 2",
+                                    id: "Activity 2",
+                                    from: new Date(2016, 3, 7, 8, 0, 0),
+                                    to: new Date(2016, 3, 8, 8, 0, 0),
+                                    progress: 75
+                                }
+                            ]
+                        },
+
+                        {
+                            name: 'Work package 2',
+                            tasks: [
+                                {
+                                    name: 'Work package 2',
+                                    id: 'Work package 2',
+                                    from: new Date(2016, 3, 9, 8, 0, 0),
+                                    to: new Date(2016, 3, 15, 8, 0, 0),
+                                    progress: 0
+                                }
+                            ]
+                        },
+
+                        {
+                            name: 'Control account 2',
+                            tasks: [
+                                {
+                                    name: 'Control account 2',
+                                    id: 'Control account 2',
+                                    from: new Date(2016, 3, 16, 8, 0, 0),
+                                    to: new Date(2016, 3, 22, 8, 0, 0),
+                                    progress: 0
+                                }
+                            ]
+                        },
+
+                        {
+                            name: 'Control account 3',
+                            tasks: [
+                                {
+                                    name: 'Control account 3',
+                                    id: 'Control account 3',
+                                    from: new Date(2016, 3, 23, 8, 0, 0),
+                                    to: new Date(2016, 3, 29, 8, 0, 0),
+                                    progress: 0
+                                }
+                            ]
+                        },
+
+                        {
+                            name: 'Node 2',
+                            children: [
+                                'Control account 4',
+                                'Control account 5',
+                            ]
+                        },
+
+                        {
+                            name: 'Control account 4',
+                            tasks: [
+                                {
+                                    name: 'Control account 4',
+                                    id: 'Control account 4',
+                                    from: new Date(2016, 3, 30, 8, 0, 0),
+                                    to: new Date(2016, 4, 5, 8, 0, 0),
+                                    progress: 0
+                                }
+                            ]
+                        },
+
+                        {
+                            name: 'Control account 5',
+                            tasks: [
+                                {
+                                    name: 'Control account 5',
+                                    id: 'Control account 5',
+                                    from: new Date(2016, 4, 6, 8, 0, 0),
+                                    to: new Date(2016, 4, 12, 8, 0, 0),
+                                    progress: 0
+                                }
+                            ]
+                        },
+
                     ];
             },
             getSampleTimespans: function() {
                 return [
                         {
-                            from: new Date(2013, 9, 21, 8, 0, 0),
-                            to: new Date(2013, 9, 25, 15, 0, 0),
+                            from: new Date(2016, 2, 21, 8, 0, 0),
+                            to: new Date(2016, 2, 25, 15, 0, 0),
+
                             name: 'Sprint 1 Timespan'
                             //priority: undefined,
                             //classes: [],

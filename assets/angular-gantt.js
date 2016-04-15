@@ -5416,7 +5416,10 @@ angular.module('gantt.templates', []).run(['$templateCache', function($templateC
         '\n' +
         '    <!-- Task content template -->\n' +
         '    <script type="text/ng-template" id="template/ganttTaskContent.tmpl.html">\n' +
-        '        <div class="gantt-task-content" unselectable="on"><span unselectable="on" gantt-bind-compile-html="getTaskContent()"/></div>\n' +
+        '        <div class="gantt-task-content" unselectable="on">\n' +
+        '            <span ng-show="!task.model.isMilestone" unselectable="on" class="task-progress-text">\n' +
+        '                {{(task.model.progress)? task.model.progress: 0 }}%\n' +
+        '            </span></div>\n' +
         '    </script>\n' +
         '\n' +
         '\n' +

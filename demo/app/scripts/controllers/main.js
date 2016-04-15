@@ -108,7 +108,7 @@ angular.module('angularGanttDemoApp')
             allowSideResizing: true,
             labelsEnabled: true,
             currentDate: 'line',
-            currentDateValue: new Date(2013, 9, 23, 11, 20, 0),
+            currentDateValue: new Date(2016, 4, 3, 11, 20, 0),
             draw: false,
             readOnly: false,
             groupDisplayMode: 'group',
@@ -221,7 +221,7 @@ angular.module('angularGanttDemoApp')
 
                     api.data.on.change($scope, function(newData) {
                         if (dataToRemove === undefined) {
-                            dataToRemove = [
+                            /*dataToRemove = [
                                 {'id': newData[2].id}, // Remove Kickoff row
                                 {
                                     'id': newData[0].id, 'tasks': [
@@ -234,7 +234,7 @@ angular.module('angularGanttDemoApp')
                                     {'id': newData[7].tasks[0].id}
                                 ]
                                 } // Remove order basket from Sprint 2
-                            ];
+                            ];*/
                         }
                     });
 
