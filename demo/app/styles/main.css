@@ -60,3 +60,13 @@ textarea.live-row {
     font-size: 0.9em;
     color: #333;
 }
+
+.gantt-task-group-right-symbol:after {
+    content: '';
+    width: 2px;
+    height: 1000px;
+    background-color: #DFDFDF;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}

@@ -8,60 +8,105 @@
  * Controller of the angularGanttDemoApp
  */
 angular.module('angularGanttDemoApp')
-    .controller('MainCtrl', ['$scope', '$timeout', '$log', 'ganttUtils', 'GanttObjectModel', 'Sample', 'ganttMouseOffset', 'ganttDebounce', 'moment', function($scope, $timeout, $log, utils, ObjectModel, Sample, mouseOffset, debounce, moment) {
+    .controller('MainCtrl', ['$scope', '$timeout', '$log', 'ganttUtils', 'GanttObjectModel', 'Sample', 'FSDependencies', 'ResizeDependencies',
+        'ganttMouseOffset', 'ganttDebounce', 'moment', function($scope, $timeout, $log, utils, ObjectModel, Sample, FSDependencies, Resize, mouseOffset, debounce, moment) {
         var objectModel;
         var dataToRemove;
+
+
+
+        function greaterThan(dateOne, dateTwo) {
+            if(dateOne.diff(dateTwo) > 0) {
+                return 1;
+            } else {
+                if(dateOne.diff(dateTwo) === 0) {
+                    return 0;
+                }
+            }
+
+            return -1;
+        }
+
+        function getDifference(dateOne, dateTwo) {
+            return dateOne.diff(dateTwo, 'days')
+        }
+
+        function findDependencies(task) {
+            if(task.dependencies) {
+                for(var i = 0; i < task.dependencies.length; i++) {
+                    updateDate(task.dependencies[i], task);
+                }
+            }
+        };
+
+        var updateDate = function(dependency) {
+            var dependencies = new FSDependencies(dependency);
+            dependencies.setDate();
+            if(dependencies.gotDependencies()) {
+                dependencies.updateChildTasks($scope.data)
+            }
+
+            $scope.$digest();
+
+            function getTaskModel(model) {
+                if(model.task && model.task.model) {
+                    return model.task.model;
+                }
+
+                return model;
+            }
+        };
 
         // Event handler
         var logScrollEvent = function(left, date, direction) {
             if (date !== undefined) {
-                $log.info('[Event] api.on.scroll: ' + left + ', ' + (date === undefined ? 'undefined' : date.format()) + ', ' + direction);
+                //$log.info('[Event] api.on.scroll: ' + left + ', ' + (date === undefined ? 'undefined' : date.format()) + ', ' + direction);
             }
         };
 
         // Event handler
         var logDataEvent = function(eventName) {
-            $log.info('[Event] ' + eventName);
+            //$log.info('[Event] ' + eventName);
         };
 
         // Event handler
         var logTaskEvent = function(eventName, task) {
-            $log.info('[Event] ' + eventName + ': ' + task.model.name);
+            //$log.info('[Event] ' + eventName + ': ' + task.model.name);
         };
 
         // Event handler
         var logRowEvent = function(eventName, row) {
-            $log.info('[Event] ' + eventName + ': ' + row.model.name);
+            //$log.info('[Event] ' + eventName + ': ' + row.model.name);
         };
 
         // Event handler
         var logTimespanEvent = function(eventName, timespan) {
-            $log.info('[Event] ' + eventName + ': ' + timespan.model.name);
+            //$log.info('[Event] ' + eventName + ': ' + timespan.model.name);
         };
 
         // Event handler
         var logLabelsEvent = function(eventName, width) {
-            $log.info('[Event] ' + eventName + ': ' + width);
+            //$log.info('[Event] ' + eventName + ': ' + width);
         };
 
         // Event handler
         var logColumnsGenerateEvent = function(columns, headers) {
-            $log.info('[Event] ' + 'columns.on.generate' + ': ' + columns.length + ' column(s), ' + headers.length + ' header(s)');
+            //$log.info('[Event] ' + 'columns.on.generate' + ': ' + columns.length + ' column(s), ' + headers.length + ' header(s)');
         };
 
         // Event handler
         var logRowsFilterEvent = function(rows, filteredRows) {
-            $log.info('[Event] rows.on.filter: ' + filteredRows.length + '/' + rows.length + ' rows displayed.');
+            //$log.info('[Event] rows.on.filter: ' + filteredRows.length + '/' + rows.length + ' rows displayed.');
         };
 
         // Event handler
         var logTasksFilterEvent = function(tasks, filteredTasks) {
-            $log.info('[Event] tasks.on.filter: ' + filteredTasks.length + '/' + tasks.length + ' tasks displayed.');
+            //$log.info('[Event] tasks.on.filter: ' + filteredTasks.length + '/' + tasks.length + ' tasks displayed.');
         };
 
         // Event handler
         var logReadyEvent = function() {
-            $log.info('[Event] core.on.ready');
+            //$log.info('[Event] core.on.ready');
         };
 
         // Event utility function
@@ -195,13 +240,20 @@ angular.module('angularGanttDemoApp')
                     api.tasks.on.remove($scope, addEventName('tasks.on.remove', logTaskEvent));
 
                     if (api.tasks.on.moveBegin) {
-                        api.tasks.on.moveBegin($scope, addEventName('tasks.on.moveBegin', logTaskEvent));
+                        api.tasks.on.moveBegin($scope, addEventName('tasks.on.moveBegin', function(evt, task) {
+                        }));
                         //api.tasks.on.move($scope, addEventName('tasks.on.move', logTaskEvent));
-                        api.tasks.on.moveEnd($scope, addEventName('tasks.on.moveEnd', logTaskEvent));
+                        api.tasks.on.moveEnd($scope, addEventName('tasks.on.moveEnd', function(evt, task) {
+                            var resizeTask = new Resize(task);
+                            resizeTask.updateDependencies($scope.data);
+                        }));
 
                         api.tasks.on.resizeBegin($scope, addEventName('tasks.on.resizeBegin', logTaskEvent));
                         //api.tasks.on.resize($scope, addEventName('tasks.on.resize', logTaskEvent));
-                        api.tasks.on.resizeEnd($scope, addEventName('tasks.on.resizeEnd', logTaskEvent));
+                        api.tasks.on.resizeEnd($scope, addEventName('tasks.on.resizeEnd', function(evt, task) {
+                            var resizeTask = new Resize(task);
+                            resizeTask.updateDependencies($scope.data);
+                        }));
                     }
 
                     api.rows.on.add($scope, addEventName('rows.on.add', logRowEvent));
@@ -222,7 +274,7 @@ angular.module('angularGanttDemoApp')
                     api.data.on.change($scope, function(newData) {
                         if (dataToRemove === undefined) {
                             /*dataToRemove = [
-                                {'id': newData[2].id}, // Remove Kickoff row
+                                {'id': newData[2].id}, // Remove Kickoff nrow
                                 {
                                     'id': newData[0].id, 'tasks': [
                                     {'id': newData[0].tasks[0].id},
@@ -236,6 +288,12 @@ angular.module('angularGanttDemoApp')
                                 } // Remove order basket from Sprint 2
                             ];*/
                         }
+                    });
+
+
+                    // DEPENDENCIES
+                    api.dependencies.on.add($scope, function(task) {
+                       updateDate(task);
                     });
 
                     // When gantt is ready, load data.
