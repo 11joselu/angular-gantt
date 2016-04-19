@@ -47,14 +47,6 @@ angular.module('angularGanttDemoApp')
             }
 
             $scope.$digest();
-
-            function getTaskModel(model) {
-                if(model.task && model.task.model) {
-                    return model.task.model;
-                }
-
-                return model;
-            }
         };
 
         // Event handler

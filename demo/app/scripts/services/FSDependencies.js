@@ -8,44 +8,32 @@
  * Service in the angularGanttDemoApp.
  */
 angular.module('angularGanttDemoApp')
-    .factory('FSDependencies', function () {
+    .factory('FSDependencies', ['Utils', function (Utils) {
 
         var Dependencies = function(dependency, fromTask, toTask) {
             this.fromTask = fromTask || dependency.getFromTask().model;
             this.toTask = toTask || dependency.getToTask().model;
+            var utils = new Utils();
 
-            this.greaterThan = function greaterThan(dateOne, dateTwo) {
-
-                if(dateOne.diff(dateTwo) > 0) {
-                    return 1;
-                } else {
-                    if(dateOne.diff(dateTwo) === 0) {
-                        return 0;
-                    }
-                }
-
-                return -1;
+            this.add = function(toTask, dateOne, dateTwo) {
+                var dates = utils.difference(dateOne, dateTwo);
+                toTask.add(dates, 'ms');
             };
-
-            this.difference = function getDifference(dateOne, dateTwo) {
-                return dateOne.diff(dateTwo, 'days')
-            };
-
 
             this.setDate = function() {
-                var greater = this.greaterThan(this.fromTask.from, this.toTask.from);
+                var greater = utils.greaterThan(this.fromTask.from, this.toTask.from);
 
                 if (greater < 0) {
-                    var diff = this.difference(this.toTask.from, this.fromTask.to);
-                    this.toTask.from = angular.copy(this.fromTask.to);
-                    this.toTask.to.subtract(diff, 'days');
+                    if (utils.isBetween(this.fromTask, this.toTask.from)) {
+                        this.add(this.toTask.to, this.fromTask.to, this.toTask.from);
+                        this.toTask.from = angular.copy(this.fromTask.to);
+                    }
 
                 } else {
-
+                    // se está comiendo el
                     if(greater > 0) {
-                        var diff = this.difference(this.fromTask.to, this.toTask.from);
+                        this.add(this.toTask.to, this.fromTask.to, this.toTask.from);
                         this.toTask.from = angular.copy(this.fromTask.to);
-                        this.toTask.to.add(diff, 'days');
                     }
 
                 }
@@ -57,24 +45,10 @@ angular.module('angularGanttDemoApp')
                         false ;
             };
 
-            this.findTask = function(data, obj) {
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].tasks) {
-                        var childTask = data[i].tasks;
-                        for(var j=0; j < childTask.length; j++) {
-
-                            if(childTask[j].id === obj.to) {
-                                return childTask[j];
-                            }
-                        }
-                    }
-                }
-            }
-
             this.updateChildTasks = function updateDate(data) {
                 if(this.gotDependencies()) {
                     for(var i = 0; i < this.toTask.dependencies.length; i++) {
-                        var toTask = this.findTask(data, this.toTask.dependencies[i]);
+                        var toTask = utils.findTask(data, this.toTask.dependencies[i]);
 
                         var dependency = new Dependencies(null, this.toTask, toTask);
                         dependency.setDate();
@@ -88,5 +62,5 @@ angular.module('angularGanttDemoApp')
 
 
         return Dependencies;
-    });
+    }]);
 ;
