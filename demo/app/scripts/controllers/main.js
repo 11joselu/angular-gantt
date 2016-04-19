@@ -9,45 +9,10 @@
  */
 angular.module('angularGanttDemoApp')
     .controller('MainCtrl', ['$scope', '$timeout', '$log', 'ganttUtils', 'GanttObjectModel', 'Sample', 'FSDependencies', 'ResizeDependencies',
-        'ganttMouseOffset', 'ganttDebounce', 'moment', function($scope, $timeout, $log, utils, ObjectModel, Sample, FSDependencies, Resize, mouseOffset, debounce, moment) {
+        'ganttMouseOffset', 'ganttDebounce', 'moment', 'Utils', function($scope, $timeout, $log, utils, ObjectModel, Sample, FSDependencies, Resize, mouseOffset, debounce, moment, Utils) {
         var objectModel;
         var dataToRemove;
-
-
-
-        function greaterThan(dateOne, dateTwo) {
-            if(dateOne.diff(dateTwo) > 0) {
-                return 1;
-            } else {
-                if(dateOne.diff(dateTwo) === 0) {
-                    return 0;
-                }
-            }
-
-            return -1;
-        }
-
-        function getDifference(dateOne, dateTwo) {
-            return dateOne.diff(dateTwo, 'days')
-        }
-
-        function findDependencies(task) {
-            if(task.dependencies) {
-                for(var i = 0; i < task.dependencies.length; i++) {
-                    updateDate(task.dependencies[i], task);
-                }
-            }
-        };
-
-        var updateDate = function(dependency) {
-            var dependencies = new FSDependencies(dependency);
-            dependencies.setDate();
-            if(dependencies.gotDependencies()) {
-                dependencies.updateChildTasks($scope.data)
-            }
-
-            $scope.$digest();
-        };
+        var utils = new Utils();
 
         // Event handler
         var logScrollEvent = function(left, date, direction) {
@@ -101,6 +66,10 @@ angular.module('angularGanttDemoApp')
             //$log.info('[Event] core.on.ready');
         };
 
+        var refreshTree = function(api) {
+            api.tree.refresh()
+        };
+
         // Event utility function
         var addEventName = function(eventName, func) {
             return function(data) {
@@ -118,19 +87,59 @@ angular.module('angularGanttDemoApp')
             maxHeight: false,
             width: false,
             zoom: 1,
-            columns: ['model.name', 'from', 'to'],
-            treeTableColumns: ['from', 'to'],
-            columnsHeaders: {'model.name' : 'Name', 'from': 'From', 'to': 'To'},
-            columnsClasses: {'model.name' : 'gantt-column-name', 'from': 'gantt-column-from', 'to': 'gantt-column-to'},
+            columns: ['model.name', 'from', 'to', 'model.wbs'],
+            // tree columns
+            treeTableColumns: [
+                'model.data.wbs',
+                'model.data.account',
+                'model.data.package',
+                'model.data.predecessors',
+                'model.data.duration',
+                'from',
+                'to'
+                ],
+            // tree columns name
+            columnsHeaders: {
+                'model.name' : 'Name',
+                'model.data.wbs': 'WBS Code',
+                'model.data.account': 'Control Account',
+                'model.data.package': 'Work Package',
+                'model.data.predecessors': 'Predecessors',
+                'model.data.duration': 'Duration',
+                'from': 'Start',
+                'to': 'Finish',
+            },
+            // tree columns clases
+            columnsClasses: {
+                'model.name' :'gantt-column-name',
+                'from': 'gantt-column-from',
+                'to': 'gantt-column-to',
+                'model.data.account': 'gantt-column-account',
+                'model.data.package': 'gantt-column-package',
+                'model.data.predecessors': 'gantt-column-predecessors',
+                'model.data.duration': 'gantt-column-duration',
+            },
+            // tree columns formaters
             columnsFormatters: {
+                'model.data.account': function(data, columName, d) {
+
+                    return (data) ? "Yes" : "";
+                },
+                'model.data.package': function(data) {
+                    return (data)? "Yes": "";
+                },
+                'model.data.predecessors': function(data) {
+                    return data? data: "";
+                },
                 'from': function(from) {
-                    return from !== undefined ? from.format('lll') : undefined;
+                    return from !== undefined ? from.format('DD/MM/YYYY') : undefined;
                 },
                 'to': function(to) {
-                    return to !== undefined ? to.format('lll') : undefined;
+                    return to !== undefined ? to.format('DD/MM/YYYY') : undefined;
                 }
             },
-            treeHeaderContent: '<i class="fa fa-align-justify"></i> {{getHeader()}}',
+            treeHeaderContent: '<i></i> {{getHeader()}}',
+            //class="fa fa-align-justify"
             columnsHeaderContents: {
                 'model.name': '<i class="fa fa-align-justify"></i> {{getHeader()}}',
                 'from': '<i class="fa fa-calendar"></i> {{getHeader()}}',
@@ -237,14 +246,16 @@ angular.module('angularGanttDemoApp')
                         //api.tasks.on.move($scope, addEventName('tasks.on.move', logTaskEvent));
                         api.tasks.on.moveEnd($scope, addEventName('tasks.on.moveEnd', function(evt, task) {
                             var resizeTask = new Resize(task);
-                            resizeTask.updateDependencies($scope.data);
+                            resizeTask.updateDependencies($scope.data, api);
+                            $scope.api.columns.generate();
+
                         }));
 
                         api.tasks.on.resizeBegin($scope, addEventName('tasks.on.resizeBegin', logTaskEvent));
                         //api.tasks.on.resize($scope, addEventName('tasks.on.resize', logTaskEvent));
                         api.tasks.on.resizeEnd($scope, addEventName('tasks.on.resizeEnd', function(evt, task) {
                             var resizeTask = new Resize(task);
-                            resizeTask.updateDependencies($scope.data);
+                            resizeTask.updateDependencies($scope.data, api);
                         }));
                     }
 
@@ -285,7 +296,11 @@ angular.module('angularGanttDemoApp')
 
                     // DEPENDENCIES
                     api.dependencies.on.add($scope, function(task) {
-                       updateDate(task);
+                       var dependencies = new FSDependencies(task);
+                        dependencies.setDate(api);
+                        if(dependencies.gotDependencies()) {
+                            dependencies.updateChildTasks($scope.data)
+                        }
                     });
 
                     // When gantt is ready, load data.

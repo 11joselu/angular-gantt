@@ -13,16 +13,26 @@ angular.module('angularGanttDemoApp')
         var Dependencies = function(dependency, fromTask, toTask) {
             this.fromTask = fromTask || dependency.getFromTask().model;
             this.toTask = toTask || dependency.getToTask().model;
+            this.toTaskObj = null;
+
             var utils = new Utils();
 
             this.add = function(toTask, dateOne, dateTwo) {
-                var dates = utils.difference(dateOne, dateTwo);
+                var dates = utils.difference(dateOne, dateTwo, 'ms');
                 toTask.add(dates, 'ms');
             };
 
-            this.setDate = function() {
-                var greater = utils.greaterThan(this.fromTask.from, this.toTask.from);
+            this.calculateLag = function(dateOne, dateTwo) {
+                return utils.difference(dateOne, dateTwo, 'days');
+            };
 
+            this.updateDuration = function(dateOne, dateTwo) {
+                var days = utils.difference(dateOne, dateTwo, 'days');
+                return days + " d";
+            };
+
+            this.setDate = function(api) {
+                var greater = utils.greaterThan(this.fromTask.from, this.toTask.from);
                 if (greater < 0) {
                     if (utils.isBetween(this.fromTask, this.toTask.from)) {
                         this.add(this.toTask.to, this.fromTask.to, this.toTask.from);
@@ -37,6 +47,8 @@ angular.module('angularGanttDemoApp')
                     }
 
                 }
+
+                api.columns.generate();
             };
 
             this.gotDependencies = function() {

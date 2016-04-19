@@ -1,3 +1,6 @@
+body {
+    font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+}
 .gantt-task-progress {
     top: 0;
     bottom: 0;
@@ -46,9 +49,18 @@
 }
 
 .gantt-tree-handle.fa{
-    box-shadow: -1px 1px 10px #5FA2DD;
     color: #5FA2DD;
     font-size: 1.05em;
+}
+
+.gantt-tree-handle.fa.fa-circle {
+    font-size: 11px;
+    font-family: FontAwesome;
+    color: #5fa2dd;
+}
+
+.gantt-tree-handle.fa.fa-check-circle {
+    font-size: 1.2em;
 }
 
 .gantt-task-background {
@@ -75,4 +87,25 @@
 .gantt .gantt-endpoint-overlay.arrow-right.start-endpoint,
 .gantt .gantt-endpoint-overlay.arrow-right.end-endpoint {
     border-left-color: rgb(176, 176, 188);
+}
+
+.text-bold{
+    font-weight: bold;
+}
+
+.title-project {
+    font-size: 1.3em;
+}
+
+/*HEADER COLUMN CLASESS*/
+.gantt-column-duration {
+    min-width: 73px;
+}
+
+.gantt-column-predecessors {
+    min-width: 100px;
+}
+
+.gantt-column-account, .gantt-column-package {
+    min-width: 64px;
 }

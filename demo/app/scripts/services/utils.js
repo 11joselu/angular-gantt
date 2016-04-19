@@ -25,7 +25,7 @@ angular.module('angularGanttDemoApp')
             };
 
             this.difference = function getDifference(dateOne, dateTwo, type) {
-                return dateOne.diff(dateTwo, 'ms')
+                return dateOne.diff(dateTwo, type)
             };
 
             this.isBetween = function(model, dateTwo) {
@@ -44,7 +44,21 @@ angular.module('angularGanttDemoApp')
                         }
                     }
                 }
-            }
+            };
+
+            this.getIndexTask = function(data, task) {
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].tasks) {
+                        var childTask = data[i].tasks;
+                        for(var j=0; j < childTask.length; j++) {
+
+                            if(childTask[j].id === task.id) {
+                                return i;
+                            }
+                        }
+                    }
+                }
+            };
        }
 
 

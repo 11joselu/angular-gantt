@@ -8,12 +8,20 @@
                class="gantt-tree-handle-button btn btn-xs"
                ng-class="{'gantt-tree-collapsed': collapsed, 'gantt-tree-expanded': !collapsed}"
                ng-click="!isCollapseDisabled() && toggle()"><span
-                class="gantt-tree-handle glyphicon glyphicon-chevron-down"
+                class="gantt-tree-handle fa"
                 ng-class="{
-                'glyphicon-chevron-right': collapsed, 'glyphicon-chevron-down': !collapsed,
+                'fa-check-circle': $parent.row.model.data.isProject,
+                'fa-folder': collapsed && !isCollapseDisabled() && !$parent.row.model.data.isProject,
+                'fa-folder-open': !collapsed && !isCollapseDisabled() && !$parent.row.model.data.isProject,
+                'fa-circle': isCollapseDisabled(),
                 'gantt-tree-collapsed': collapsed, 'gantt-tree-expanded': !collapsed}"></span>
             </a>
-            <span gantt-row-label class="gantt-label-text" gantt-bind-compile-html="getRowContent()"/>
+            <span class="gantt-label-text"
+                ng-class="{
+                'text-bold': !isCollapseDisabled(),
+                'title-project': $parent.row.model.data.isProject
+                }"
+                gantt-bind-compile-html="getRowContent()"/>
         </div>
     </div>
 </div>

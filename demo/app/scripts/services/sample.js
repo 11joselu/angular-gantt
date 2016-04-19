@@ -20,7 +20,15 @@ angular.module('angularGanttDemoApp')
                                 'Node 1',
                                 'Control account 3',
                                 'Node 2'
-                            ]
+                            ],
+                            data: {
+                                account: true,
+                                wbs: 0,
+                                package: true,
+                                predecessors: "8FS-1 d",
+                                duration: '21 d',
+                                isProject: true
+                            }
                         },
 
                         // this is a milestone
@@ -39,7 +47,12 @@ angular.module('angularGanttDemoApp')
                                         'allowRowSwitching': false
                                     }
                                 }
-                            ]
+                            ],
+
+                             data: {
+                                wbs: 1,
+                                duration: '0 d'
+                            }
                         },
 
                         // this is a summary task
@@ -50,6 +63,10 @@ angular.module('angularGanttDemoApp')
                                 'Control account 1',
                                 'Control account 2',
                             ],
+                            data: {
+                                wbs: 2,
+                                duration: '14 d'
+                            }
                         },
 
                         // summary task milestone
@@ -68,7 +85,11 @@ angular.module('angularGanttDemoApp')
                                         'allowRowSwitching': false
                                     }
                                 }
-                            ]
+                            ],
+                            data: {
+                                wbs: 2.1,
+                                duration: '0 d'
+                            }
                         },
 
                         {
@@ -77,7 +98,12 @@ angular.module('angularGanttDemoApp')
                                 'Milestone 3',
                                 'Work package 1',
                                 'Work package 2'
-                            ]
+                            ],
+                            data: {
+                                wbs: 2.2,
+                                duration: '4 d',
+                                account: true
+                            }
                         },
 
                        {
@@ -95,7 +121,11 @@ angular.module('angularGanttDemoApp')
                                         'allowRowSwitching': false
                                     }
                                 }
-                            ]
+                            ],
+                            data: {
+                                wbs: "2.2.1",
+                                duration: '0 d',
+                            }
                         },
 
                         {
@@ -104,7 +134,12 @@ angular.module('angularGanttDemoApp')
                                 'Milestone 4',
                                 'Activity 1',
                                 'Activity 2',
-                            ]
+                            ],
+                            data: {
+                                wbs: "2.2.2",
+                                duration: '4 d',
+                                package: true
+                            }
                         },
 
                         {
@@ -122,7 +157,11 @@ angular.module('angularGanttDemoApp')
                                         'allowRowSwitching': false
                                     }
                                 }
-                            ]
+                            ],
+                            data: {
+                                wbs: "2.2.2.1",
+                                duration: '0 d',
+                            }
                         },
 
                         {
@@ -135,7 +174,11 @@ angular.module('angularGanttDemoApp')
                                     to: new Date(2016, 3, 4, 8, 0, 0),
                                     progress: 100
                                 }
-                            ]
+                            ],
+                            data: {
+                                wbs: "2.2.2.2",
+                                duration: '3 d',
+                            }
                         },
 
                         {
@@ -148,7 +191,12 @@ angular.module('angularGanttDemoApp')
                                     to: new Date(2016, 3, 8, 8, 0, 0),
                                     progress: 75
                                 }
-                            ]
+                            ],
+                            data: {
+                                wbs: "2.2.2.3",
+                                duration: '2 d',
+                                predecessors: '8Fs-1 d'
+                            }
                         },
 
                         {
@@ -161,7 +209,13 @@ angular.module('angularGanttDemoApp')
                                     to: new Date(2016, 3, 15, 8, 0, 0),
                                     progress: 0
                                 }
-                            ]
+                            ],
+                            data: {
+                                wbs: "2.2.3",
+                                duration: '5 d',
+                                package: true,
+                                predecessors: '6'
+                            }
                         },
 
                         {
@@ -174,7 +228,14 @@ angular.module('angularGanttDemoApp')
                                     to: new Date(2016, 3, 22, 8, 0, 0),
                                     progress: 0
                                 }
-                            ]
+                            ],
+                            data: {
+                                wbs: "2.3",
+                                duration: '5 d',
+                                account: true,
+                                package: true,
+                                predecessors: '4'
+                            }
                         },
 
                         {
@@ -187,7 +248,14 @@ angular.module('angularGanttDemoApp')
                                     to: new Date(2016, 3, 29, 8, 0, 0),
                                     progress: 0
                                 }
-                            ]
+                            ],
+                            data: {
+                                wbs: "3",
+                                account: true,
+                                package: true,
+                                predecessors: '2',
+                                duration: '5 d'
+                            }
                         },
 
                         {
@@ -195,7 +263,12 @@ angular.module('angularGanttDemoApp')
                             children: [
                                 'Control account 4',
                                 'Control account 5',
-                            ]
+                            ],
+                            data: {
+                                wbs: "4",
+                                predecessors: '10FS+2 d',
+                                duration: '10 d'
+                            }
                         },
 
                         {
@@ -208,7 +281,13 @@ angular.module('angularGanttDemoApp')
                                     to: new Date(2016, 4, 5, 8, 0, 0),
                                     progress: 0
                                 }
-                            ]
+                            ],
+                            data: {
+                                wbs: "4.1",
+                                account: true,
+                                package: true,
+                                duration: '5 d',
+                            }
                         },
 
                         {
@@ -221,7 +300,14 @@ angular.module('angularGanttDemoApp')
                                     to: new Date(2016, 4, 12, 8, 0, 0),
                                     progress: 0
                                 }
-                            ]
+                            ],
+                            data: {
+                                wbs: "4.1",
+                                account: true,
+                                package: true,
+                                predecessors: '14',
+                                duration: '5 d'
+                            }
                         },
 
                     ];

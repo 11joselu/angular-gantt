@@ -3617,7 +3617,7 @@ angular.module('gantt.labels.templates', []).run(['$templateCache', function($te
         '<div class="gantt-labels-body" ng-style="getLabelsCss()">\n' +
         '    <div gantt-vertical-scroll-receiver>\n' +
         '        <div ng-repeat="row in gantt.rowsManager.visibleRows track by row.model.id">\n' +
-        '            <div gantt-row-label\n' +
+        '            <div\n' +
         '                 class="gantt-row-label gantt-row-height"\n' +
         '                 ng-class="row.model.classes"\n' +
         '                 ng-style="{\'height\': row.model.height}">\n' +
@@ -3692,7 +3692,7 @@ angular.module('gantt.table.templates', []).run(['$templateCache', function($tem
         '        <div class="gantt-table-content" ng-style="getMaxHeightCss()">\n' +
         '            <div gantt-vertical-scroll-receiver>\n' +
         '                <div class="gantt-table-row" ng-repeat="row in gantt.rowsManager.visibleRows track by row.model.id" ng-controller="TableColumnRowController">\n' +
-        '                    <div gantt-row-label class="gantt-row-label gantt-row-height" ng-class="row.model.classes" ng-style="{\'height\': row.model.height}">\n' +
+        '                    <div class="gantt-row-label gantt-row-height" ng-class="row.model.classes" ng-style="{\'height\': row.model.height}">\n' +
         '                        <div class="gantt-valign-container">\n' +
         '                            <div class="gantt-valign-content">\n' +
         '                                <span class="gantt-label-text" gantt-bind-compile-html="getRowContent()"></span>\n' +
@@ -3763,12 +3763,20 @@ angular.module('gantt.tree.templates', []).run(['$templateCache', function($temp
         '               class="gantt-tree-handle-button btn btn-xs"\n' +
         '               ng-class="{\'gantt-tree-collapsed\': collapsed, \'gantt-tree-expanded\': !collapsed}"\n' +
         '               ng-click="!isCollapseDisabled() && toggle()"><span\n' +
-        '                class="gantt-tree-handle glyphicon glyphicon-chevron-down"\n' +
+        '                class="gantt-tree-handle fa"\n' +
         '                ng-class="{\n' +
-        '                \'glyphicon-chevron-right\': collapsed, \'glyphicon-chevron-down\': !collapsed,\n' +
+        '                \'fa-check-circle\': $parent.row.model.data.isProject,\n' +
+        '                \'fa-folder\': collapsed && !isCollapseDisabled() && !$parent.row.model.data.isProject,\n' +
+        '                \'fa-folder-open\': !collapsed && !isCollapseDisabled() && !$parent.row.model.data.isProject,\n' +
+        '                \'fa-circle\': isCollapseDisabled(),\n' +
         '                \'gantt-tree-collapsed\': collapsed, \'gantt-tree-expanded\': !collapsed}"></span>\n' +
         '            </a>\n' +
-        '            <span gantt-row-label class="gantt-label-text" gantt-bind-compile-html="getRowContent()"/>\n' +
+        '            <span class="gantt-label-text"\n' +
+        '                ng-class="{\n' +
+        '                \'text-bold\': !isCollapseDisabled(),\n' +
+        '                \'title-project\': $parent.row.model.data.isProject\n' +
+        '                }"\n' +
+        '                gantt-bind-compile-html="getRowContent()"/>\n' +
         '        </div>\n' +
         '    </div>\n' +
         '</div>\n' +
