@@ -248,12 +248,11 @@ angular.module('angularGanttDemoApp')
                             var resizeTask = new Resize(task);
                             resizeTask.updateDependencies($scope.data, api);
                             $scope.api.columns.generate();
-
                         }));
 
                         api.tasks.on.resizeBegin($scope, addEventName('tasks.on.resizeBegin', logTaskEvent));
                         //api.tasks.on.resize($scope, addEventName('tasks.on.resize', logTaskEvent));
-                        api.tasks.on.resizeEnd($scope, addEventName('tasks.on.resizeEnd', function(evt, task) {
+                        api.tasks.on.resizeEnd($scope, addEventName('tasks.on.resizeEnd', function(evt, task, row) {
                             var resizeTask = new Resize(task);
                             resizeTask.updateDependencies($scope.data, api);
                         }));
@@ -297,9 +296,9 @@ angular.module('angularGanttDemoApp')
                     // DEPENDENCIES
                     api.dependencies.on.add($scope, function(task) {
                        var dependencies = new FSDependencies(task);
-                        dependencies.setDate(api);
+                        dependencies.setDate($scope.data, api);
                         if(dependencies.gotDependencies()) {
-                            dependencies.updateChildTasks($scope.data)
+                            dependencies.updateChildTasks($scope.data, api)
                         }
                     });
 

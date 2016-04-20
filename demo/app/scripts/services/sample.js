@@ -25,7 +25,6 @@ angular.module('angularGanttDemoApp')
                                 account: true,
                                 wbs: 0,
                                 package: true,
-                                predecessors: "8FS-1 d",
                                 duration: '21 d',
                                 isProject: true
                             }
@@ -195,7 +194,6 @@ angular.module('angularGanttDemoApp')
                             data: {
                                 wbs: "2.2.2.3",
                                 duration: '2 d',
-                                predecessors: '8Fs-1 d'
                             }
                         },
 
@@ -214,7 +212,6 @@ angular.module('angularGanttDemoApp')
                                 wbs: "2.2.3",
                                 duration: '5 d',
                                 package: true,
-                                predecessors: '6'
                             }
                         },
 
@@ -234,7 +231,6 @@ angular.module('angularGanttDemoApp')
                                 duration: '5 d',
                                 account: true,
                                 package: true,
-                                predecessors: '4'
                             }
                         },
 
@@ -253,7 +249,6 @@ angular.module('angularGanttDemoApp')
                                 wbs: "3",
                                 account: true,
                                 package: true,
-                                predecessors: '2',
                                 duration: '5 d'
                             }
                         },
@@ -266,7 +261,6 @@ angular.module('angularGanttDemoApp')
                             ],
                             data: {
                                 wbs: "4",
-                                predecessors: '10FS+2 d',
                                 duration: '10 d'
                             }
                         },
@@ -305,7 +299,6 @@ angular.module('angularGanttDemoApp')
                                 wbs: "4.1",
                                 account: true,
                                 package: true,
-                                predecessors: '14',
                                 duration: '5 d'
                             }
                         },

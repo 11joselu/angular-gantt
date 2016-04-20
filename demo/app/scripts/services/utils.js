@@ -24,12 +24,24 @@ angular.module('angularGanttDemoApp')
                 return -1;
             };
 
+            this.isPositiveLag = function(lag) {
+                if (lag > 0){
+                    return 1
+                } else {
+                    if (lag < 0) {
+                        return -1
+                    }
+                }
+
+                return 0;
+            }
+
             this.difference = function getDifference(dateOne, dateTwo, type) {
                 return dateOne.diff(dateTwo, type)
             };
 
-            this.isBetween = function(model, dateTwo) {
-                return dateTwo.isBetween(model.from, model.to);
+            this.isBetween = function(fromTask, toTask) {
+                return toTask.from.isBetween(fromTask.from, fromTask.to) || toTask.to.isBetween(fromTask.from, fromTask.to);
             };
 
             this.findTask = function(data, obj) {
@@ -59,6 +71,23 @@ angular.module('angularGanttDemoApp')
                     }
                 }
             };
+
+            this.getPredecessorsValues = function(predecessors) {
+                var days = predecessors.match(/[\+|\-]\d*/g);
+                var parent = predecessors.match(/[0-9]*\FS/g).map(function(str) {
+                    return Number(str.substr(0, str.indexOf("FS")));
+                });
+
+                return {
+                    days: days,
+                    parent: parent
+                }
+            };
+
+            this.hasPredecessors = function(task) {
+                return angular.isDefined(task.data) &&
+                        angular.isDefined(task.data.predecessors);
+            }
        }
 
 
