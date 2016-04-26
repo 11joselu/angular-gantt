@@ -132,7 +132,8 @@ angular.module('angularGanttDemoApp')
                 this.toTask.from = angular.copy(fromTask);
                 // Test if values are at the weekend
                 var task = utils.setMonday(this.toTask);
-                this.toTask = angular.copy(task);
+                this.toTask.from = task.from;
+                this.toTask.to = task.to;
             }
 
             /**

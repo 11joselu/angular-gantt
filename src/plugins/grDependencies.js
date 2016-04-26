@@ -122,7 +122,6 @@
                         });
 
                         api.grDependencies.on.displayed(scope, function(groupTask) {
-                            console.log('detected');
                             manager.setTasks(groupTask);
                         });
 
