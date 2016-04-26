@@ -16,7 +16,6 @@
                     },
                     link: function(scope, element, attrs, ganttCtrl) {
                         var api = ganttCtrl.gantt.api;
-
                         // Load options from global options attribute.
                         if (scope.options && typeof(scope.options.dependencies) === 'object') {
                             for (var option in scope.options.dependencies) {
@@ -43,7 +42,6 @@
                         }
 
                         var manager = new DependenciesManager(ganttCtrl.gantt, scope, api);
-
                         function createLeftOverlay() {
                             return angular.element('<span><span class="gantt-endpoint-overlay start-endpoint arrow-right"></span></span>');
                         }
@@ -124,6 +122,7 @@
                         });
 
                         api.grDependencies.on.displayed(scope, function(groupTask) {
+                            console.log('detected');
                             manager.setTasks(groupTask);
                         });
 

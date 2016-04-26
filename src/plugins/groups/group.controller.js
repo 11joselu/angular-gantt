@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils', function($scope, TaskGroup, utils) {
+    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', '$element', 'GanttTaskGroup', 'ganttUtils', function($scope, $element, TaskGroup, utils) {
         var updateTaskGroup = function() {
             var rowGroups = $scope.row.model.groups;
 
@@ -15,6 +15,11 @@
 
                 $scope.row.setFromTo();
                 $scope.row.setFromToByValues($scope.taskGroup.from, $scope.taskGroup.to);
+                if ($scope.taskGroup.from && $scope.taskGroup.to) {
+                    $scope.taskGroup.$element = $element;
+                    $scope.gantt.api.grDependencies.raise.displayed($scope.taskGroup);
+                }
+
             } else {
                 $scope.taskGroup = undefined;
                 $scope.display = undefined;
