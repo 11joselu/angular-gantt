@@ -5,7 +5,7 @@
   module
     .factory('Utils', [Utils]);
 
-  function Utils() {
+   function Utils() {
     /*All utils functions*/
     var Utils = function() {
       this.DAY        = 1;
@@ -37,18 +37,18 @@
        * @return {[Boolean]}
        */
       this.sameDependencies = function(fromTask, toTask) {
-            if (toTask.dependencies && toTask.dependencies.length > 0) {
-                for(var i = 0; i < toTask.dependencies.length; i++) {
-                    var depend = toTask.dependencies[i];
-                    if(depend.to === fromTask.name) {
-                        toTask.dependencies.splice(i, 1);
-                        return true;
-                    }
-                }
+        if (toTask.dependencies && toTask.dependencies.length > 0) {
+          for(var i = 0; i < toTask.dependencies.length; i++) {
+            var depend = toTask.dependencies[i];
+            if(depend.to === fromTask.name) {
+              toTask.dependencies.splice(i, 1);
+              return true;
             }
+          }
+        }
 
-            return false;
-        };
+        return false;
+      };
 
 
       /**
@@ -230,9 +230,9 @@
           finish: ""
         }
       };
-
     };
 
 
     return Utils;
   }
+

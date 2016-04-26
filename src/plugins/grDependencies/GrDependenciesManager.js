@@ -2,7 +2,7 @@
 (function() {
     'use strict';
 
-    angular.module('gantt.grDependencies').factory('GrDependenciesManager', ['GanttGroupDependencyTaskMouseHandler', 'GroupsDependenciesEvents', function(GroupMouseHandler, DependenciesEvents) {
+    angular.module('gantt.grDependencies').factory('GrDependenciesManager', ['GanttDependencyTaskMouseHandler', 'GanttDependenciesManager', 'GanttDependenciesEvents','GanttDependenciesCommon', 'GanttDependency', function(GroupMouseHandler, DependenciesManager, DependenciesEvents, Common, Dependency) {
         var DependenciesManager = function(gantt, pluginScope, api) {
             var self = this;
 
@@ -10,13 +10,13 @@
             this.pluginScope = pluginScope;
             this.api = api;
             this.allTaskGroup = [];
+
             this.api.registerEvent('grDependencies', 'add');
             this.api.registerEvent('grDependencies', 'change');
             this.api.registerEvent('grDependencies', 'remove');
             this.api.registerEvent('grDependencies', 'displayed');
 
-            this.plumb = jsPlumb.getInstance();
-            this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
+            this.plumb = Common.plumb;
 
             this.events = new DependenciesEvents(this);
 
@@ -48,7 +48,7 @@
 
                 if (!self.pluginScope.readOnly) {
                     groupsTask.dependencies.mouseHandler = new GroupMouseHandler(self, groupsTask);
-                    groupsTask.dependencies.mouseHandler.install();
+                    groupsTask.dependencies.mouseHandler.installTaskGroup();
                 }
 
                 // WARNING: Performances issues
@@ -75,10 +75,17 @@
                 } else {
                     self.draggingConnection = undefined;
                     angular.forEach(self.allTaskGroup, function(task) {
-                        task.dependencies.mouseHandler.install();
+                        task.dependencies.mouseHandler.installTaskGroup();
                     });
                 }
             };
+
+            this.getTask = function(taskId) {
+            };
+
+            this.addDependency = function(groupTask, model) {
+
+            }
 
         };
 

@@ -36,8 +36,8 @@ angular.module('angularGanttDemoApp')
             }
 
             var task = utils.setMonday(this.task.model);
-            this.task.model.from = task.from;
-            this.task.model.to = task.to;
+            this.model.from = task.from;
+            this.model.to = task.to;
             api.columns.generate();
           };
 
