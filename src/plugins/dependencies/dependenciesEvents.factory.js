@@ -71,9 +71,16 @@
 
                     var dependency = self.manager.addDependency(sourceEndpoint.$task, connectionModel);
                     info.connection.$dependency = dependency;
-                    dependency.connection = info.connection;
 
-                    self.manager.api.dependencies.raise.add(dependency);
+                    if (dependency) {
+                        dependency.connection = info.connection;
+                        if (sourceEndpoint.$task.type) {
+                            self.manager.api.grDependencies.raise.add(dependency);
+                        } else {
+                            self.manager.api.dependencies.raise.add(dependency);
+                        }
+                    }
+
 
                 }
             };

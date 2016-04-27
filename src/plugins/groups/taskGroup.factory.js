@@ -15,6 +15,11 @@
             self.promotedTasks = [];
             self.showGrouping = false;
 
+            this.getContentElement = function() {
+
+                return angular.element(row.$element[0]);
+            };
+
             var groupRowGroups = self.row.model.groups;
             if (typeof(groupRowGroups) === 'boolean') {
                 groupRowGroups = {enabled: groupRowGroups};

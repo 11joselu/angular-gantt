@@ -14,6 +14,11 @@
             this.api.registerEvent('dependencies', 'change');
             this.api.registerEvent('dependencies', 'remove');
 
+            this.api.registerEvent('grDependencies', 'add');
+            this.api.registerEvent('grDependencies', 'change');
+            this.api.registerEvent('grDependencies', 'remove');
+            this.api.registerEvent('grDependencies', 'displayed');
+
             this.plumb = jsPlumb.getInstance();
             this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
 
@@ -22,6 +27,9 @@
 
             this.tasksList = [];
             this.tasks = {};
+
+            this.groupList =[];
+            this.groups = {};
 
             this.events = new DependenciesEvents(this);
 
@@ -94,27 +102,27 @@
              * @param model Model object for the dependency.
              */
             this.addDependency = function(task, model) {
-                var dependency = new Dependency(this, task, model);
+                    var dependency = new Dependency(this, task, model);
 
-                var fromTaskId = dependency.getFromTaskId();
-                var toTaskId = dependency.getToTaskId();
+                    var fromTaskId = dependency.getFromTaskId();
+                    var toTaskId = dependency.getToTaskId();
 
-                if (!(fromTaskId in this.dependenciesFrom)) {
-                    this.dependenciesFrom[fromTaskId] = [];
-                }
-                if (!(toTaskId in this.dependenciesTo)) {
-                    this.dependenciesTo[toTaskId] = [];
-                }
+                    if (!(fromTaskId in this.dependenciesFrom)) {
+                        this.dependenciesFrom[fromTaskId] = [];
+                    }
+                    if (!(toTaskId in this.dependenciesTo)) {
+                        this.dependenciesTo[toTaskId] = [];
+                    }
 
-                if (fromTaskId) {
-                    this.dependenciesFrom[fromTaskId].push(dependency);
-                }
+                    if (fromTaskId) {
+                        this.dependenciesFrom[fromTaskId].push(dependency);
+                    }
 
-                if (toTaskId) {
-                    this.dependenciesTo[toTaskId].push(dependency);
-                }
+                    if (toTaskId) {
+                        this.dependenciesTo[toTaskId].push(dependency);
+                    }
 
-                return dependency;
+                    return dependency;
             };
 
             /**
@@ -194,10 +202,19 @@
                     angular.forEach(self.tasks, function(task) {
                         task.dependencies.mouseHandler.release();
                     });
+
+                    angular.forEach(self.groups, function(gr) {
+                        gr.dependencies.mouseHandler.release();
+                    });
+
                 } else {
                     self.draggingConnection = undefined;
                     angular.forEach(self.tasks, function(task) {
                         task.dependencies.mouseHandler.install();
+                    });
+
+                    angular.forEach(self.groups, function(gr) {
+                        gr.dependencies.mouseHandler.install();
                     });
                 }
             };
@@ -229,7 +246,6 @@
                         task.dependencies.endpoints.push(endpointObject);
                     }
                 }
-
             };
 
             var removeTaskEndpoint = function(task) {
@@ -262,6 +278,38 @@
                 }
             };
 
+            var addGroupsEndpoints = function(groupsTask) {
+                if (!groupsTask.dependencies) {
+                    groupsTask.dependencies = {};
+                }
+
+                groupsTask.dependencies.endpoints = [];
+
+                if (self.pluginScope.endpoints) {
+                    for (var i = 0; i < self.pluginScope.endpoints.length; i++) {
+                        var controllerElement = angular.element(groupsTask.$element)[0];
+                        var groupElement = angular.element(controllerElement).children();
+                        if(groupElement[0]) {
+                            var endpointObject = self.plumb.addEndpoint(groupElement, self.pluginScope.endpoints[i]);
+                            endpointObject.setVisible(false, true, true); // hide endpoint
+                            endpointObject.$task = groupsTask;
+                            groupsTask.dependencies.endpoints.push(endpointObject);
+                        }
+                    }
+                }
+            };
+
+            var addGroupHandler = function(groupsTask) {
+                if (!groupsTask.dependencies) {
+                    groupsTask.dependencies = {};
+                }
+
+                if (!self.pluginScope.readOnly) {
+                    groupsTask.dependencies.mouseHandler = new TaskMouseHandler(self, groupsTask);
+                    groupsTask.dependencies.mouseHandler.install(groupsTask.row.$element);
+                }
+            };
+
             /**
              * Set tasks objects that can be used to display dependencies.
              *
@@ -287,6 +335,28 @@
                 self.tasks = newTasks;
                 self.tasksList = tasks;
             };
+
+            this.setGroupsTasks = function(grTasks) {
+                angular.forEach(self.groups, function(taskGr) {
+                    removeTaskMouseHandler(taskGr);
+                    removeTaskEndpoint(taskGr);
+                });
+
+                var newTasks = {};
+                var tasksList = [];
+                for (var i = 0; i < grTasks.length; i++) {
+                    var task = grTasks[i];
+                    if (isTaskEnabled(task)) {
+                        newTasks[task.model.id] = task;
+                        tasksList.push(task);
+                        addGroupsEndpoints(task);
+                        addGroupHandler(task);
+                    }
+                }
+                self.groups = newTasks;
+                self.groupList = grTasks;
+
+            }
 
             var disconnectTaskDependencies = function(task) {
                 var dependencies = self.getTaskDependencies(task);

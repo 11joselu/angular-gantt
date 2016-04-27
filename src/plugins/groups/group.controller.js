@@ -1,9 +1,8 @@
 (function(){
     'use strict';
-    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', '$element', 'GanttTaskGroup', 'ganttUtils', function($scope, $element, TaskGroup, utils) {
+    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', '$element', 'GanttTaskGroup', 'ganttUtils', 'ganttArrays', function($scope, $element, TaskGroup, utils, arrays) {
         var updateTaskGroup = function() {
             var rowGroups = $scope.row.model.groups;
-
             if (typeof(rowGroups) === 'boolean') {
                 rowGroups = {enabled: rowGroups};
             }
@@ -12,12 +11,17 @@
             if (enabledValue) {
                 $scope.display = utils.firstProperty([rowGroups], 'display', $scope.pluginScope.display);
                 $scope.taskGroup = new TaskGroup($scope.row, $scope.pluginScope);
-
                 $scope.row.setFromTo();
                 $scope.row.setFromToByValues($scope.taskGroup.from, $scope.taskGroup.to);
-                if ($scope.taskGroup.from && $scope.taskGroup.to) {
-                    $scope.taskGroup.$element = $element;
-                    $scope.gantt.api.grDependencies.raise.displayed($scope.taskGroup);
+
+                // Set new TaskGroup Dependencies
+                if ($scope.gantt.api.grDependencies &&
+                    ($scope.taskGroup.from && $scope.taskGroup.to)) {
+                        $scope.taskGroup.$element = $element;
+                        $scope.taskGroup.model = $scope.taskGroup.row.model;
+                        $scope.taskGroup.type = "TaskGroup";
+                        arrays.pushGroup($scope.taskGroup);
+                        $scope.gantt.api.grDependencies.raise.displayed($scope.taskGroup);
                 }
 
             } else {

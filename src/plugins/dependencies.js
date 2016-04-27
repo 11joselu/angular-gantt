@@ -1,8 +1,8 @@
 (function() {
     'use strict';
     angular.module('gantt.dependencies', ['gantt', 'gantt.dependencies.templates']).directive('ganttDependencies',
-        ['$timeout', '$document', 'ganttDebounce', 'GanttDependenciesManager', 'GanttDependenciesChecker',
-            function($timeout, $document, debounce, DependenciesManager, DependenciesChecker) {
+        ['$timeout', '$document', 'ganttDebounce', 'GanttDependenciesManager', 'GanttDependenciesChecker', 'ganttArrays',
+            function($timeout, $document, debounce, DependenciesManager, DependenciesChecker, arrays) {
                 return {
                     restrict: 'E',
                     require: '^gantt',
@@ -193,6 +193,12 @@
                                 checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
                             }
                         });
+
+                        api.grDependencies.on.displayed(scope, debounce(function(groups){
+                            $timeout(function() {
+                                manager.setGroupsTasks(arrays.getGroup());
+                            }, 0)
+                        }))
 
 
                     }

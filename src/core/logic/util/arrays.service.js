@@ -1,6 +1,7 @@
 (function(){
     'use strict';
     angular.module('gantt').service('ganttArrays', [function() {
+        var groups = [];
         return {
             moveToIndex: function(array, oldIndex, newIndex) {
                 if (newIndex >= array.length) {
@@ -77,6 +78,20 @@
                     return true;
                 }
                 return false;
+            },
+
+            pushGroup: function(gr) {
+                var found = groups.some(function(group) {
+                    return group.model.name === gr.model.name;
+                });
+
+                if(!found) {
+                    groups.push(gr);
+                }
+            },
+
+            getGroup: function() {
+                return groups;
             }
         };
     }]);
