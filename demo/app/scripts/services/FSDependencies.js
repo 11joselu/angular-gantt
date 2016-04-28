@@ -34,6 +34,7 @@ angular.module('angularGanttDemoApp')
 
             return str;
         };
+
         /**
          * Set String to precedessors column
          * @param {[type]} data [array of all data task]
@@ -57,10 +58,10 @@ angular.module('angularGanttDemoApp')
             var endStr = "";
 
             if(lag.diff < 0) {
-                endStr = " -" + lag.diff + " d;";
+                endStr = " -" + (lag.diff - utils.DAY) + " d;";
             } else {
                 if(lag.diff > 0) {
-                    endStr = " +" + lag.diff + " d;";
+                    endStr = " +" + (lag.diff - utils.DAY) + " d;";
                 }
             }
 
@@ -209,6 +210,11 @@ angular.module('angularGanttDemoApp')
                 }
             };
 
+            /**
+             * Remove index of task at predecessors columns
+             * @param  {[Array of tasks]} data
+             * @param  {[API]} api  [Api events]
+             */
             this.removeDependencies = function(data, api) {
                 var _lag = this.getLag(data, this.fromTask, this.toTask);
                 var index = utils.getIndexTask(data, this.toTask);
@@ -216,7 +222,9 @@ angular.module('angularGanttDemoApp')
                 ;
                 data[index].data.predecessors = removeFromArray(arr, _lag.fromTaskIdx).join(";");
                 api.columns.generate();
-
+                /**
+                 * Search for index of removed task
+                 */
                 function removeFromArray(arr, str) {
                     for(var i = 0; i < arr.length; i++) {
                         if(arr[i].indexOf(str) >= 0) {

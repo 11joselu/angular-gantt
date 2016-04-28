@@ -50,6 +50,25 @@
         return false;
       };
 
+      /**
+       * Deny on same hierarchy
+       * @param dependency
+       * @returns {boolean}
+       */
+     this.denyDropOnChild = function(dependency) {
+        var fromTask = dependency.getFromTask();
+        var toTask = dependency.getToTaskId();
+
+        for (var i = 0; i < fromTask.tasks.length; i++) {
+            if (fromTask.tasks[i].model.id === toTask) {
+                return true;
+            }
+        }
+
+        return false;
+
+     };
+
 
       /**
        * Comparation with lags
@@ -117,6 +136,11 @@
        */
       this.getIndexTask = function(data, task) {
         for (var i = 0; i < data.length; i++) {
+
+          if (data[i].name && (data[i].name === task.name)) {
+            return i;
+          }
+
           if (data[i].tasks) {
             var childTask = data[i].tasks;
             for(var j=0; j < childTask.length; j++) {
@@ -219,6 +243,7 @@
         return ~arr.indexOf(search) ? true : false;
       };
 
+      // TO DO
       this.getHours = function(task) {
         var startTime   = moment("08:00:00 am", 'hh:mm:ss a');
         var endTime     = moment("17:00:00 pm", 'hh:mm:ss a');

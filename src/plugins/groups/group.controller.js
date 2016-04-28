@@ -15,13 +15,17 @@
                 $scope.row.setFromToByValues($scope.taskGroup.from, $scope.taskGroup.to);
 
                 // Set new TaskGroup Dependencies
-                if ($scope.gantt.api.grDependencies &&
-                    ($scope.taskGroup.from && $scope.taskGroup.to)) {
-                        $scope.taskGroup.$element = $element;
-                        $scope.taskGroup.model = $scope.taskGroup.row.model;
-                        $scope.taskGroup.type = "TaskGroup";
-                        arrays.pushGroup($scope.taskGroup);
-                        $scope.gantt.api.grDependencies.raise.displayed($scope.taskGroup);
+                if ($scope.pluginScope.display === 'group') {
+                    if ($scope.gantt.api.grDependencies &&
+                        ($scope.taskGroup.from && $scope.taskGroup.to)) {
+                            $scope.taskGroup.$element = $element;
+                            $scope.taskGroup.model = $scope.taskGroup.row.model;
+                            $scope.taskGroup.model.from = $scope.taskGroup.from;
+                            $scope.taskGroup.model.to = $scope.taskGroup.to;
+                            $scope.taskGroup.type = "TaskGroup";
+                            arrays.pushGroup($scope.taskGroup);
+                            $scope.gantt.api.grDependencies.raise.displayed($scope.taskGroup);
+                    }
                 }
 
             } else {

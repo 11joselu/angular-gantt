@@ -74,7 +74,7 @@ angular.module('angularGanttDemoApp')
               var days = utils.getPredecessorsValues(predecessors.data.predecessors);
 
               var totalDays = days.parent.map(function(parentIndex) {
-                var fromTask = data[parentIndex].tasks[0];
+                var fromTask = (data[parentIndex].tasks) ? data[parentIndex].tasks[0] : data[parentIndex];
                 var daysDiff = utils.difference(vm.model.from, fromTask.to, 'days');
                 var str = parentIndex + "FS";
 

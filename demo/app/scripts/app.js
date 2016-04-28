@@ -22,7 +22,6 @@ angular.module('angularGanttDemoApp', [
     'gantt.dependencies',
     'gantt.overlap',
     'gantt.resizeSensor',
-    'gantt.grDependencies',
     'ngAnimate',
     'mgcrea.ngStrap'
 ]).config(['$compileProvider', function($compileProvider) {

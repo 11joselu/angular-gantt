@@ -295,6 +295,17 @@ angular.module('angularGanttDemoApp')
 
                     });
 
+                    api.grDependencies.on.add($scope, function(grTask) {
+                        if (!utils.denyDropOnChild(grTask)) {
+                            var dependencies = new FSDependencies(grTask);
+                            dependencies.setDate($scope.data, api);
+                            if(dependencies.gotDependencies()) {
+                                dependencies.updateChildTasks($scope.data, api)
+                            }
+
+                        }
+                    })
+
                     // When gantt is ready, load data.
                     // `data` attribute could have been used too.
                     $scope.load();

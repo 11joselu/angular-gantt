@@ -151,13 +151,11 @@
                         api.tasks.on.displayed(scope, debounce(function(tasks) {
                             manager.setTasks(tasks);
                             manager.refresh();
-                            if (scope.conflictChecker && scope.enabled) {
-                                checker.refresh(tasks);
-                            }
                         }));
 
                         api.rows.on.displayed(scope, function() {
                             manager.refresh();
+                            manager.refresh(manager.groups);
                         });
 
                         api.tasks.on.viewChange(scope, function(task) {
@@ -167,6 +165,7 @@
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([task]);
                             }
+
                         });
 
                         api.tasks.on.viewRowChange(scope, function(task) {
@@ -174,6 +173,8 @@
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([task]);
                             }
+
+                            manager.setTask(manager.groups);
                         });
 
                         api.dependencies.on.add(scope, function(dependency) {
@@ -186,6 +187,7 @@
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
                             }
+
                         });
 
                         api.dependencies.on.remove(scope, function(dependency) {
@@ -195,10 +197,18 @@
                         });
 
                         api.grDependencies.on.displayed(scope, debounce(function(groups){
-                            $timeout(function() {
-                                manager.setGroupsTasks(arrays.getGroup());
-                            }, 0)
-                        }))
+                            manager.setGroupsTasks(arrays.getGroup());
+                            manager.refresh(manager.groups);
+                        }));
+
+                        api.grDependencies.on.remove(scope, function(dependency) {
+                            checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
+                        });
+
+                        api.grDependencies.on.add(scope, function(dependency) {
+                            manager.denyDropOnChild(dependency);
+                            manager.refresh(manager.groups);
+                        })
 
 
                     }

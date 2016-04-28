@@ -8,6 +8,7 @@
     top: -25%;
     bottom: 0;
     margin: auto;
+    z-index: 1
 }
 
 .gantt-task-group-left-main,
@@ -38,7 +39,7 @@
     width: 0;
     height: 50%;
 
-    top: 75%;
+    top: 80%;
     bottom: 0;
 
     border-left: 6px solid transparent;
@@ -47,11 +48,15 @@
 }
 
 .gantt-task-group-left-symbol {
-    left: -6px;
+    left: -3px;
+    -webkit-transform: rotate(21deg);
+            transform: rotate(21deg);
 }
 
 .gantt-task-group-right-symbol {
-    right: -6px;
+    right: -3px;
+    -webkit-transform: rotate(-21deg);
+            transform: rotate(-21deg);
 }
 
 .gantt-task-overview {

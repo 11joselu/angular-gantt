@@ -102,27 +102,29 @@
              * @param model Model object for the dependency.
              */
             this.addDependency = function(task, model) {
-                    var dependency = new Dependency(this, task, model);
 
-                    var fromTaskId = dependency.getFromTaskId();
-                    var toTaskId = dependency.getToTaskId();
+                var dependency = new Dependency(this, task, model);
 
-                    if (!(fromTaskId in this.dependenciesFrom)) {
-                        this.dependenciesFrom[fromTaskId] = [];
-                    }
-                    if (!(toTaskId in this.dependenciesTo)) {
-                        this.dependenciesTo[toTaskId] = [];
-                    }
+                var fromTaskId = dependency.getFromTaskId();
+                var toTaskId = dependency.getToTaskId();
 
-                    if (fromTaskId) {
-                        this.dependenciesFrom[fromTaskId].push(dependency);
-                    }
+                if (!(fromTaskId in this.dependenciesFrom)) {
+                    this.dependenciesFrom[fromTaskId] = [];
+                }
 
-                    if (toTaskId) {
-                        this.dependenciesTo[toTaskId].push(dependency);
-                    }
+                if (!(toTaskId in this.dependenciesTo)) {
+                    this.dependenciesTo[toTaskId] = [];
+                }
 
-                    return dependency;
+                if (fromTaskId) {
+                    this.dependenciesFrom[fromTaskId].push(dependency);
+                }
+
+                if (toTaskId) {
+                    this.dependenciesTo[toTaskId].push(dependency);
+                }
+
+                return dependency;
             };
 
             /**
@@ -135,7 +137,6 @@
                 var fromDependencies = this.dependenciesFrom[dependency.getFromTaskId()];
                 var fromRemove = [];
                 var i;
-
                 if (fromDependencies) {
                     for (i = 0; i < fromDependencies.length; i++) {
                         if (dependency === fromDependencies[i]) {
@@ -182,7 +183,6 @@
 
             this.getTaskDependencies = function(task) {
                 var dependencies = [];
-
                 var fromDependencies = self.dependenciesFrom[task.model.id];
                 if (fromDependencies) {
                     dependencies = dependencies.concat(fromDependencies);
@@ -410,7 +410,9 @@
              * @returns {*}
              */
             this.getTask = function(taskId) {
-                return self.tasks[taskId];
+                if (self.tasks[taskId]) return self.tasks[taskId];
+
+                return self.groups[taskId];
             };
 
             var getSourceEndpoints = function(task) {
@@ -484,11 +486,10 @@
              */
             this.refresh = function(tasks) {
                 self.plumb.setSuspendDrawing(true);
-
                 try {
                     var tasksDependencies;
                     var i;
-                    if (tasks && !angular.isArray(tasks)) {
+                    if (tasks && !angular.isArray(tasks) && !angular.isObject(tasks)) {
                         tasks = [tasks];
                     }
 
@@ -517,6 +518,20 @@
                 } finally {
                     self.plumb.setSuspendDrawing(false, true);
                 }
+            };
+
+            this.denyDropOnChild = function(dependency) {
+               var model = dependency.task.model;
+               for(var i = 0; i < model.children.length; i++) {
+                    for(var j = 0; j < model.dependencies.length; j++) {
+                        if (model.children[i] === model.dependencies[j].to) {
+                            model.dependencies.splice(j, 1);
+                            this.refresh(this.groups);
+                            return;
+                        }
+                    }
+               }
+
             };
 
             this.api.registerMethod('dependencies', 'refresh', this.refresh, this);
