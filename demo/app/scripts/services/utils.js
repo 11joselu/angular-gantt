@@ -182,6 +182,29 @@
 
       };
 
+      this.updateAllLag = function(_allPred, data, model) {
+        var self = this;
+        return _allPred.parent.map(function(parentIndex) {
+            var _str = parentIndex + "FS";
+            var _endStr = "", _sp = "";
+            var fromTask = (data[parentIndex].tasks) ?
+                            data[parentIndex].tasks[0] :
+                            data[parentIndex];
+
+            var diff = self.difference(model.from, fromTask.to, 'days') - self.DAY;
+
+            if (diff > 0) {
+                _endStr = " +" + diff + "d";
+            } else {
+                if (diff < 0) {
+                    _endStr = "" + diff + "d";
+                }
+            }
+
+            return  _sp + _str + _endStr;
+        });
+      }
+
       /**
        * Return if task has predecessors
        * @param  {[Taks]}  task

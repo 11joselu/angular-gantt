@@ -27,7 +27,8 @@ angular.module('angularGanttDemoApp')
                                 package: true,
                                 duration: '21 d',
                                 isProject: true
-                            }
+                            },
+                            dependencies: false
                         },
 
                         // this is a milestone

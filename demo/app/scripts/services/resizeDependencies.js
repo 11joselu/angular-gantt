@@ -47,16 +47,16 @@ angular.module('angularGanttDemoApp')
            * @return {[Task]}
            */
           this.updateDuration = function(data) {
-            var task = utils.setMonday(this.model);
+              var task = utils.setMonday(this.model);
 
-            // Warning: this.model lose references
-            var taskIndex = utils.getIndexTask(data, this.model);
-            data[taskIndex].tasks[0] = angular.copy(task);
+              // Warning: this.model lose references
+              var taskIndex = utils.getIndexTask(data, this.model);
+              data[taskIndex].tasks[0] = angular.copy(task);
 
-            data[taskIndex].data.duration = Math.abs(utils.difference(this.model.from, this.model.to, 'days')) + " d";
-            this.updatePredecessors(data, taskIndex);
+              data[taskIndex].data.duration = Math.abs(utils.difference(this.model.from, this.model.to, 'days')) + " d";
+              this.updatePredecessors(data, taskIndex);
 
-            return task;
+              return task;
           };
 
           /**
@@ -66,35 +66,16 @@ angular.module('angularGanttDemoApp')
            * @return {[String]} all predecessors values
            */
           this.updatePredecessors = function(data, index) {
+            var model = data[index];
             var vm = this;
 
-            if(utils.hasPredecessors(data[index])) {
-              var predecessors = data[index];
-              // Get predecessors values
-              var days = utils.getPredecessorsValues(predecessors.data.predecessors);
+            if (utils.hasPredecessors(model)) {
 
-              var totalDays = days.parent.map(function(parentIndex) {
-                var fromTask = (data[parentIndex].tasks) ? data[parentIndex].tasks[0] : data[parentIndex];
-                var daysDiff = utils.difference(vm.model.from, fromTask.to, 'days');
-                var str = parentIndex + "FS";
+                var _allPred = utils.getPredecessorsValues(model.data.predecessors);
 
-                if (utils.isPositiveLag(daysDiff) > 0) {
-                  var days = daysDiff - utils.DAY;
-                  if (days > 0 ) {
-                    return str + "+" + days + " d;";
-                  } else {
-                    return str;
-                  }
-                } else {
-                  if (utils.isPositiveLag(daysDiff) < 0) {
-                    return str + daysDiff + " d;";
-                  }
-                }
+                var days = utils.updateAllLag(_allPred, data, vm.model);
 
-                return str;
-              });
-
-              predecessors.data.predecessors = totalDays.join(";");
+               model.data.predecessors = days.join(";");
             }
           };
         };

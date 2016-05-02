@@ -15,24 +15,8 @@ angular.module('angularGanttDemoApp')
          * Update task predecessors on resize or move event
          * @return {[type]} [description]
          */
-        var updatePre = function(getAllPred, lag) {
-             var str = "";
-             var updateIndex = getAllPred.parent.indexOf(lag.fromTaskIdx);
-
-            getAllPred.parent.forEach(function(value, index) {
-
-                if(index === updateIndex) {
-                    getAllPred.days[index] = lag.diff;
-                }
-
-                var day = (getAllPred.days[index] > 0) ? "+"+ getAllPred.days[index] :
-                                                            getAllPred.days[index];
-                var days = (getAllPred.days[index] !== 0)? day + " d;": ";";
-
-                str += value +"FS" + days;
-            });
-
-            return str;
+        var updatePre = function(getAllPred, data, toTask) {
+            return utils.updateAllLag(getAllPred, data, toTask)
         };
 
         /**
@@ -40,34 +24,42 @@ angular.module('angularGanttDemoApp')
          * @param {[type]} data [array of all data task]
          * @param {[type]} lag  [is lag values]
          */
-        var setLagValue = function(data, lag, update){
+        var setLagValue = function(data, lag, update, toTask){
 
-            var _data = data[lag.toTaskIdx].data;
-            var _pred = (_data.predecessors)? _data.predecessors : "";
-            var getAllPred = utils.getPredecessorsValues(_pred);
+            var fromTaskIdx = lag.fromTaskIdx;
+            var toTaskIdx = lag.toTaskIdx;
+            var diff = lag.diff - utils.DAY;
+            var _data = data[toTaskIdx].data;
+            var _str = fromTaskIdx + "FS";
+            var _endStr = "", _sp = "";
 
-            if (utils.isInArray(getAllPred.parent, lag.fromTaskIdx)) {
-                if (update) {
-                    var str = updatePre(getAllPred, lag)
-                    _data.predecessors = str;
+            if (_data.predecessors) {
+                var getAllPred = utils.getPredecessorsValues(_data.predecessors);
+
+                if (utils.isInArray(getAllPred.parent, fromTaskIdx)) {
+                    if (update) {
+                        var days = updatePre(getAllPred, data, toTask);
+                        _data.predecessors = days.join(";");
+                    }
+                    return;
+                } else {
+                    _sp = ";";
                 }
-                return;
             }
 
-            var str = lag.fromTaskIdx + "FS";
-            var endStr = "";
 
-            if(lag.diff < 0) {
-                endStr = " -" + (lag.diff - utils.DAY) + " d;";
+
+            if (diff > 0) {
+                _endStr = " +" + diff + "d";
             } else {
-                if(lag.diff > 0) {
-                    endStr = " +" + (lag.diff - utils.DAY) + " d;";
+                if (diff < 0) {
+                    _endStr = "" + diff + "d";
                 }
             }
 
-            endStr = (endStr)? endStr: ";";
-            _pred += str + endStr;
-            _data.predecessors = _pred;
+            _data.predecessors = (_data.predecessors) ? _data.predecessors : "";
+            _data.predecessors += _sp + _str + _endStr;
+
         };
 
 
@@ -131,6 +123,11 @@ angular.module('angularGanttDemoApp')
                 var fromTask = date || this.fromTask.to;
                 this.add(this.toTask.to, fromTask, this.toTask.from);
                 this.toTask.from = angular.copy(fromTask);
+
+                if(this.toTask.from === this.toTask.from) {
+                    this.toTask.from.add(1, 'days');
+                    this.toTask.to.add(1, 'days');
+                }
                 // Test if values are at the weekend
                 var task = utils.setMonday(this.toTask);
                 this.toTask.from = task.from;
@@ -176,7 +173,7 @@ angular.module('angularGanttDemoApp')
 
                     // set lag values
                     var lag = this.getLag(data, this.fromTask, this.toTask);
-                    setLagValue(data, lag, update);
+                    setLagValue(data, lag, update, this.toTask);
                }
                     // update tree table
                     api.columns.generate();
