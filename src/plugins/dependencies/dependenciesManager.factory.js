@@ -522,16 +522,34 @@
 
             this.denyDropOnChild = function(dependency) {
                var model = dependency.task.model;
-               for(var i = 0; i < model.children.length; i++) {
-                    for(var j = 0; j < model.dependencies.length; j++) {
-                        if (model.children[i] === model.dependencies[j].to) {
-                            model.dependencies.splice(j, 1);
-                            this.refresh(this.groups);
-                            return;
+               var toTaskId = dependency.getToTaskId();
+               var descendants = dependency.task.descendants;
+
+               for (var i = 0; i < descendants.length; i++) {
+
+                   if (descendants[i].model.id == toTaskId) {
+                       model.dependencies = model.dependencies.filter(function(dependency){
+                            return dependency.to !== toTaskId
+                       });
+
+                       return true;
+                   } else {
+                        if (descendants[i].model.tasks) {
+                            var tasks = descendants[i].model.tasks;
+                            for (var j = 0; j < tasks.length; j++) {
+                                if (tasks[j].id === toTaskId) {
+                                    model.dependencies = model.dependencies.filter(function(dependency){
+                                        return dependency.to !== toTaskId
+                                    });
+
+                                    return true;
+                                }
+                            }
                         }
-                    }
+                   }
                }
 
+                return false;
             };
 
             this.api.registerMethod('dependencies', 'refresh', this.refresh, this);

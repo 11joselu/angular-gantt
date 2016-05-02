@@ -160,49 +160,56 @@
        */
       this.getPredecessorsValues = function(pred) {
         // var days = pred.match(/[\+|\-]\d*/g);
-        var predecessors = pred.split(";");
-        var days = predecessors.map(function(value) {
-          var days = value.match(/[+|-]\d*/g, "");
-          return  (days)? Number(days[0]) : 0;
-        }).filter(function(value) {
-          return value || value === 0;
-        });
+            var predecessors = pred.split(";");
+            var days = predecessors.map(function(value) {
+              var days = value.match(/[+|-]\d*/g, "");
+              return  (days)? Number(days[0]) : 0;
+            }).filter(function(value) {
+              return value || value === 0;
+            });
 
-        var parent = predecessors.map(function(value) {
-          var parent = value.replace(/\FS.*$/g, "");
-          return Number(parent);
-        }).filter(function(value) {
-          return value;
-        });
+            var parent = predecessors.map(function(value) {
+              var parent = value.replace(/\FS.*$/g, "");
+              return Number(parent);
+            }).filter(function(value) {
+              return value;
+            });
 
-        return {
-          days: days,
-          parent: parent
-        }
+            return {
+              days: days,
+              parent: parent
+            }
 
       };
 
+      /**
+       * Update all lag columns values
+       * @param  {[Array]} _allPred [Array of predecessors values]
+       * @param  {[Array]} data     [description]
+       * @param  {[Taks]} model    [description]
+       * @return {[Array]} Array of strings
+       */
       this.updateAllLag = function(_allPred, data, model) {
-        var self = this;
-        return _allPred.parent.map(function(parentIndex) {
+         var self = this;
+         return _allPred.parent.map(function(parentIndex) {
             var _str = parentIndex + "FS";
             var _endStr = "", _sp = "";
             var fromTask = (data[parentIndex].tasks) ?
                             data[parentIndex].tasks[0] :
                             data[parentIndex];
 
-            var diff = self.difference(model.from, fromTask.to, 'days') - self.DAY;
+            var diff = self.difference(model.from, fromTask.to, 'days');
 
             if (diff > 0) {
-                _endStr = " +" + diff + "d";
+                _endStr = " +" + (diff - self.DAY) + "d";
             } else {
                 if (diff < 0) {
-                    _endStr = "" + diff + "d";
+                    _endStr = "" + (diff) + "d";
                 }
             }
 
             return  _sp + _str + _endStr;
-        });
+         });
       }
 
       /**
@@ -240,6 +247,9 @@
           }
         }
 
+        this.getHours(task.from, 8);
+        this.getHours(task.to, 17);
+
         return task;
       };
 
@@ -267,17 +277,28 @@
       };
 
       // TO DO
-      this.getHours = function(task) {
-        var startTime   = moment("08:00:00 am", 'hh:mm:ss a');
-        var endTime     = moment("17:00:00 pm", 'hh:mm:ss a');
+      this.getHours = function(date, min) {
 
-        var ROUNDING =  30 * 60 * 1000; /*ms*/
-        var start = moment(Math.ceil((+task) / ROUNDING) * ROUNDING);
-        return {
-          start: "",
-          finish: ""
+        var nextDay = angular.copy(date);
+        nextDay.set('hours', min).set('minutes', 0).set('milliseconds', 0).add(1, 'days');
+
+        var beforeDay = angular.copy(date);
+            beforeDay.set('hours', min).set('minutes', 0).set('milliseconds', 0).subtract(1, 'day');
+
+        var toNext = date.diff(nextDay, 'hours');
+        var toBefore = date.diff(beforeDay, 'hours');
+
+        if (Math.abs(toBefore) < Math.abs(toNext)) {
+            date.hour(min);
+            date.minutes(0);
+            date.milliseconds(0);
+        } else {
+            date.set('hours', min).set('minutes', 0).set('milliseconds', 0)
         }
+
+        return date;
       };
+
     };
 
 

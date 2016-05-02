@@ -59,7 +59,6 @@ angular.module('angularGanttDemoApp')
 
             _data.predecessors = (_data.predecessors) ? _data.predecessors : "";
             _data.predecessors += _sp + _str + _endStr;
-
         };
 
 
@@ -124,7 +123,7 @@ angular.module('angularGanttDemoApp')
                 this.add(this.toTask.to, fromTask, this.toTask.from);
                 this.toTask.from = angular.copy(fromTask);
 
-                if(this.toTask.from === this.toTask.from) {
+                if(utils.difference(this.fromTask.to, this.toTask.from, 'days') === 0) {
                     this.toTask.from.add(1, 'days');
                     this.toTask.to.add(1, 'days');
                 }
@@ -143,7 +142,6 @@ angular.module('angularGanttDemoApp')
 
                if(!utils.sameDependencies(this.fromTask, this.toTask)) {
                     var greater = utils.greaterThan(this.fromTask.to, this.toTask.from);
-
                     if(greater < 0 ) {
                         // Move toTask at the end of fromTask
                         if (utils.isBetween(this.fromTask, this.toTask)) {

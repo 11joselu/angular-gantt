@@ -21,6 +21,7 @@ angular.module('angularGanttDemoApp')
            * @return {[type]}      [description]
            */
           this.updateDependencies = function(data, api) {
+
             var task = this.updateDuration(data);
             if (this.model.dependencies) {
               // update model values from weekend updates

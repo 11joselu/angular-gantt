@@ -132,10 +132,10 @@ angular.module('angularGanttDemoApp')
                     return data? data: "";
                 },
                 'from': function(from) {
-                    return from !== undefined ? from.format('DD/MM/YYYY') : undefined;
+                    return from !== undefined ? from.format('lll') : undefined;
                 },
                 'to': function(to) {
-                    return to !== undefined ? to.format('DD/MM/YYYY') : undefined;
+                    return to !== undefined ? to.format('lll') : undefined;
                 }
             },
             treeHeaderContent: '<i></i> {{getHeader()}}',
