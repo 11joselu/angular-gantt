@@ -304,7 +304,13 @@ angular.module('angularGanttDemoApp')
                             }
 
                         }
-                    })
+                    });
+
+                    api.grDependencies.on.remove($scope, function(task) {
+                       var dependencies = new FSDependencies(task);
+                        dependencies.removeDependencies($scope.data, api);
+
+                    });
 
                     // When gantt is ready, load data.
                     // `data` attribute could have been used too.
