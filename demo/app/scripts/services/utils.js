@@ -65,6 +65,12 @@
             }
         }
 
+        for (var i = 0; i < fromTask.descendants.length; i++ ){
+            if (fromTask.descendants[i].model.id === toTask) {
+                return true;
+            }
+        }
+
         return false;
 
      };
@@ -199,12 +205,11 @@
                             data[parentIndex];
 
             var diff = self.difference(model.from, fromTask.to, 'days');
-
             if (diff > 0) {
-                _endStr = " +" + (diff - self.DAY) + "d";
+                _endStr = " +" + diff + "d";
             } else {
                 if (diff < 0) {
-                    _endStr = "" + (diff) + "d";
+                    _endStr = "" + diff + "d";
                 }
             }
 

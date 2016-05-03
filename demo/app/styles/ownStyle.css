@@ -5,7 +5,7 @@ body {
     top: 0;
     bottom: 0;
     height: auto !important;
-    background-color: #4B6A85 !important;
+    background-color: #4B6A85;
 }
 
 .gantt-task-group, .gantt-task-group-left-main, .gantt-task-group-right-main {
@@ -13,7 +13,7 @@ body {
 }
 
 .gantt-task-group-left-symbol, .gantt-task-group-right-symbol {
-    border-top: 12px solid #34D075 !important;
+    border-top: 12px solid #5B5B5B !important;
 }
 
 .gantt-task {
@@ -70,7 +70,7 @@ body {
 .task-is-milestone  .gantt-task-background {
      width: 12px;
      height: 12px;
-     background: #bec938;
+     background: #2BA3AD;
      -webkit-transform: rotate(45deg);
      -moz-transform: rotate(45deg);
      -ms-transform: rotate(45deg);
@@ -108,4 +108,29 @@ body {
 
 .gantt-column-account, .gantt-column-package {
     min-width: 64px;
+}
+
+.gantt-task-conent {
+    min-width: 14px;
+}
+
+.gantt-task-group {
+    background: #5B5B5B;
+}
+
+.gantt-task-group-left-symbol, .gantt-task-group-right-symbol {
+    border-top-color: #5B5B5B;
+}
+
+.gantt-task-group {
+    height: 8%;
+}
+
+.gantt-task-group-right-symbol, .gantt-task-group-left-symbol {
+    border: none !important;
+    width: 3px;
+    height: 12px;
+    background: #5B5B5B;
+    transform: rotate(0) !important;
+    top: 0;
 }

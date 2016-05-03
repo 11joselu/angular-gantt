@@ -274,7 +274,11 @@ angular.module('angularGanttDemoApp')
                                     id: 'Control account 4',
                                     from: new Date(2016, 3, 30, 8, 0, 0),
                                     to: new Date(2016, 4, 5, 8, 0, 0),
-                                    progress: 0
+                                    color: "rgb(255,178,178)",
+                                    progress: {
+                                        percent: 75,
+                                        color: "red"
+                                    }
                                 }
                             ],
                             data: {
@@ -293,7 +297,11 @@ angular.module('angularGanttDemoApp')
                                     id: 'Control account 5',
                                     from: new Date(2016, 4, 6, 8, 0, 0),
                                     to: new Date(2016, 4, 12, 8, 0, 0),
-                                    progress: 0
+                                    color: "rgb(255,178,178)",
+                                    progress: {
+                                        percent: 0.0,
+                                        color: "red"
+                                    }
                                 }
                             ],
                             data: {

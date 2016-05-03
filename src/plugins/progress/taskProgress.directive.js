@@ -45,7 +45,7 @@
                         if (progress.color) {
                             css['background-color'] = progress.color;
                         } else {
-                            css['background-color'] = '#6BC443';
+                            css['background-color'] = '#4B6A85';
                         }
 
                         css.width = progress.percent + '%';

@@ -210,6 +210,16 @@ angular.module('angularGanttDemoApp')
                 conflictChecker: true
             },
             targetDataAddRowIndex: undefined,
+            jsPlumbDefaults: {
+                                Endpoint: ['Dot', {radius: 4}],
+                                EndpointStyle: {fillStyle: '#456', strokeStyle: '#456', lineWidth: 1},
+                                Connector: 'Flowchart',
+                                PaintStyle: {
+                                    fillStyle: "#000",
+                                    strokeStyle: "#000"
+                                },
+                                ConnectionOverlays: [['Arrow', { foldback: 1, location: 1, length: 8, width: 8}]]
+            },
             canDraw: function(event) {
                 var isLeftMouseButton = event.button === 0 || event.button === 1;
                 return $scope.options.draw && !$scope.options.readOnly && isLeftMouseButton;

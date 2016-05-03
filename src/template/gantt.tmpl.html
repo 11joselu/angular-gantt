@@ -151,7 +151,7 @@
     <script type="text/ng-template" id="template/ganttTaskContent.tmpl.html">
         <div class="gantt-task-content" unselectable="on">
             <span ng-show="!task.model.isMilestone" unselectable="on" class="task-progress-text">
-                {{(task.model.progress)? task.model.progress: 0 }}%
+                {{(!task.model.progress)? 0 : (task.model.progress.percent || task.model.progress.percent == 0) ? task.model.progress.percent : task.model.progress }}%
             </span></div>
     </script>
 
