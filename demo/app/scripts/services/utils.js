@@ -11,6 +11,7 @@
       this.DAY        = 1;
       this.SATURDAY   = 6;
       this.SUNDAY     = 0;
+
       /**
        * Comparation between dates
        * @param  {[Date]} dateOne
