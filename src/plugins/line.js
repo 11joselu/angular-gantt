@@ -1,16 +1,12 @@
 (function(){
     'use strict';
     angular.module('gantt.line', ['gantt', 'gantt.line.templates'])
-        .directive('ganttLine', ['$compile', '$document',
-            function( $compile, $document) {
-        // Provides the row sort functionality to any Gantt row
-        // Uses the sortableState to share the current row
-
+        .directive('ganttTaskLine', ['moment', '$compile', '$document', function(moment, $compile, $document) {
         return {
             restrict: 'E',
             require: '^gantt',
             scope: {
-                enabled: '=?',
+                enabled: '=?'
             },
             link: function(scope, element, attrs, ganttCtrl) {
                 var api = ganttCtrl.gantt.api;
@@ -19,15 +15,14 @@
                     scope.enabled = true;
                 }
 
-                 api.directives.on.new(scope, function(directiveName, taskScope, taskElement) {
+                api.directives.on.new(scope, function(directiveName, taskScope, taskElement) {
                     if (directiveName === 'ganttTask') {
                         var lineScope = taskScope.$new();
                         lineScope.pluginScope = scope;
 
                         var ifElement = $document[0].createElement('div');
-                        //angular.element(ifElement).attr('data-ng-if', 'task.model.progress !== undefined && pluginScope.enabled');
-
-                        var lineElement = $document[0].createElement('gantt-task-line');
+                        angular.element(ifElement).attr('data-ng-if', 'pluginScope.enabled');
+                        var lineElement = $document[0].createElement('gantt-task-base-line');
                         if (attrs.templateUrl !== undefined) {
                             angular.element(lineElement).attr('data-template-url', attrs.templateUrl);
                         }
