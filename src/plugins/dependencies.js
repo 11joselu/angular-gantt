@@ -151,6 +151,11 @@
                         api.tasks.on.displayed(scope, debounce(function(tasks) {
                             manager.setTasks(tasks);
                             manager.refresh();
+
+                            if (manager.groups) {
+                                manager.refresh(manager.groups);
+                            }
+
                         }));
 
                         api.rows.on.displayed(scope, function() {
@@ -159,6 +164,7 @@
                         });
 
                         api.tasks.on.viewChange(scope, function(task) {
+
                             if (task.$element) {
                                 manager.plumb.revalidate(task.$element[0]);
                             }
@@ -178,6 +184,7 @@
                         });
 
                         api.dependencies.on.add(scope, function(dependency) {
+
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
                             }

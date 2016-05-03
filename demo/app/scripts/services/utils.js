@@ -252,8 +252,8 @@
           }
         }
 
-        this.getHours(task.from, 8);
-        this.getHours(task.to, 17);
+        task.from = this.getHours(task.from, 8);
+        task.to = this.getHours(task.to, 17);
 
         return task;
       };
@@ -283,25 +283,25 @@
 
       // TO DO
       this.getHours = function(date, min) {
-
+        var _date = angular.copy(date);
         var nextDay = angular.copy(date);
         nextDay.set('hours', min).set('minutes', 0).set('milliseconds', 0).add(1, 'days');
 
         var beforeDay = angular.copy(date);
             beforeDay.set('hours', min).set('minutes', 0).set('milliseconds', 0).subtract(1, 'day');
 
-        var toNext = date.diff(nextDay, 'hours');
-        var toBefore = date.diff(beforeDay, 'hours');
+        var toNext = _date.diff(nextDay, 'hours');
+        var toBefore = _date.diff(beforeDay, 'hours');
 
         if (Math.abs(toBefore) < Math.abs(toNext)) {
-            date.hour(min);
-            date.minutes(0);
-            date.milliseconds(0);
+            _date.hour(min);
+            _date.minutes(0);
+            _date.milliseconds(0);
         } else {
-            date.set('hours', min).set('minutes', 0).set('milliseconds', 0)
+            _date.set('hours', min).set('minutes', 0).set('milliseconds', 0)
         }
 
-        return date;
+        return _date;
       };
 
     };
