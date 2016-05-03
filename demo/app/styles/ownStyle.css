@@ -17,7 +17,7 @@ body {
 }
 
 .gantt-task {
-    height: 60%;
+    height: 30%;
 }
 
 .gantt-row-height {
@@ -133,4 +133,19 @@ body {
     background: #5B5B5B;
     transform: rotate(0) !important;
     top: 0;
+}
+
+.gantt-task-milestone {
+    min-width: 1em;
+}
+
+.gantt-task-content {
+    overflow: visible;
+}
+
+.task-progress-text {
+    left: 100%;
+    z-index: 99;
+    color: #000;
+    font-weight: bold;
 }
