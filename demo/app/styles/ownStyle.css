@@ -148,4 +148,5 @@ body {
     z-index: 99;
     color: #000;
     font-weight: bold;
+    top: -4px;
 }
