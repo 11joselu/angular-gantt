@@ -207,11 +207,11 @@ angular.module('angularGanttDemoApp')
             timeFramesMagnet: true,
             dependencies: {
                 enabled: true,
-                conflictChecker: true
+                conflictChecker: false
             },
             targetDataAddRowIndex: undefined,
             jsPlumbDefaults: {
-                                Endpoint: ['Dot', {radius: 4}],
+                                Endpoint: ['Dot', {radius: 3}],
                                 EndpointStyle: {fillStyle: '#456', strokeStyle: '#456', lineWidth: 1},
                                 Connector: 'Flowchart',
                                 PaintStyle: {
