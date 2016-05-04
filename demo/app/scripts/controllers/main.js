@@ -9,7 +9,7 @@
  */
 angular.module('angularGanttDemoApp')
     .controller('MainCtrl', ['$scope', '$timeout', '$log', 'ganttUtils', 'GanttObjectModel', 'Sample', 'FSDependencies', 'ResizeDependencies',
-        'ganttMouseOffset', 'ganttDebounce', 'moment', 'Utils', function($scope, $timeout, $log, utils, ObjectModel, Sample, FSDependencies, Resize, mouseOffset, debounce, moment, Utils) {
+        'ganttMouseOffset', 'ganttDebounce', 'moment', 'Utils', 'ViewService', function($scope, $timeout, $log, utils, ObjectModel, Sample, FSDependencies, Resize, mouseOffset, debounce, moment, Utils, View) {
         var objectModel;
         var dataToRemove;
         var utils = new Utils();
@@ -81,6 +81,7 @@ angular.module('angularGanttDemoApp')
         $scope.options = {
             mode: 'custom',
             scale: 'day',
+            progress: false,
             sortMode: undefined,
             sideMode: 'TreeTable',
             daily: false,
@@ -132,10 +133,11 @@ angular.module('angularGanttDemoApp')
                     return data? data: "";
                 },
                 'from': function(from) {
-                    return from !== undefined ? from.format('lll') : undefined;
+                    // from.format('lll')
+                    return from !== undefined ? from.format('MM/DD/YYYY') : undefined;
                 },
                 'to': function(to) {
-                    return to !== undefined ? to.format('lll') : undefined;
+                    return to !== undefined ? to.format('MM/DD/YYYY') : undefined;
                 }
             },
             treeHeaderContent: '<i></i> {{getHeader()}}',
@@ -373,6 +375,8 @@ angular.module('angularGanttDemoApp')
             }
         };
 
+        $scope.viewSelected = "plan";
+
         $scope.handleTaskIconClick = function(taskModel) {
             alert('Icon from ' + taskModel.name + ' task has been clicked.');
         };
@@ -387,6 +391,21 @@ angular.module('angularGanttDemoApp')
 
         $scope.collapseAll = function() {
             $scope.api.tree.collapseAll();
+        };
+
+        $scope.updateView = function() {
+            switch($scope.viewSelected) {
+                case "plan":
+                    $scope.options.progress = false;
+                    $scope.data = Sample.getPlanData();
+                    break;
+
+                case "control":
+                    $scope.options.progress = true;
+                    $scope.data = Sample.getSampleData();
+                    break;
+                case "both": ;
+            }
         };
 
         $scope.$watch('options.sideMode', function(newValue, oldValue) {
@@ -431,9 +450,8 @@ angular.module('angularGanttDemoApp')
 
         // Reload data action
         $scope.load = function() {
-            $scope.data = Sample.getSampleData();
+            $scope.data = Sample.getPlanData();
             dataToRemove = undefined;
-
             $scope.timespans = Sample.getSampleTimespans();
         };
 

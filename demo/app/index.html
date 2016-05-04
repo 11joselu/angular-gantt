@@ -235,9 +235,34 @@
                     <div class="panel-group" bs-collapse>
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h4 class="panel-title">
-                                    <a href="" bs-collapse-toggle>Gantt</a>
-                                </h4>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h4 class="panel-title">
+                                            <a href="" bs-collapse-toggle>Gantt</a>
+                                        </h4>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="col-md-4">
+                                            <input type="radio" name="view" id="plan"
+                                                ng-model="viewSelected" value="plan"
+                                                ng-change="updateView()">
+                                            <label for="plan">Plan</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="radio" name="view"
+                                                id="control" ng-model="viewSelected"
+                                                value="control"
+                                                ng-change="updateView()">
+                                            <label for="control">Control</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="radio" name="view" id="both"
+                                                ng-model="viewSelected" value="both"
+                                                ng-change="updateView()">
+                                            <label for="both">Both</label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="panel-collapse" bs-collapse-target>
                                 <div class="panel-body">
@@ -285,7 +310,7 @@
                                         <gantt-tooltips></gantt-tooltips>
                                         <gantt-task-line></gantt-task-line>
                                         <gantt-bounds></gantt-bounds>
-                                        <gantt-progress></gantt-progress>
+                                        <gantt-progress enabled="options.progress"></gantt-progress>
                                         <gantt-sortable></gantt-sortable>
                                         <gantt-movable enabled="!options.readOnly"  allow-row-switching="false"></gantt-movable>
                                         <gantt-draw-task
@@ -383,6 +408,7 @@
 <script src="scripts/services/utils.js"></script>
 <script src="scripts/services/FSDependencies.js"></script>
 <script src="scripts/services/resizeDependencies.js"></script>
+<script src="scripts/services/ViewService.js"></script>
 <!-- endbuild -->
 </body>
 </html>
