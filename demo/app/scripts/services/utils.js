@@ -233,30 +233,35 @@
        * @param {[Task]} taskModel
        */
       this.setMonday = function(taskModel) {
-        var task = angular.copy(taskModel);
-        if(this.isWeekend(task.from)) {
+        if (!taskModel.isMilestone) {
+            var task = angular.copy(taskModel);
+            if(this.isWeekend(task.from)) {
 
-          if(this.getWeekDay(task.from) === this.SATURDAY) {
-            task.to.add(2, 'days');
-            task.from.add(2, 'days');
-          } else {
-            task.to.add(1, 'days');
-            task.from.add(1, 'days');
-          }
+              if(this.getWeekDay(task.from) === this.SATURDAY) {
+                task.to.add(2, 'days');
+                task.from.add(2, 'days');
+              } else {
+                task.to.add(1, 'days');
+                task.from.add(1, 'days');
+              }
+            }
+
+            if(this.isWeekend(task.to)) {
+              if(this.getWeekDay(task.to) === this.SATURDAY) {
+                task.to.add(2, 'days');
+              } else {
+                task.to.add(1, 'days');
+              }
+            }
+
+            task.from = this.getHours(task.from, 8);
+            task.to = this.getHours(task.to, 17);
+
+            return task;
+
         }
 
-        if(this.isWeekend(task.to)) {
-          if(this.getWeekDay(task.to) === this.SATURDAY) {
-            task.to.add(2, 'days');
-          } else {
-            task.to.add(1, 'days');
-          }
-        }
-
-        task.from = this.getHours(task.from, 8);
-        task.to = this.getHours(task.to, 17);
-
-        return task;
+        return taskModel;
       };
 
       /**

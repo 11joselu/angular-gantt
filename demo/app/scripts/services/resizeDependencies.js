@@ -36,9 +36,12 @@ angular.module('angularGanttDemoApp')
               return;
             }
 
-            var task = utils.setMonday(this.task.model);
-            this.model.from = task.from;
-            this.model.to = task.to;
+            if (!this.model.isMilestone) {
+                var task = utils.setMonday(this.task.model);
+                this.model.from = task.from;
+                this.model.to = task.to;
+            }
+
             api.columns.generate();
           };
 

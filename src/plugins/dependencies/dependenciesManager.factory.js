@@ -17,6 +17,7 @@
             this.api.registerEvent('grDependencies', 'add');
             this.api.registerEvent('grDependencies', 'change');
             this.api.registerEvent('grDependencies', 'remove');
+            this.api.registerEvent('grDependencies', 'destroy');
             this.api.registerEvent('grDependencies', 'displayed');
 
             this.plumb = jsPlumb.getInstance();

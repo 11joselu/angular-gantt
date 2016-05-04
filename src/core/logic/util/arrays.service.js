@@ -92,6 +92,10 @@
 
             getGroup: function() {
                 return groups;
+            },
+
+            resetGroup: function() {
+                groups.length = 0;
             }
         };
     }]);

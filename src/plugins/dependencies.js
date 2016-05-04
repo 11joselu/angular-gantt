@@ -204,6 +204,7 @@
                         });
 
                         api.grDependencies.on.displayed(scope, debounce(function(groups){
+
                             manager.setGroupsTasks(arrays.getGroup());
                             manager.refresh(manager.groups);
                         }));
@@ -215,7 +216,11 @@
                         api.grDependencies.on.add(scope, function(dependency) {
                             manager.denyDropOnChild(dependency);
                             manager.refresh(manager.groups);
-                        })
+                        });
+
+                        api.grDependencies.on.destroy(scope, function() {
+                            arrays.resetGroup();
+                        });
 
 
                     }

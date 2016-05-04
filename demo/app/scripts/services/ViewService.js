@@ -10,37 +10,38 @@
 angular.module('angularGanttDemoApp')
     .factory('ViewService', [function () {
         var View = function (control, plan) {
-            this.control = control;
-            this.plan = plan;
-            var controlCopy = angular.copy(this.control);
-            var planCopy = angular.copy(this.plan);
+            this.control = angular.copy(control);
+            this.plan = angular.copy(plan);
 
-            this.toControl = function() {
-                return this.control;
+            var isMilestone = function(obj) {
+                return moment(obj.from).diff(obj.to) === 0;
             };
 
-            this.toPlan = function() {
-                for (var i = 0; i < controlCopy.length; i++) {
-                    if (controlCopy[i].tasks) {
-                        var tasks = controlCopy[i].tasks;
+            this.concat = function() {
 
-                        for (var j = 0; j < tasks.length; j++) {
-                            for (var k = 0; k < planCopy.length; k++) {
-                                if (tasks[j].name === planCopy[k].name) {
-                                    tasks[j].from = planCopy[k].from;
-                                    tasks[j].to = planCopy[k].to;
-                                    planCopy.splice(k, 1);
-                                    break;
+                for (var i = 0; i < this.plan.length; i++) {
+                    if (plan[i].tasks) {
+                        var tasks = plan[i].tasks;
+                        for (var j = 0;  j < tasks.length; j++) {
+
+                            if (isMilestone(tasks[j])) {
+                                tasks[j].movable = false;
+                                // this.control[i].tasks.push(tasks[j]);
+                                break;
+                            } else {
+                                this.control[i].tasks[j].base = {
+                                    from: tasks[j].from,
+                                    to: tasks[j].to
                                 }
                             }
                         }
-
-                        controlCopy[i].dependencies = false;
                     }
                 }
-
-                return controlCopy;
             };
+
+            this.getConcatenated = function() {
+                return this.control;
+            }
         }
 
         return View;

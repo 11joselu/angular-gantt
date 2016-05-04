@@ -134,10 +134,10 @@ angular.module('angularGanttDemoApp')
                 },
                 'from': function(from) {
                     // from.format('lll')
-                    return from !== undefined ? from.format('MM/DD/YYYY') : undefined;
+                    return from !== undefined ? from.format('DD/MM/YYYY') : undefined;
                 },
                 'to': function(to) {
-                    return to !== undefined ? to.format('MM/DD/YYYY') : undefined;
+                    return to !== undefined ? to.format('DD/MM/YYYY') : undefined;
                 }
             },
             treeHeaderContent: '<i></i> {{getHeader()}}',
@@ -394,18 +394,30 @@ angular.module('angularGanttDemoApp')
         };
 
         $scope.updateView = function() {
+            $scope.api.grDependencies.raise.destroy();
+
             switch($scope.viewSelected) {
                 case "plan":
                     $scope.options.progress = false;
+                    $scope.options.readOnly = false;
                     $scope.data = Sample.getPlanData();
                     break;
 
                 case "control":
                     $scope.options.progress = true;
+                    $scope.options.readOnly = false;
                     $scope.data = Sample.getSampleData();
                     break;
-                case "both": ;
+                case "both":
+                    var view = new View(Sample.getSampleData(), Sample.getPlanData());
+                    view.concat();
+                    var newData = view.getConcatenated();
+                    $scope.options.readOnly = true;
+                    $scope.data = newData;
+                ;
             }
+
+            $scope.api.data.raise.change();
         };
 
         $scope.$watch('options.sideMode', function(newValue, oldValue) {
@@ -450,7 +462,7 @@ angular.module('angularGanttDemoApp')
 
         // Reload data action
         $scope.load = function() {
-            $scope.data = Sample.getPlanData();
+            $scope.data = Sample.getSampleData();
             dataToRemove = undefined;
             $scope.timespans = Sample.getSampleTimespans();
         };
