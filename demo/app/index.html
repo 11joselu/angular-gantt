@@ -243,15 +243,22 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="col-md-4">
-                                            <input type="radio" name="view" id="plan">
+                                            <input type="radio" name="view" id="plan"
+                                                ng-model="viewSelected" value="plan"
+                                                ng-change="updateView()">
                                             <label for="plan">Plan</label>
                                         </div>
                                         <div class="col-md-4">
-                                            <input type="radio" name="view" id="control">
+                                            <input type="radio" name="view"
+                                                id="control" ng-model="viewSelected"
+                                                value="control"
+                                                ng-change="updateView()">
                                             <label for="control">Control</label>
                                         </div>
                                         <div class="col-md-4">
-                                            <input type="radio" name="view" id="both">
+                                            <input type="radio" name="view" id="both"
+                                                ng-model="viewSelected" value="both"
+                                                ng-change="updateView()">
                                             <label for="both">Both</label>
                                         </div>
                                     </div>
@@ -302,7 +309,7 @@
                                         <gantt-groups enabled="options.groupDisplayMode === 'group' || options.groupDisplayMode === 'overview' || options.groupDisplayMode === 'promote'" display="options.groupDisplayMode"></gantt-groups>
                                         <gantt-tooltips></gantt-tooltips>
                                         <gantt-bounds></gantt-bounds>
-                                        <gantt-progress></gantt-progress>
+                                        <gantt-progress enabled="options.progress"></gantt-progress>
                                         <gantt-sortable></gantt-sortable>
                                         <gantt-movable enabled="!options.readOnly"  allow-row-switching="false"></gantt-movable>
                                         <gantt-draw-task
@@ -400,6 +407,7 @@
 <script src="scripts/services/utils.js"></script>
 <script src="scripts/services/FSDependencies.js"></script>
 <script src="scripts/services/resizeDependencies.js"></script>
+<script src="scripts/services/ViewService.js"></script>
 <!-- endbuild -->
 </body>
 </html>

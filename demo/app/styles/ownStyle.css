@@ -154,3 +154,17 @@ body {
 .gantt-task-foreground {
     width: 95%;
 }
+
+.task-planned {
+    color: #999;
+    font-weight: normal;
+}
+
+.task-planned:hover {
+    font-weight: bold;
+}
+
+.task-milestone-planned .gantt-task-background {
+    background-color: transparent;
+    border: 1px solid #8F8F8F;
+}
