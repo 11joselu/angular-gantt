@@ -21,6 +21,7 @@ angular.module('angularGanttDemoApp', [
     'gantt.groups',
     'gantt.dependencies',
     'gantt.overlap',
+    'gantt.line',
     'gantt.resizeSensor',
     'ngAnimate',
     'mgcrea.ngStrap'

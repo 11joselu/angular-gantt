@@ -151,16 +151,14 @@
                         api.tasks.on.displayed(scope, debounce(function(tasks) {
                             manager.setTasks(tasks);
                             manager.refresh();
-
-                            if (manager.groups) {
-                                manager.refresh(manager.groups);
-                            }
-
+                            manager.refresh(manager.groups);
                         }));
 
                         api.rows.on.displayed(scope, function() {
                             manager.refresh();
-                            manager.refresh(manager.groups);
+                            manager.setGroupsTasks(arrays.getGroup());
+                            arrays.resetGroup();
+                            manager.refresh(arrays.getGroup());
                         });
 
                         api.tasks.on.viewChange(scope, function(task) {
@@ -204,9 +202,9 @@
                         });
 
                         api.grDependencies.on.displayed(scope, debounce(function(groups){
-
-                            manager.setGroupsTasks(arrays.getGroup());
-                            manager.refresh(manager.groups);
+                                manager.setGroupsTasks(arrays.getGroup());
+                                arrays.resetGroup();
+                                manager.refresh(arrays.getGroup());
                         }));
 
                         api.grDependencies.on.remove(scope, function(dependency) {
@@ -218,10 +216,9 @@
                             manager.refresh(manager.groups);
                         });
 
-                        api.grDependencies.on.destroy(scope, function() {
+                        api.grDependencies.on.change(scope, function() {
                             arrays.resetGroup();
                         });
-
 
                     }
                 };

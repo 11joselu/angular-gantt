@@ -160,10 +160,6 @@ body {
     font-weight: normal;
 }
 
-.task-planned:hover {
-    font-weight: bold;
-}
-
 .task-milestone-planned .gantt-task-background {
     background-color: transparent;
     border: 1px solid #8F8F8F;

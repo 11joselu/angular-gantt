@@ -394,7 +394,7 @@ angular.module('angularGanttDemoApp')
         };
 
         $scope.updateView = function() {
-            $scope.api.grDependencies.raise.destroy();
+            $scope.api.grDependencies.raise.change();
 
             switch($scope.viewSelected) {
                 case "plan":
@@ -413,11 +413,9 @@ angular.module('angularGanttDemoApp')
                     view.concat();
                     var newData = view.getConcatenated();
                     $scope.options.readOnly = true;
+                    $scope.options.progress = true;
                     $scope.data = newData;
-                ;
             }
-
-            $scope.api.data.raise.change();
         };
 
         $scope.$watch('options.sideMode', function(newValue, oldValue) {
@@ -462,7 +460,7 @@ angular.module('angularGanttDemoApp')
 
         // Reload data action
         $scope.load = function() {
-            $scope.data = Sample.getSampleData();
+            $scope.data = Sample.getPlanData();
             dataToRemove = undefined;
             $scope.timespans = Sample.getSampleTimespans();
         };

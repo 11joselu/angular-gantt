@@ -17,13 +17,13 @@
             },
             replace: true,
             scope: true,
-            controller: ['$scope', '$element', function($scope, $element) {
+            require: '^gantt',
+            controller: ['$scope', '$element', '$attrs', function($scope, $element, $attrs) {
                 if ($scope.task.model.base) {
                     $scope.showLine = true;
                     var left = $scope.task.rowsManager.gantt.getPositionByDate($scope.task.model.base.from);
                     var width = $scope.task.rowsManager.gantt.getPositionByDate($scope.task.model.base.to);
                     $scope.task.updatePosAndSize();
-                    console.log()
                 } else {
                     $scope.showLine = false;
                 }

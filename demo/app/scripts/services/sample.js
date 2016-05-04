@@ -45,10 +45,6 @@ angular.module('angularGanttDemoApp')
                                     movable: {
                                         'allowResizing': false,
                                         'allowRowSwitching': false
-                                    },
-                                    base: {
-                                        from: new Date(2016, 3, 2, 8, 0, 0),
-                                        to: new Date(2016, 3, 2, 8, 0, 0),
                                     }
                                 }
                             ],
