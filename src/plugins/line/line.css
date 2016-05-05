@@ -1,0 +1,6 @@
+.gantt-task-base-line {
+    height: 18%;
+    bottom: -2px;
+    background: #979797;
+    position: absolute;
+}
