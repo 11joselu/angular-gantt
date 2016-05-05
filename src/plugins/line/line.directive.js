@@ -18,22 +18,40 @@
             replace: true,
             scope: true,
             require: '^gantt',
-            controller: ['$scope', '$element', '$attrs', function($scope, $element, $attrs) {
+            controller: ['$scope', '$element', function($scope, $element) {
+
+                $scope.simplifyMoment = function(d) {
+                    return moment.isMoment(d) ? d.unix() : d;
+                };
+
+                 $scope.getClasses = function() {
+                    var classes = [];
+
+                    if (typeof($scope.task.model.base) === 'object') {
+                        classes = $scope.task.model.base.classes;
+                    }
+
+                    return classes;
+                };
+
+
                 if ($scope.task.model.base) {
-                    $scope.showLine = true;
-                    var left = $scope.task.rowsManager.gantt.getPositionByDate($scope.task.model.base.from);
-                    var width = $scope.task.rowsManager.gantt.getPositionByDate($scope.task.model.base.to);
-                    $scope.task.updatePosAndSize();
-                } else {
-                    $scope.showLine = false;
+                    $scope.$watchGroup(['simplifyMoment(task.model.base.from)', 'simplifyMoment(task.model.base.to)', 'task.left', 'task.width'], function() {
+                        var left = $scope.task.rowsManager.gantt.getPositionByDate($scope.task.model.base.from);
+                        var right = $scope.task.rowsManager.gantt.getPositionByDate($scope.task.model.base.to);
+
+                        $element.css('left', left + 'px');
+                        $element.css('width', right - left + 'px');
+
+                    });
                 }
 
-                $scope.getCss = function() {
-                    return {
-                        left: left + 'px',
-                        width: width + 'px'
-                    }
-                };
+
+
+                $scope.task.rowsManager.gantt.api.directives.raise.new('ganttBounds', $scope, $element);
+                $scope.$on('$destroy', function() {
+                    $scope.task.rowsManager.gantt.api.directives.raise.destroy('ganttBounds', $scope, $element);
+                });
             }]
         };
     }]);

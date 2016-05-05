@@ -158,7 +158,7 @@
                             manager.refresh();
                             manager.setGroupsTasks(arrays.getGroup());
                             arrays.resetGroup();
-                            manager.refresh(arrays.getGroup());
+                            manager.refresh(manager.groups);
                         });
 
                         api.tasks.on.viewChange(scope, function(task) {
@@ -166,10 +166,12 @@
                             if (task.$element) {
                                 manager.plumb.revalidate(task.$element[0]);
                             }
+
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([task]);
                             }
 
+                            revalidate(manager.groups);
                         });
 
                         api.tasks.on.viewRowChange(scope, function(task) {
@@ -204,7 +206,7 @@
                         api.grDependencies.on.displayed(scope, debounce(function(groups){
                                 manager.setGroupsTasks(arrays.getGroup());
                                 arrays.resetGroup();
-                                manager.refresh(arrays.getGroup());
+                                manager.refresh(manager.groups);
                         }));
 
                         api.grDependencies.on.remove(scope, function(dependency) {
@@ -219,6 +221,17 @@
                         api.grDependencies.on.change(scope, function() {
                             arrays.resetGroup();
                         });
+
+                        var revalidate = function(obj) {
+                          angular.forEach(obj, function(grTask) {
+                              if(grTask.$element) {
+                                  var controllerElement = angular.element(grTask.$element)[0];
+                                  var groupElement = angular.element(controllerElement).children();
+                                  manager.plumb.revalidate(groupElement);
+                              }
+
+                          });
+                        }
 
                     }
                 };

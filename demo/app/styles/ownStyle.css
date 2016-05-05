@@ -164,3 +164,18 @@ body {
     background-color: transparent;
     border: 1px solid #8F8F8F;
 }
+
+.task-base-milestone {
+    width: 12px !important;
+    height: 12px;
+    background: transparent;
+    transform: rotate(45deg);
+    border: 1px solid #979797;
+    top: 12px;
+}
+
+.gantt-table-header-row {
+    position: relative;
+    top: 63%;
+    width: 100%;
+}

@@ -82,6 +82,7 @@ angular.module('angularGanttDemoApp')
             mode: 'custom',
             scale: 'day',
             progress: false,
+            baseline: false,
             sortMode: undefined,
             sideMode: 'TreeTable',
             daily: false,
@@ -107,8 +108,8 @@ angular.module('angularGanttDemoApp')
                 'model.data.package': 'Work Package',
                 'model.data.predecessors': 'Predecessors',
                 'model.data.duration': 'Duration',
-                'from': 'Start',
-                'to': 'Finish',
+                'from': 'Baseline Start',
+                'to': 'Baseline Finish',
             },
             // tree columns clases
             columnsClasses: {
@@ -144,8 +145,6 @@ angular.module('angularGanttDemoApp')
             //class="fa fa-align-justify"
             columnsHeaderContents: {
                 'model.name': '<i class="fa fa-align-justify"></i> {{getHeader()}}',
-                'from': '<i class="fa fa-calendar"></i> {{getHeader()}}',
-                'to': '<i class="fa fa-calendar"></i> {{getHeader()}}'
             },
             autoExpand: 'none',
             taskOutOfRange: 'truncate',
@@ -396,25 +395,29 @@ angular.module('angularGanttDemoApp')
         $scope.updateView = function() {
             $scope.api.grDependencies.raise.change();
 
-            switch($scope.viewSelected) {
+            switch ($scope.viewSelected) {
                 case "plan":
                     $scope.options.progress = false;
-                    $scope.options.readOnly = false;
-                    $scope.data = Sample.getPlanData();
+                    $scope.options.baseline = false;
+                    $scope.data = angular.copy(Sample.getPlanData());
+                    $scope.options.columnsHeaders.from = "Baseline Start";
+                    $scope.options.columnsHeaders.to = "Baseline Finish";
                     break;
 
                 case "control":
                     $scope.options.progress = true;
-                    $scope.options.readOnly = false;
-                    $scope.data = Sample.getSampleData();
+                    $scope.options.baseline = false;
+                    $scope.data = angular.copy(Sample.getSampleData());
+                    $scope.options.columnsHeaders.from = "Start";
+                    $scope.options.columnsHeaders.to = "Finish";
                     break;
                 case "both":
                     var view = new View(Sample.getSampleData(), Sample.getPlanData());
                     view.concat();
                     var newData = view.getConcatenated();
-                    $scope.options.readOnly = true;
                     $scope.options.progress = true;
-                    $scope.data = newData;
+                    $scope.options.baseline = true;
+                    $scope.data = angular.copy(newData);
             }
         };
 

@@ -153,11 +153,7 @@
             <span ng-show="!task.model.isMilestone" unselectable="on" class="task-progress-text">
                 {{(task.model.progress !== undefined)? (task.model.progress.percent || task.model.progress.percent == 0) ? task.model.progress.percent + "%" : task.model.progress + "%" : ""}}
             </span>
-
-            <span class="task-progress-text task-planned" ng-show="task.model.progress === undefined">
-                {{ task.model.name }}
-            </span>
-            </div>
+        </div>
     </script>
 
 

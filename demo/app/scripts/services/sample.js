@@ -16,7 +16,7 @@ angular.module('angularGanttDemoApp')
                         {
                             name: 'Development',
                             children: [
-                                'Milestone 1',
+                                'Milestone',
                                 'Node 1',
                                 'Control account 3',
                                 'Node 2'
@@ -33,11 +33,11 @@ angular.module('angularGanttDemoApp')
 
                         // this is a milestone
                         {
-                            name: 'Milestone 1',
+                            name: 'Milestone',
                             tasks: [
                                 {
-                                    name: 'Milestone 1',
-                                    id: 'Milestone 1',
+                                    name: 'Milestone',
+                                    id: 'Milestone',
                                     from: new Date(2016, 3, 5, 8, 0, 0),
                                     to: new Date(2016, 3, 5, 8, 0, 0),
                                     isMilestone: true,
@@ -171,8 +171,8 @@ angular.module('angularGanttDemoApp')
                                     name: "Activity 1",
                                     id: "Activity 1",
                                     from: new Date(2016, 3, 2, 8, 0, 0),
-                                    to: new Date(2016, 3, 9, 8, 0, 0),
-                                    progress: 50
+                                    to: new Date(2016, 3, 4, 8, 0, 0),
+                                    progress: 100
                                 }
                             ],
                             data: {
@@ -204,7 +204,7 @@ angular.module('angularGanttDemoApp')
                                 {
                                     name: 'Work package 2',
                                     id: 'Work package 2',
-                                    from: new Date(2016, 3, 11, 8, 0, 0),
+                                    from: new Date(2016, 3, 12, 8, 0, 0),
                                     to: new Date(2016, 3, 18, 8, 0, 0),
                                     progress: 0
                                 }
@@ -595,7 +595,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Control account 4',
                                     id: 'Control account 4',
                                     from: new Date(2016, 3, 17, 8, 0, 0),
-                                    to: new Date(2016, 3, 29, 8, 0, 0),
+                                    to: new Date(2016, 3, 23, 8, 0, 0),
                                     color: "#8F8F8F",
                                 }
                             ],

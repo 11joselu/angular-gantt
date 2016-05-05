@@ -23,23 +23,18 @@ angular.module('angularGanttDemoApp')
                     if (plan[i].tasks) {
                         var tasks = plan[i].tasks;
                         for (var j = 0;  j < tasks.length; j++) {
-
-                            if (isMilestone(tasks[j])) {
-                                tasks[j].movable = false;
-                                // this.control[i].tasks.push(tasks[j]);
-                                break;
-                            } else {
                                 this.control[i].tasks[j].base = {
                                     from: tasks[j].from,
-                                    to: tasks[j].to
+                                    to: tasks[j].to,
+                                    classes: isMilestone(tasks[j])? ['task-milestone-planned', 'task-base-milestone'] : []
                                 }
-                            }
                         }
                     }
                 }
             };
 
             this.getConcatenated = function() {
+                console.log(this.control);
                 return this.control;
             }
         }

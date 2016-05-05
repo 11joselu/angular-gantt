@@ -308,7 +308,7 @@
                                         </gantt-table>
                                         <gantt-groups enabled="options.groupDisplayMode === 'group' || options.groupDisplayMode === 'overview' || options.groupDisplayMode === 'promote'" display="options.groupDisplayMode"></gantt-groups>
                                         <gantt-tooltips></gantt-tooltips>
-                                        <gantt-task-line></gantt-task-line>
+                                        <gantt-task-line enabled="options.baseline"></gantt-task-line>
                                         <gantt-bounds></gantt-bounds>
                                         <gantt-progress enabled="options.progress"></gantt-progress>
                                         <gantt-sortable></gantt-sortable>
@@ -318,7 +318,7 @@
                                             move-threshold="2"
                                             task-factory="options.drawTaskFactory">
                                         </gantt-draw-task>
-                                        <gantt-overlap></gantt-overlap>
+                                        <gantt-overlap enabled="false"></gantt-overlap>
                                         <gantt-resize-sensor></gantt-resize-sensor>
                                         <gantt-dependencies
                                             enabled="options.dependencies.enabled"
