@@ -251,6 +251,8 @@ angular.module('angularGanttDemoApp')
                     api.tasks.on.rowChange($scope, addEventName('tasks.on.rowChange', logTaskEvent));
                     api.tasks.on.remove($scope, addEventName('tasks.on.remove', logTaskEvent));
 
+                    api.side.setWidth(300)
+
                     if (api.tasks.on.moveBegin) {
                         api.tasks.on.moveBegin($scope, addEventName('tasks.on.moveBegin', function(evt, task) {
                         }));

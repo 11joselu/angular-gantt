@@ -179,3 +179,7 @@ body {
     top: 63%;
     width: 100%;
 }
+
+.gantt-side {
+    width: 20px;
+}
