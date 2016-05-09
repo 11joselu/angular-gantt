@@ -21,7 +21,6 @@
              */
             var ElementHandler = function(element) {
                 this.element = element;
-
                 this.mouseExitHandler = function() {
                     $timeout.cancel(self.hideEndpointsPromise);
                     self.hideEndpointsPromise = $timeout(self.hideEndpoints, 1000, false);
@@ -50,20 +49,27 @@
             /**
              * Install mouse handler for this task, and hide all endpoints.
              */
-            this.install = function(element) {
+            this.install = function() {
                 if (!self.installed) {
                     self.hideEndpoints();
 
-                    self.elementHandlers.push(new ElementHandler(element || self.task.getContentElement()));
-                    angular.forEach(self.task.dependencies.endpoints, function(endpoint) {
-                        self.elementHandlers.push(new ElementHandler(angular.element(endpoint.canvas)));
-                    });
+                    var element = self.task.getContentElement();
+                    if (!angular.isArray(element)) {
+                        element = angular.element(element);
+                    }
+                    if (element) {
+                        // console.log(self.task.getContentElement())
+                        self.elementHandlers.push(new ElementHandler(element));
+                        angular.forEach(self.task.dependencies.endpoints, function(endpoint) {
+                            self.elementHandlers.push(new ElementHandler(angular.element(endpoint.canvas)));
+                        });
 
-                    angular.forEach(self.elementHandlers, function(elementHandler) {
-                        elementHandler.install();
-                    });
+                        angular.forEach(self.elementHandlers, function(elementHandler) {
+                            elementHandler.install();
+                        });
 
-                    self.installed = true;
+                        self.installed = true;
+                    }
                 }
             };
 

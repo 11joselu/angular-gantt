@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('gantt.dependencies').factory('GanttDependenciesEvents', ['$timeout', function($timeout) {
+    angular.module('gantt.dependencies').factory('GanttDependenciesEvents', [function() {
         /**
          * Creates a new DependenciesEvents object.
          *
@@ -38,7 +38,7 @@
                 self.manager.setDraggingConnection(undefined);
             });
 
-            this.manager.plumb.bind('beforeDrop', function(params) {
+            this.manager.plumb.bind('beforeDrop', function() {
                 self.manager.setDraggingConnection(undefined);
                 return true;
             });
@@ -71,16 +71,9 @@
 
                     var dependency = self.manager.addDependency(sourceEndpoint.$task, connectionModel);
                     info.connection.$dependency = dependency;
+                    dependency.connection = info.connection;
 
-                    if (dependency) {
-                        dependency.connection = info.connection;
-                        if (sourceEndpoint.$task.type) {
-                            self.manager.api.grDependencies.raise.add(dependency);
-                        } else {
-                            self.manager.api.dependencies.raise.add(dependency);
-                        }
-                    }
-
+                    self.manager.api.dependencies.raise.add(dependency);
 
                 }
             };
@@ -114,6 +107,7 @@
                     var dependency = self.manager.addDependency(sourceEndpoint.$task, connectionModel);
                     info.connection.$dependency = dependency;
                     dependency.connection = info.connection;
+
                     self.manager.api.dependencies.raise.change(dependency, oldDependency);
                 }
             };
@@ -124,11 +118,7 @@
 
                     dependency.removeFromTaskModel();
                     self.manager.removeDependency(dependency, true); // Connection will be disconnected later by jsPlumb.
-                    if (dependency.task.type) {
-                        self.manager.api.grDependencies.raise.remove(dependency);
-                    } else {
-                        self.manager.api.dependencies.raise.remove(dependency);
-                    }
+                    self.manager.api.dependencies.raise.remove(dependency);
                 }
             };
 

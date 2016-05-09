@@ -2,7 +2,7 @@
 (function() {
     'use strict';
 
-    angular.module('gantt.dependencies').factory('GanttDependenciesManager', ['GanttDependency', 'GanttDependenciesEvents', 'GanttDependencyTaskMouseHandler', function(Dependency, DependenciesEvents, TaskMouseHandler) {
+    angular.module('gantt.dependencies').factory('GanttDependenciesManager', ['GanttDependency', 'GanttDependenciesEvents', 'GanttDependencyTaskMouseHandler','GanttTasksGroup', function(Dependency, DependenciesEvents, TaskMouseHandler, TasksGroup) {
         var DependenciesManager = function(gantt, pluginScope, api) {
             var self = this;
 
@@ -14,10 +14,6 @@
             this.api.registerEvent('dependencies', 'change');
             this.api.registerEvent('dependencies', 'remove');
 
-            this.api.registerEvent('grDependencies', 'add');
-            this.api.registerEvent('grDependencies', 'change');
-            this.api.registerEvent('grDependencies', 'remove');
-            this.api.registerEvent('grDependencies', 'displayed');
 
             this.plumb = jsPlumb.getInstance();
             this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
@@ -238,7 +234,7 @@
 
                 task.dependencies.endpoints = [];
 
-                if (self.pluginScope.endpoints) {
+                if (self.pluginScope.endpoints && task.$element) {
                     for (var i = 0; i < self.pluginScope.endpoints.length; i++) {
                         var endpointObject = self.plumb.addEndpoint(task.$element, self.pluginScope.endpoints[i]);
                         endpointObject.setVisible(false, true, true); // hide endpoint
@@ -287,14 +283,14 @@
 
                 if (self.pluginScope.endpoints) {
                     for (var i = 0; i < self.pluginScope.endpoints.length; i++) {
-                        var controllerElement = angular.element(groupsTask.$element)[0];
-                        var groupElement = angular.element(controllerElement).children();
-                        if(groupElement[0]) {
-                            var endpointObject = self.plumb.addEndpoint(groupElement, self.pluginScope.endpoints[i]);
+
+                        if(!groupsTask.$element) {
+                            groupsTask.$element = groupsTask.getContentElement();
+                        }
+                        var endpointObject = self.plumb.addEndpoint(groupsTask.$element, self.pluginScope.endpoints[i]);
                             endpointObject.setVisible(false, true, true); // hide endpoint
                             endpointObject.$task = groupsTask;
                             groupsTask.dependencies.endpoints.push(endpointObject);
-                        }
                     }
                 }
             };
@@ -337,9 +333,9 @@
             };
 
             this.setGroupsTasks = function(grTasks) {
-                angular.forEach(self.groups, function(taskGr) {
-                    removeTaskMouseHandler(taskGr);
-                    removeTaskEndpoint(taskGr);
+                angular.forEach(self.groups, function(task) {
+                    removeTaskMouseHandler(task);
+                    removeTaskEndpoint(task);
                 });
 
                 var newTasks = {};
@@ -349,6 +345,7 @@
                     if (isTaskEnabled(task)) {
                         newTasks[task.model.id] = task;
                         tasksList.push(task);
+                        var grTask = new TasksGroup(task, pluginScope);
                         addGroupsEndpoints(task);
                         addGroupHandler(task);
                     }
@@ -506,7 +503,18 @@
                                 }
                             });
                         });
+
+                        angular.forEach(self.groups, function(task) {
+                            var taskDependencies = self.getTaskDependencies(task);
+                            angular.forEach(taskDependencies, function(taskDependency) {
+                                if (!(taskDependency in tasksDependencies)) {
+                                    tasksDependencies.push(taskDependency);
+                                }
+                            });
+                        });
+
                     }
+
 
                     for (i = 0; i < tasksDependencies.length; i++) {
                         self.removeDependency(tasksDependencies[i]);
@@ -515,6 +523,11 @@
                     angular.forEach(tasks, function(task) {
                         self.addDependenciesFromTask(task);
                     });
+
+                    angular.forEach(self.groups, function(task) {
+                        self.addDependenciesFromTask(task);
+                    });
+
                 } finally {
                     self.plumb.setSuspendDrawing(false, true);
                 }
@@ -525,31 +538,19 @@
                var toTaskId = dependency.getToTaskId();
                var descendants = dependency.task.descendants;
 
-               for (var i = 0; i < descendants.length; i++) {
+               if (descendants) {
+                   return descendants.some(function(row, index) {
+                       if (row.model.id === toTaskId || row.model.name === toTaskId) {
+                           model.dependencies.splice(index, 1);
+                           return true;
+                       }
 
-                   if (descendants[i].model.id == toTaskId) {
-                       model.dependencies = model.dependencies.filter(function(dependency){
-                            return dependency.to !== toTaskId
-                       });
-
-                       return true;
-                   } else {
-                        if (descendants[i].model.tasks) {
-                            var tasks = descendants[i].model.tasks;
-                            for (var j = 0; j < tasks.length; j++) {
-                                if (tasks[j].id === toTaskId) {
-                                    model.dependencies = model.dependencies.filter(function(dependency){
-                                        return dependency.to !== toTaskId
-                                    });
-
-                                    return true;
-                                }
-                            }
-                        }
-                   }
+                       return false;
+                   });
                }
 
-                return false;
+               return false;
+
             };
 
             this.api.registerMethod('dependencies', 'refresh', this.refresh, this);

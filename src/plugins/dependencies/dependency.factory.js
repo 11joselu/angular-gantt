@@ -98,7 +98,7 @@
                 if (task === undefined || task.$element === undefined) {
                     return false;
                 }
-                var element = task.$element[0];
+                var element = task.$element[0] || task.$element;
                 return dom.isElementVisible(element);
             };
 

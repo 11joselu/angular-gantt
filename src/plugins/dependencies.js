@@ -151,14 +151,12 @@
                         api.tasks.on.displayed(scope, debounce(function(tasks) {
                             manager.setTasks(tasks);
                             manager.refresh();
-                            manager.refresh(manager.groups);
                         }));
 
                         api.rows.on.displayed(scope, function() {
                             manager.refresh();
-                            manager.setGroupsTasks(arrays.getGroup());
-                            arrays.resetGroup();
                             manager.refresh(manager.groups);
+
                         });
 
                         api.tasks.on.viewChange(scope, function(task) {
@@ -171,7 +169,6 @@
                                 checker.refresh([task]);
                             }
 
-                            revalidate(manager.groups);
                         });
 
                         api.tasks.on.viewRowChange(scope, function(task) {
@@ -184,6 +181,10 @@
                         });
 
                         api.dependencies.on.add(scope, function(dependency) {
+
+                            manager.denyDropOnChild(dependency);
+                            manager.refresh(manager.groups);
+
 
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
@@ -204,34 +205,9 @@
                         });
 
                         api.grDependencies.on.displayed(scope, debounce(function(groups){
-                                manager.setGroupsTasks(arrays.getGroup());
-                                arrays.resetGroup();
-                                manager.refresh(manager.groups);
+                                manager.setGroupsTasks(groups);
+                                manager.refresh();
                         }));
-
-                        api.grDependencies.on.remove(scope, function(dependency) {
-                            checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
-                        });
-
-                        api.grDependencies.on.add(scope, function(dependency) {
-                            manager.denyDropOnChild(dependency);
-                            manager.refresh(manager.groups);
-                        });
-
-                        api.grDependencies.on.change(scope, function() {
-                            arrays.resetGroup();
-                        });
-
-                        var revalidate = function(obj) {
-                          angular.forEach(obj, function(grTask) {
-                              if(grTask.$element) {
-                                  var controllerElement = angular.element(grTask.$element)[0];
-                                  var groupElement = angular.element(controllerElement).children();
-                                  manager.plumb.revalidate(groupElement);
-                              }
-
-                          });
-                        }
 
                     }
                 };
