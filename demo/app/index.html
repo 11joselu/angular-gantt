@@ -264,6 +264,24 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-md-4">
+
+                                        <div class="col-md-1">
+                                           <i class="fa fa-link link-icons" aria-hidden="true" ng-click="linkTasks()"></i>
+                                        </div>
+
+                                        <div class="col-md-1">
+                                          <i class="fa fa-chain-broken link-icons" aria-hidden="true" ng-click="unLinkTasks()"></i>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="panel-collapse" bs-collapse-target>
                                 <div class="panel-body">
                                     <div gantt
@@ -409,6 +427,8 @@
 <script src="scripts/services/FSDependencies.js"></script>
 <script src="scripts/services/resizeDependencies.js"></script>
 <script src="scripts/services/ViewService.js"></script>
+<script src="scripts/services/Linker.js"></script>
+
 <!-- endbuild -->
 </body>
 </html>

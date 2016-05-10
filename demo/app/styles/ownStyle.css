@@ -183,3 +183,24 @@ body {
 .gantt-side {
     width: 20px;
 }
+
+.task-is-selected {
+    border-top: 1px solid green;
+    border-bottom: 1px solid green;
+    background-color: #DBDBDB;
+}
+
+.gantt-row-content {
+    background: #fff;
+}
+
+.link-icons {
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    padding-top: 0.2em
+}
+
+.link-icons:hover {
+    background-color: #D5D5D5;
+}

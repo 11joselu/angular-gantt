@@ -9,10 +9,55 @@
  */
 angular.module('angularGanttDemoApp')
     .controller('MainCtrl', ['$scope', '$timeout', '$log', 'ganttUtils', 'GanttObjectModel', 'Sample', 'FSDependencies', 'ResizeDependencies',
-        'ganttMouseOffset', 'ganttDebounce', 'moment', 'Utils', 'ViewService', function($scope, $timeout, $log, utils, ObjectModel, Sample, FSDependencies, Resize, mouseOffset, debounce, moment, Utils, View) {
+        'ganttMouseOffset', 'ganttDebounce', 'moment', 'ViewService', 'Linker', function($scope, $timeout, $log, utils, ObjectModel, Sample, FSDependencies, Resize, mouseOffset, debounce, moment, View, Linker) {
         var objectModel;
         var dataToRemove;
-        var utils = new Utils();
+        var toLink = [];
+        var taskSelected = null;
+
+        var toggleLink = function(directiveScope) {
+            var model = directiveScope.task.row.model;
+            if (toggleClass(directiveScope.task)) {
+                if (toLink.indexOf(directiveScope.task) === -1) {
+                    toLink.push(directiveScope.task);
+                }
+            }else {
+                toLink.splice(toLink.indexOf(directiveScope.task), 1);
+            }
+
+        };
+
+        var toggleClass = function(task) {
+            var model = task.row.model;
+
+            if (hasClass(model)) {
+                removeClass(model);
+                return false;
+            }
+
+            addClass(model);
+
+            return true;
+        }
+
+        var hasClass = function(model) {
+            if (model.classes == undefined) {
+                model.classes = [];
+                return false;
+            }
+
+            return ~model.classes.indexOf('task-is-selected') !== 0;
+        };
+
+        var removeClass = function(model) {
+            model.classes.splice(model.classes.indexOf('task-is-selected'), 1);
+        };
+
+        var addClass = function(model) {
+            if (!hasClass(model)) {
+                model.classes.push('task-is-selected');
+            }
+        };
 
         // Event handler
         var logScrollEvent = function(left, date, direction) {
@@ -77,6 +122,20 @@ angular.module('angularGanttDemoApp')
             };
         };
 
+        $scope.linkTasks = function() {
+            var linker = new Linker($scope.data, $scope.api);
+            toLink = linker.linkTaks(toLink);
+        };
+
+        $scope.unLinkTasks = function() {
+            var linker = new Linker($scope.data, $scope.api);
+            toLink = linker.unLinkTasks(toLink);
+
+            $timeout(function() {
+                $scope.api.dependencies.refresh();
+            }, 0)
+        };
+
         // angular-gantt options
         $scope.options = {
             mode: 'custom',
@@ -87,7 +146,7 @@ angular.module('angularGanttDemoApp')
             sideMode: 'TreeTable',
             daily: false,
             maxHeight: false,
-            width: false,
+            width: true,
             zoom: 1,
             columns: ['model.name', 'from', 'to', 'model.wbs'],
             // tree columns
@@ -98,7 +157,9 @@ angular.module('angularGanttDemoApp')
                 'model.data.predecessors',
                 'model.data.duration',
                 'from',
-                'to'
+                'to',
+                'base.from',
+                'base.to'
                 ],
             // tree columns name
             columnsHeaders: {
@@ -110,6 +171,8 @@ angular.module('angularGanttDemoApp')
                 'model.data.duration': 'Duration',
                 'from': 'Baseline Start',
                 'to': 'Baseline Finish',
+                'base.from': 'Baseline Start',
+                'base.to': 'Baseline Finish'
             },
             // tree columns clases
             columnsClasses: {
@@ -294,10 +357,13 @@ angular.module('angularGanttDemoApp')
 
                     // DEPENDENCIES
                     api.dependencies.on.add($scope, function(task) {
-                       var dependencies = new FSDependencies(task);
-                        dependencies.setDate($scope.data, api);
-                        if(dependencies.gotDependencies()) {
-                            dependencies.updateChildTasks($scope.data, api)
+                        if (!utils.denyDrop(task)) {
+                            var dependencies = new FSDependencies(task);
+                            dependencies.setDate($scope.data, api);
+                            if(dependencies.gotDependencies()) {
+                                dependencies.updateChildTasks($scope.data, api)
+                            }
+
                         }
                     });
 
@@ -308,34 +374,42 @@ angular.module('angularGanttDemoApp')
 
                     });
 
-                    api.grDependencies.on.add($scope, function(grTask) {
-                        if (!utils.denyDropOnChild(grTask)) {
-                            var dependencies = new FSDependencies(grTask);
-                            dependencies.setDate($scope.data, api);
-                            if(dependencies.gotDependencies()) {
-                                dependencies.updateChildTasks($scope.data, api)
-                            }
-
-                        }
-                    });
-
-                    api.grDependencies.on.remove($scope, function(task) {
-                       var dependencies = new FSDependencies(task);
-                        dependencies.removeDependencies($scope.data, api);
-
-                    });
-
                     // When gantt is ready, load data.
                     // `data` attribute could have been used too.
                     $scope.load();
+
+
 
                     // Add some DOM events
                     api.directives.on.new($scope, function(directiveName, directiveScope, element) {
                         if (directiveName === 'ganttTask') {
                             element.bind('click', function(event) {
                                 event.stopPropagation();
-                                logTaskEvent('task-click', directiveScope.task);
+
+                                if (event.ctrlKey) {
+                                    if (taskSelected) {
+                                        toLink.unshift(taskSelected);
+                                        taskSelected = null;
+                                    }
+
+                                    toggleLink(directiveScope);
+                                } else {
+
+                                    addClass(directiveScope.task.row.model);
+
+                                    if (taskSelected && taskSelected.model.id !== directiveScope.task.model.id ) {
+                                        removeClass(taskSelected.row.model);
+                                    }
+
+                                    taskSelected = directiveScope.task;
+
+                                    toLink = [];
+                                }
+
+                                console.log(toLink);
+
                             });
+
                             element.bind('mousedown touchstart', function(event) {
                                 event.stopPropagation();
                                 $scope.live.row = directiveScope.task.row.model;
@@ -395,7 +469,6 @@ angular.module('angularGanttDemoApp')
         };
 
         $scope.updateView = function() {
-            $scope.api.grDependencies.raise.change();
 
             switch ($scope.viewSelected) {
                 case "plan":
@@ -404,6 +477,8 @@ angular.module('angularGanttDemoApp')
                     $scope.data = angular.copy(Sample.getPlanData());
                     $scope.options.columnsHeaders.from = "Baseline Start";
                     $scope.options.columnsHeaders.to = "Baseline Finish";
+                    toLink = [];
+
                     break;
 
                 case "control":
@@ -412,6 +487,8 @@ angular.module('angularGanttDemoApp')
                     $scope.data = angular.copy(Sample.getSampleData());
                     $scope.options.columnsHeaders.from = "Start";
                     $scope.options.columnsHeaders.to = "Finish";
+                    toLink = [];
+
                     break;
                 case "both":
                     var view = new View(Sample.getSampleData(), Sample.getPlanData());
@@ -420,6 +497,8 @@ angular.module('angularGanttDemoApp')
                     $scope.options.progress = true;
                     $scope.options.baseline = true;
                     $scope.data = angular.copy(newData);
+                    toLink = [];
+                    break;
             }
         };
 
