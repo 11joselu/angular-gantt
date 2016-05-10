@@ -8,6 +8,7 @@
                     require: '^gantt',
                     scope: {
                         enabled: '=?',
+                        hierarchy: '=?',
                         readOnly: '=?',
                         jsPlumbDefaults: '=?',
                         endpoints: '=?',
@@ -30,6 +31,10 @@
 
                         if (scope.readOnly === undefined) {
                             scope.readOnly = false;
+                        }
+
+                        if (scope.hierarchy === undefined) {
+                            scope.hierarchy = true;
                         }
 
                         if (scope.jsPlumbDefaults === undefined) {
@@ -155,7 +160,10 @@
 
                         api.rows.on.displayed(scope, function() {
                             manager.refresh();
-                            manager.refresh(manager.groups);
+
+                            if (scope.hierarchy) {
+                                manager.refresh(manager.groups);
+                            }
 
                         });
 
@@ -177,13 +185,17 @@
                                 checker.refresh([task]);
                             }
 
-                            manager.setTask(manager.groups);
+                            if (scope.hierarchy) {
+                                manager.setTask(manager.groups);
+                            }
                         });
 
                         api.dependencies.on.add(scope, function(dependency) {
 
-                            manager.denyDropOnChild(dependency);
-                            manager.refresh(manager.groups);
+                            if (scope.hierarchy) {
+                                manager.denyDrop(dependency);
+                                manager.refresh(manager.groups);
+                            }
 
 
                             if (scope.conflictChecker && scope.enabled) {
@@ -205,8 +217,10 @@
                         });
 
                         api.grDependencies.on.displayed(scope, debounce(function(groups){
+                            if (scope.hierarchy) {
                                 manager.setGroupsTasks(groups);
                                 manager.refresh();
+                            }
                         }));
 
                     }

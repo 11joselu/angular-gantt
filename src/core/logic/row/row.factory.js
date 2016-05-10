@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-    angular.module('gantt').factory('GanttRow', ['GanttTask', 'moment', '$filter', function(Task, moment, $filter) {
+    angular.module('gantt').factory('GanttRow', ['GanttTask', 'moment', '$filter', 'GanttTasksGroup', 'GanttHierarchy', function(Task, moment, $filter, TaskGroup, Hierarchy) {
         var Row = function(rowsManager, model) {
             this.rowsManager = rowsManager;
             this.model = model;
@@ -12,6 +12,7 @@
             this.tasks = [];
             this.filteredTasks = [];
             this.visibleTasks = [];
+            this.groups = [];
         };
 
         Row.prototype.addTaskImpl = function(task, viewOnly) {
@@ -29,17 +30,19 @@
 
         };
 
+
         // Adds a task to a specific row. Merges the task if there is already one with the same id
         Row.prototype.addTask = function(taskModel, viewOnly) {
             // Copy to new task (add) or merge with existing (update)
             var task, isUpdate = false;
-
             this.rowsManager.gantt.objectModel.cleanTask(taskModel);
+
             if (taskModel.id in this.tasksMap) {
                 task = this.tasksMap[taskModel.id];
                 if (task.model === taskModel) {
                     return task;
                 }
+
                 task.model = taskModel;
                 isUpdate = true;
             } else {
@@ -60,6 +63,14 @@
 
             return task;
         };
+
+        Row.prototype.addGroupTask = function(taskModel, viewOnly) {
+            this.rowsManager.gantt.objectModel.cleanTask(taskModel);
+            if (!viewOnly) {
+                var task = new TaskGroup(this, taskModel);
+                this.groups.push(task);
+            }
+        }
 
         // Removes the task from the existing row and adds it to he current one
         Row.prototype.moveTaskToRow = function(task, viewOnly) {

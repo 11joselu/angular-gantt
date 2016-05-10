@@ -214,9 +214,8 @@ angular.module('angularGanttDemoApp')
                 var _lag = this.getLag(data, this.fromTask, this.toTask);
                 var index = utils.getIndexTask(data, this.toTask);
                 var arr = data[index].data.predecessors.split(";");
-                ;
+
                 data[index].data.predecessors = removeFromArray(arr, _lag.fromTaskIdx).join(";");
-                api.columns.generate();
                 /**
                  * Search for index of removed task
                  */

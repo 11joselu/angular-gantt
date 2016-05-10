@@ -1,6 +1,28 @@
 (function() {
     'use strict';
     angular.module('gantt').service('ganttUtils', [function() {
+
+         var isDescOrAnces = function(arr, model, toTaskId) {
+            return arr.some(function(row, index) {
+               if (row.model.id === toTaskId || row.model.name === toTaskId) {
+                   model.dependencies.splice(getIndex(model.dependencies, row.model), 1);
+                   return true;
+               }
+
+               return false;
+           });
+        }
+
+        var getIndex = function(dependencies, model) {
+            for(var i = 0; i < dependencies.length; i++) {
+                if (dependencies[i].to === model.id || dependencies[i].to === model.name) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
         return {
             createBoundedWrapper: function(object, method) {
                 return function() {
@@ -40,7 +62,44 @@
                 return function() {
                     return seedId += 1;
                 };
-            })()
+            })(),
+
+            denyDrop: function(dependency) {
+               var model        = dependency.task.model;
+               var descendants  = dependency.task.descendants;
+               var ancestors    = dependency.task.ancestors;
+               var toTask       = dependency.getToTask();
+               var toTaskId     = dependency.getToTaskId();
+
+               if (descendants) {
+                    if (isDescOrAnces(descendants, model, toTaskId)) {
+                        return true;
+                    }
+               }
+
+               if (ancestors) {
+                    if (isDescOrAnces(ancestors, model, toTaskId)) {
+                        return true;
+                    }
+               }
+
+               if (toTask.model.children && toTask.model.children.indexOf(model.id) >= 0) {
+                   model.dependencies.splice(getIndex(model.dependencies, model), 1);
+                   return true;
+               }
+
+               if (toTask.model.children && toTask.descendants) {
+                    for (var i = 0; i < toTask.descendants.length; i++) {
+                        var modl = toTask.descendants[i].model;
+                        if (modl.id === model.id || modl.id === model.name || modl.name === model.name) {
+                            model.dependencies.splice(getIndex(model.dependencies, modl))
+                            return true;
+                        }
+                    }
+               }
+
+               return false;
+            }
         };
     }]);
 }());

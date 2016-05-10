@@ -58,6 +58,7 @@ angular.module('angularGanttDemoApp')
                         // this is a summary task
                         {
                             name: 'Node 1',
+                            id: 'Node 1',
                             children: [
                                 'Milestone 2',
                                 'Control account 1',
@@ -94,6 +95,7 @@ angular.module('angularGanttDemoApp')
 
                         {
                             name: 'Control account 1',
+                            id: 'Control account 1',
                             children: [
                                 'Milestone 3',
                                 'Work package 1',
@@ -130,6 +132,7 @@ angular.module('angularGanttDemoApp')
 
                         {
                             name: 'Work package 1',
+                            id: 'Work package 1',
                             children: [
                                 'Milestone 4',
                                 'Activity 1',
@@ -256,6 +259,7 @@ angular.module('angularGanttDemoApp')
 
                         {
                             name: 'Node 2',
+                            id: 'Node 2',
                             children: [
                                 'Control account 4',
                                 'Control account 5',
@@ -526,7 +530,6 @@ angular.module('angularGanttDemoApp')
                                     from: new Date(2016, 3, 8, 8, 0, 0),
                                     to: new Date(2016, 3, 14, 8, 0, 0),
                                     color: "#8F8F8F",
-
                                 }
                             ],
                             data: {

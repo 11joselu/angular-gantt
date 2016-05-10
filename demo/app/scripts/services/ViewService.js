@@ -34,7 +34,6 @@ angular.module('angularGanttDemoApp')
             };
 
             this.getConcatenated = function() {
-                console.log(this.control);
                 return this.control;
             }
         }

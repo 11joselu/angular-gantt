@@ -2,7 +2,7 @@
 (function() {
     'use strict';
 
-    angular.module('gantt.dependencies').factory('GanttDependenciesManager', ['GanttDependency', 'GanttDependenciesEvents', 'GanttDependencyTaskMouseHandler','GanttTasksGroup', function(Dependency, DependenciesEvents, TaskMouseHandler, TasksGroup) {
+    angular.module('gantt.dependencies').factory('GanttDependenciesManager', ['GanttDependency', 'GanttDependenciesEvents', 'GanttDependencyTaskMouseHandler','GanttTasksGroup', 'ganttUtils', function(Dependency, DependenciesEvents, TaskMouseHandler, TasksGroup, ganttUtils) {
         var DependenciesManager = function(gantt, pluginScope, api) {
             var self = this;
 
@@ -533,25 +533,11 @@
                 }
             };
 
-            this.denyDropOnChild = function(dependency) {
-               var model = dependency.task.model;
-               var toTaskId = dependency.getToTaskId();
-               var descendants = dependency.task.descendants;
-
-               if (descendants) {
-                   return descendants.some(function(row, index) {
-                       if (row.model.id === toTaskId || row.model.name === toTaskId) {
-                           model.dependencies.splice(index, 1);
-                           return true;
-                       }
-
-                       return false;
-                   });
-               }
-
-               return false;
-
+            this.denyDrop = function(dependency) {
+               return ganttUtils.denyDrop(dependency);
             };
+
+
 
             this.api.registerMethod('dependencies', 'refresh', this.refresh, this);
         };

@@ -57,24 +57,24 @@
        * @returns {boolean}
        */
      this.denyDropOnChild = function(dependency) {
-        var fromTask = dependency.getFromTask();
-        var toTask = dependency.getToTaskId();
+           var model = dependency.task.model;
+           var toTaskId = dependency.getToTaskId();
+           var descendants = dependency.task.descendants;
 
-        for (var i = 0; i < fromTask.tasks.length; i++) {
-            if (fromTask.tasks[i].model.id === toTask) {
-                return true;
-            }
-        }
+           if (descendants) {
+               return descendants.some(function(row, index) {
+                   if (row.model.id === toTaskId || row.model.name === toTaskId) {
+                       model.dependencies.splice(index, 1);
+                       return true;
+                   }
 
-        for (var i = 0; i < fromTask.descendants.length; i++ ){
-            if (fromTask.descendants[i].model.id === toTask) {
-                return true;
-            }
-        }
+                   return false;
+               });
+           }
 
-        return false;
+           return false;
 
-     };
+        };
 
 
       /**
