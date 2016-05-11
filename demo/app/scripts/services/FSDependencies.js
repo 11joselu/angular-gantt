@@ -96,13 +96,20 @@ angular.module('angularGanttDemoApp')
 
                function setText(data, idx, days, move) {
 
+
                    if (!data.predecessors) {
                        data.predecessors = getString(idx, days);
 
                    } else {
                        var pred = utils.getPredecessorsValues(data.predecessors);
                        var _indexParent = pred.parent.indexOf(idx);
-                       pred.days[_indexParent] = diff;
+                       console.log(_indexParent);
+                       if (_indexParent === -1) {
+                          pred.parent.push(idx);
+                          pred.days.push(days);
+                       } else {
+                            pred.days[_indexParent] = diff;
+                       }
 
                        data.predecessors = pred.parent.map(function(value, index) {
                            return getString(value, pred.days[index]);
