@@ -67,6 +67,10 @@ body {
     background-color: rgb(95, 162, 221);
 }
 
+.task-is-milestone {
+    max-width: 1em;
+}
+
 .task-is-milestone  .gantt-task-background {
      width: 12px;
      height: 12px;

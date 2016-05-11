@@ -11,19 +11,6 @@ angular.module('angularGanttDemoApp')
     .factory('FSDependencies', ['Utils', function (Utils) {
         var utils = new Utils();
 
-        function getString(idx, days) {
-            var str = idx .toString();
-            if (days > 0) {
-                str += "FS +" + days + "d";
-            } else {
-                if (days < 0) {
-                    str += "FS " + days + "d";
-                }
-            }
-
-            return str;
-        };
-
         /**
          * Constructor of task dependencias
          * @param {[Dependency]} dependency [dependency event values]
@@ -99,7 +86,7 @@ angular.module('angularGanttDemoApp')
 
 
                    if (!data.predecessors) {
-                       data.predecessors = getString(idx, days);
+                       data.predecessors = utils.getString(idx, days);
 
                    } else {
                        var pred = utils.getPredecessorsValues(data.predecessors);
@@ -113,7 +100,7 @@ angular.module('angularGanttDemoApp')
                        }
 
                        data.predecessors = pred.parent.map(function(value, index) {
-                           return getString(value, pred.days[index]);
+                           return utils.getString(value, pred.days[index]);
                        }).join(";");
                    }
                }
@@ -230,7 +217,7 @@ angular.module('angularGanttDemoApp')
                 pred.days.splice(predIndex, 1);
 
                 data[toIndex].data.predecessors = pred.parent.map(function(value, index) {
-                    return getString(value, pred.days[index]);
+                    return utils.getString(value, pred.days[index]);
                 }).join(";");
 
                 api.columns.generate();

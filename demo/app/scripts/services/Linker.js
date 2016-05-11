@@ -13,6 +13,8 @@
         this.api = api;
 
         this.linkTaks = function(links) {
+          if (links.length === 0) { return []};
+
           var fromTask = links[0];
 
           if (fromTask) {
@@ -20,13 +22,12 @@
                   fromTask.model.dependencies = [];
               }
 
-               removeClasses(fromTask);
+               // removeClasses(fromTask);
 
                for (var i = 1; i < links.length; i++) {
 
-                  if (fromTask.model.dependencies.indexOf(links[i].model.id) < 0) {
+                  if (!isIn(fromTask.model.dependencies, links[i])) {
 
-                      removeClasses(links[i]);
 
                       fromTask.model.dependencies.push({
                           to: links[i].model.id
@@ -40,10 +41,13 @@
                       }
                   }
 
+
+                  // removeClasses(links[i]);
+
                     // api.dependencies.refresh();
                }
 
-               return [];
+               return links;
           }
 
           return links;
@@ -53,46 +57,60 @@
           task.row.model.classes = [];
         }
 
-        this.unLinkTasks = function(links, api) {
-            var fromTask = links[0];
-
-            if (fromTask) {
-                if (!fromTask.model.dependencies) {
-                    for (var i = 1; i < links.length; i++ ){
-                        var model = links[i].model;
-                        if (model.dependencies) {
-                            model.dependencies = model.dependencies.filter(function(dependency) {
-                                return dependency.to !== fromTask.model.id;
-                            });
-                        }
-
-                        removeClasses(links[i]);
-                        removeClasses(fromTask);
-
-                    }
-                } else {
-                   var dependencies = fromTask.model.dependencies;
-
-                   for (var i = 0; i < dependencies.length; i++ ) {
-
-                        for(var j = 0; j < links.length; j++) {
-                            if (dependencies[i].to === links[j].model.id) {
-                                dependencies.splice(i, 1);
-                            }
-
-                            removeClasses(links[j]);
-                        }
-                   }
-
-                   fromTask.model.dependencies = dependencies;
+        var isIn = function(dependencies, task) {
+            for(var i = 0; i < dependencies.length; i++) {
+                if (dependencies[i].to === task.model.id) {
+                    return true;
                 }
-                return [];
             }
 
-            return links;
-
+            return false;
         }
-      };
+
+        var removeFromPredecessors = function(data, fromTask, dependencyID) {
+            var dependencyIdx = utils.getIndexTask(data, dependencyID);
+
+            if (data[dependencyIdx].data) {
+                var pred = utils.getPredecessorsValues(data[dependencyIdx].data.predecessors);
+                var fromIdex = utils.getIndexTask(fromTask);
+                var idx = pred.parent.indexOf(fromIdex);
+                pred.parent.splice(idx);
+                pred.days.splice(idx);
+
+                data[dependencyIdx].data.predecessors = pred.parent.map(function(value, index) {
+                    return utils.getString(value, pred.days[index])
+                }).join(";");
+            }
+        };
+
+
+        this.unLinkTasks = function(links, api) {
+            if (links.length === 0) {return []};
+
+            var fromTask = links[0];
+
+            if (fromTask.model.dependencies) {
+                var dependencies = fromTask.model.dependencies;
+
+                for (var i = 0; i < dependencies.length; i++ ) {
+
+                     for(var j = 0; j < links.length; j++) {
+                         if (dependencies[i].to === links[j].model.id) {
+                             removeFromPredecessors(this.data, fromTask, dependencies[i].to);
+                             dependencies.splice(i, 1);
+                         }
+
+                         // removeClasses(links[j]);
+                     }
+                }
+
+                fromTask.model.dependencies = dependencies;
+            }
+
+            // return [];
+            return links;
+        }
+    };
 
 
 

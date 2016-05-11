@@ -403,7 +403,14 @@ angular.module('angularGanttDemoApp')
 
                                     taskSelected = directiveScope.task;
 
-                                    toLink = [];
+                                    if (toLink.length > 0) {
+                                        angular.forEach(toLink, function(task) {
+                                            if (taskSelected.model.id !== task.model.id) {
+                                                removeClass(task.row.model);
+                                            }
+                                        })
+                                        toLink = [];
+                                    }
                                 }
 
                             });

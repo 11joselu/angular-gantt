@@ -62,19 +62,6 @@ angular.module('angularGanttDemoApp')
               return task;
           };
 
-          function getString(idx, days) {
-               var str = idx .toString();
-               if (days > 0) {
-                   str += "FS +" + days + "d";
-               } else {
-                   if (days < 0) {
-                       str += "FS " + days + "d";
-                   }
-               }
-
-               return str;
-          };
-
           /**
            * Update all lag columns values
            * @param  {[Array]} _allPred [Array of predecessors values]
@@ -104,7 +91,7 @@ angular.module('angularGanttDemoApp')
 
                         pred.days[index] = diff;
 
-                        return getString(value, pred.days[index]);
+                        return utils.getString(value, pred.days[index]);
                      }
                  });
 

@@ -31,6 +31,19 @@
         return -1;
       };
 
+      this.getString = function (idx, days) {
+            var str = idx .toString();
+            if (days > 0) {
+                str += "FS +" + days + "d";
+            } else {
+                if (days < 0) {
+                    str += "FS " + days + "d";
+                }
+            }
+
+            return str;
+      };
+
       /**
        * Detect if fromTask and ToTask has bi-directional dependencies
        * @param  {[Task]} fromTask
@@ -150,8 +163,7 @@
           if (data[i].tasks) {
             var childTask = data[i].tasks;
             for(var j=0; j < childTask.length; j++) {
-
-              if(childTask[j].id === task.id) {
+              if(childTask[j].id === task.id || childTask[j].id === task) {
                 return i;
               }
             }
