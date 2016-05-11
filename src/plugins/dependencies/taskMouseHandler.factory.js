@@ -45,7 +45,6 @@
             };
 
 
-
             /**
              * Install mouse handler for this task, and hide all endpoints.
              */
@@ -58,7 +57,6 @@
                         element = angular.element(element);
                     }
                     if (element) {
-                        // console.log(self.task.getContentElement())
                         self.elementHandlers.push(new ElementHandler(element));
                         angular.forEach(self.task.dependencies.endpoints, function(endpoint) {
                             self.elementHandlers.push(new ElementHandler(angular.element(endpoint.canvas)));

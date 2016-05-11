@@ -11,6 +11,19 @@ angular.module('angularGanttDemoApp')
     .factory('FSDependencies', ['Utils', function (Utils) {
         var utils = new Utils();
 
+        function getString(idx, days) {
+            var str = idx .toString();
+            if (days > 0) {
+                str += "FS +" + days + "d";
+            } else {
+                if (days < 0) {
+                    str += "FS " + days + "d";
+                }
+            }
+
+            return str;
+        };
+
         /**
          * Constructor of task dependencias
          * @param {[Dependency]} dependency [dependency event values]
@@ -81,18 +94,6 @@ angular.module('angularGanttDemoApp')
                // data[idx].data.predecessors = idx;
                setText(data[idx].data, toIndex, diff, parentMove);
 
-               function getString(idx, days) {
-                   var str = idx .toString();
-                   if (days > 0) {
-                       str += "FS +" + days + "d";
-                   } else {
-                       if (days < 0) {
-                           str += "FS " + days + "d";
-                       }
-                   }
-
-                   return str;
-               };
 
                function setText(data, idx, days, move) {
 
@@ -103,7 +104,7 @@ angular.module('angularGanttDemoApp')
                    } else {
                        var pred = utils.getPredecessorsValues(data.predecessors);
                        var _indexParent = pred.parent.indexOf(idx);
-                       console.log(_indexParent);
+
                        if (_indexParent === -1) {
                           pred.parent.push(idx);
                           pred.days.push(days);
@@ -167,12 +168,10 @@ angular.module('angularGanttDemoApp')
 
                     toTsk.from = angular.copy(fromTsk.to);
 
-                    console.log(lag);
                     toTsk.to.add(lag, 'days');
 
                     var newDays = Math.abs(utils.difference(toTsk.from, toTsk.to, 'days'));
 
-                    console.log(newDays - days);
 
                     toTsk.to.subtract(newDays - days, 'days');
 
@@ -221,23 +220,21 @@ angular.module('angularGanttDemoApp')
              * @param  {[API]} api  [Api events]
              */
             this.removeDependencies = function(data, api) {
-                var _lag = this.getLag(data, this.fromTask, this.toTask);
-                var index = utils.getIndexTask(data, this.toTask);
-                var arr = data[index].data.predecessors.split(";");
+                var fromIndex = utils.getIndexTask(data, this.fromTask);
+                var toIndex = utils.getIndexTask(data, this.toTask);
 
-                data[index].data.predecessors = removeFromArray(arr, _lag.fromTaskIdx).join(";");
-                /**
-                 * Search for index of removed task
-                 */
-                function removeFromArray(arr, str) {
-                    for(var i = 0; i < arr.length; i++) {
-                        if(arr[i].indexOf(str) >= 0) {
-                            arr.splice(i, 1);
-                        }
-                    }
+                var pred = utils.getPredecessorsValues(data[toIndex].data.predecessors);
 
-                    return arr;
-                }
+                var predIndex = pred.parent.indexOf(fromIndex);
+                pred.parent.splice(predIndex, 1);
+                pred.days.splice(predIndex, 1);
+
+                data[toIndex].data.predecessors = pred.parent.map(function(value, index) {
+                    return getString(value, pred.days[index]);
+                }).join(";");
+
+                api.columns.generate();
+
             };
         };
 
