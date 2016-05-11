@@ -1,85 +1,88 @@
 'use strict';
 
 /**
- * @ngdoc service
- * @name angularGanttDemoApp.Sample
- * @description
- * # Sample
- * Service in the angularGanttDemoApp.
- */
+* @ngdoc service
+* @name angularGanttDemoApp.Sample
+* @description
+* # Sample
+* Service in the angularGanttDemoApp.
+*/
 angular.module('angularGanttDemoApp')
-    .factory('ResizeDependencies', ['FSDependencies', 'Utils', function (Dependencies, Utils) {
-        var utils = new Utils();
+.factory('ResizeDependencies', ['FSDependencies', 'Utils', function (Dependencies, Utils) {
+    var utils = new Utils();
 
-        var Resize = function(task) {
-          this.task = task;
-          this.model = task.model;
-          /**
-           * Update all task dependencies
-           * @param  {[Array]} data [Array of taks]
-           * @param  {[API]} api  [Api events]
-           * @return {[type]}      [description]
-           */
-          this.updateDependencies = function(data, api) {
+    var Resize = function(task) {
+        var resize      = this;
 
-            var task = this.updateDuration(data);
-            if (this.model.dependencies) {
-              // update model values from weekend updates
-              this.model = angular.copy(task);
-              for(var i = 0; i < this.model.dependencies.length; i++) {
-                var toTask = utils.findTask(data, this.model.dependencies[i]);
-                var dependencies = new Dependencies(null, this.model, toTask);
-                dependencies.setDate(data, api, true);
-                dependencies.updateChildTasks(data, api);
-              }
+        resize.task     = task;
+        resize.model    = task.model;
+        /**
+        * Update all task dependencies
+        * @param  {[Array]} data [Array of taks]
+        * @param  {[API]} api  [Api events]
+        * @return {[type]}      [description]
+        */
+        resize.updateDependencies = function(data, api) {
 
-              return;
+            var task = resize.updateDuration(data);
+            if (resize.model.dependencies) {
+            // update model values from weekend updates
+                resize.model = angular.copy(task);
+                for(var i = 0; i < resize.model.dependencies.length; i++) {
+                    var toTask = utils.findTask(data, resize.model.dependencies[i]);
+                    var dependencies = new Dependencies(null, resize.model, toTask);
+                    dependencies.setDate(data, api, true);
+                    dependencies.updateChildTasks(data, api);
+                }
+
+                return;
             }
 
-            if (!this.model.isMilestone) {
-               /* var task = utils.setMonday(this.task.model);
-                this.model.from = task.from;
-                this.model.to = task.to;*/
+            if (!resize.model.isMilestone) {
+                var task = utils.setMonday(resize.task.model);
+                resize.model.from = task.from;
+                resize.model.to = task.to;
             }
 
-            this.updatePredecessors(data);
+            resize.updatePredecessors(data);
             api.columns.generate();
-          };
+        };
 
-          /**
-           * Update Task duration column
-           * @param  {[Array]} data [Array of taks]
-           * @return {[Task]}
-           */
-          this.updateDuration = function(data) {
-              var task = utils.setMonday(this.model);
+        /**
+        * Update Task duration column
+        * @param  {[Array]} data [Array of taks]
+        * @return {[Task]}
+        */
+        resize.updateDuration = function(data) {
+            var task = utils.setMonday(resize.model);
 
-              // Warning: this.model lose references
-              var taskIndex = utils.getIndexTask(data, this.model);
-              data[taskIndex].tasks[0] = angular.copy(task);
+            // Warning: resize.model lose references
+            var taskIndex = utils.getIndexTask(data, resize.model);
+            data[taskIndex].tasks[0] = angular.copy(task);
 
-              data[taskIndex].data.duration = Math.abs(utils.difference(this.model.from, this.model.to, 'days')) + " d";
-              return task;
-          };
+            data[taskIndex].data.duration = Math.abs(utils.difference(resize.model.from, resize.model.to, 'days')) + " d";
 
-          /**
-           * Update all lag columns values
-           * @param  {[Array]} _allPred [Array of predecessors values]
-           * @param  {[Array]} data     [description]
-           * @param  {[Taks]} model    [description]
-           * @return {[Array]} Array of strings
-           */
-          this.updatePredecessors = function(data) {
-             var vm = this;
+            return task;
+        };
 
-             if (this.task.row.model.data && this.task.row.model.data.predecessors) {
-                 var rowData = this.task.row.model.data;
-                 var pred = utils.getPredecessorsValues(rowData.predecessors);
+        /**
+        * Update all lag columns values
+        * @param  {[Array]} _allPred [Array of predecessors values]
+        * @param  {[Array]} data     [description]
+        * @param  {[Taks]} model    [description]
+        * @return {[Array]} Array of strings
+        */
+        resize.updatePredecessors = function(data) {
+            var vm = resize;
 
-                 var arr = pred.parent.map(function(value, index) {
-                     var fromTasks = data[value];
+            if (resize.task.row.model.data && resize.task.row.model.data.predecessors) {
+                var rowData = resize.task.row.model.data;
+                var pred = utils.getPredecessorsValues(rowData.predecessors);
 
-                     if (fromTasks.tasks) {
+                var arr = pred.parent.map(function(value, index) {
+                    var fromTasks = data[value];
+
+                    if (fromTasks.tasks) {
                         var fromTask = fromTasks.tasks[0];
                         var diff = utils.difference(fromTask.to, vm.model.from, 'days');
 
@@ -92,17 +95,16 @@ angular.module('angularGanttDemoApp')
                         pred.days[index] = diff;
 
                         return utils.getString(value, pred.days[index]);
-                     }
-                 });
+                    }
+                });
 
-                 rowData.predecessors = arr.join(";");
+                rowData.predecessors = arr.join(";");
 
-             }
-          };
+            }
         };
+    };
 
 
 
-        return Resize;
-    }]);
-;
+    return Resize;
+}]);
