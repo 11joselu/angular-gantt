@@ -151,10 +151,10 @@ angular.module('angularGanttDemoApp')
             columns: ['model.name', 'from', 'to', 'model.wbs'],
             // tree columns
             treeTableColumns: [
+                'model.data.predecessors',
                 'model.data.wbs',
                 'model.data.account',
                 'model.data.package',
-                'model.data.predecessors',
                 'model.data.duration',
                 'from',
                 'to',
@@ -405,8 +405,6 @@ angular.module('angularGanttDemoApp')
 
                                     toLink = [];
                                 }
-
-                                console.log(toLink);
 
                             });
 

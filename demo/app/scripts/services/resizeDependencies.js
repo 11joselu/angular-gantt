@@ -37,11 +37,12 @@ angular.module('angularGanttDemoApp')
             }
 
             if (!this.model.isMilestone) {
-                var task = utils.setMonday(this.task.model);
+               /* var task = utils.setMonday(this.task.model);
                 this.model.from = task.from;
-                this.model.to = task.to;
+                this.model.to = task.to;*/
             }
 
+            this.updatePredecessors(data);
             api.columns.generate();
           };
 
@@ -58,29 +59,58 @@ angular.module('angularGanttDemoApp')
               data[taskIndex].tasks[0] = angular.copy(task);
 
               data[taskIndex].data.duration = Math.abs(utils.difference(this.model.from, this.model.to, 'days')) + " d";
-              this.updatePredecessors(data, taskIndex);
-
               return task;
           };
 
+          function getString(idx, days) {
+               var str = idx .toString();
+               if (days > 0) {
+                   str += "FS +" + days + "d";
+               } else {
+                   if (days < 0) {
+                       str += "FS " + days + "d";
+                   }
+               }
+
+               return str;
+          };
+
           /**
-           * Update all tasks predecessors values
-           * @param  {[Array]} data [Array of taks]
-           * @param  {[Integer]} index [index of tasks]
-           * @return {[String]} all predecessors values
+           * Update all lag columns values
+           * @param  {[Array]} _allPred [Array of predecessors values]
+           * @param  {[Array]} data     [description]
+           * @param  {[Taks]} model    [description]
+           * @return {[Array]} Array of strings
            */
-          this.updatePredecessors = function(data, index) {
-            var model = data[index];
-            var vm = this;
+          this.updatePredecessors = function(data) {
+             var vm = this;
 
-            if (utils.hasPredecessors(model)) {
+             if (this.task.row.model.data && this.task.row.model.data.predecessors) {
+                 var rowData = this.task.row.model.data;
+                 var pred = utils.getPredecessorsValues(rowData.predecessors);
 
-                var _allPred = utils.getPredecessorsValues(model.data.predecessors);
+                 var arr = pred.parent.map(function(value, index) {
+                     var fromTasks = data[value];
 
-                var days = utils.updateAllLag(_allPred, data, vm.model);
+                     if (fromTasks.tasks) {
+                        var fromTask = fromTasks.tasks[0];
+                        var diff = utils.difference(fromTask.to, vm.model.from, 'days');
 
-               model.data.predecessors = days.join(";");
-            }
+                        if (diff < 0) {
+                            diff = Math.abs(diff)
+                        } else {
+                            diff = -diff;
+                        }
+
+                        pred.days[index] = diff;
+
+                        return getString(value, pred.days[index]);
+                     }
+                 });
+
+                 rowData.predecessors = arr.join(";");
+
+             }
           };
         };
 

@@ -174,7 +174,7 @@ angular.module('angularGanttDemoApp')
                                     name: "Activity 1",
                                     id: "Activity 1",
                                     from: new Date(2016, 3, 2, 8, 0, 0),
-                                    to: new Date(2016, 3, 4, 8, 0, 0),
+                                    to: new Date(2016, 3, 4, 17, 0, 0),
                                     progress: 100
                                 }
                             ],
@@ -191,7 +191,7 @@ angular.module('angularGanttDemoApp')
                                     name: "Activity 2",
                                     id: "Activity 2",
                                     from: new Date(2016, 3, 4, 8, 0, 0),
-                                    to: new Date(2016, 3, 7, 8, 0, 0),
+                                    to: new Date(2016, 3, 7, 17, 0, 0),
                                     progress: 100
                                 }
                             ],
@@ -208,7 +208,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Work package 2',
                                     id: 'Work package 2',
                                     from: new Date(2016, 3, 12, 8, 0, 0),
-                                    to: new Date(2016, 3, 18, 8, 0, 0),
+                                    to: new Date(2016, 3, 18, 17, 0, 0),
                                     progress: 0
                                 }
                             ],
@@ -226,7 +226,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Control account 2',
                                     id: 'Control account 2',
                                     from: new Date(2016, 3, 21, 8, 0, 0),
-                                    to: new Date(2016, 3, 25, 8, 0, 0),
+                                    to: new Date(2016, 3, 25, 17, 0, 0),
                                     progress: 0
                                 }
                             ],
@@ -245,7 +245,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Control account 3',
                                     id: 'Control account 3',
                                     from: new Date(2016, 3, 28, 8, 0, 0),
-                                    to: new Date(2016, 4, 1, 8, 0, 0),
+                                    to: new Date(2016, 4, 1, 17, 0, 0),
                                     progress: 0
                                 }
                             ],
@@ -277,7 +277,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Control account 4',
                                     id: 'Control account 4',
                                     from: new Date(2016, 3, 23, 8, 0, 0),
-                                    to: new Date(2016, 3, 29, 8, 0, 0),
+                                    to: new Date(2016, 3, 29, 17, 0, 0),
                                     color: "rgb(255,178,178)",
                                     progress: {
                                         percent: 75,
@@ -300,7 +300,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Control account 5',
                                     id: 'Control account 5',
                                     from: new Date(2016, 3, 30, 8, 0, 0),
-                                    to: new Date(2016, 4, 5, 8, 0, 0),
+                                    to: new Date(2016, 4, 5, 17, 0, 0),
                                     color: "rgb(255,178,178)",
                                     progress: {
                                         percent: 0.0,
@@ -492,7 +492,7 @@ angular.module('angularGanttDemoApp')
                                     name: "Activity 1",
                                     id: "Activity 1",
                                     from: new Date(2016, 3, 2, 8, 0, 0),
-                                    to: new Date(2016, 3, 4, 8, 0, 0),
+                                    to: new Date(2016, 3, 4, 17, 0, 0),
                                     color: "#8F8F8F",
 
                                 }
@@ -510,7 +510,7 @@ angular.module('angularGanttDemoApp')
                                     name: "Activity 2",
                                     id: "Activity 2",
                                     from: new Date(2016, 3, 4, 8, 0, 0),
-                                    to: new Date(2016, 3, 7, 8, 0, 0),
+                                    to: new Date(2016, 3, 7, 17, 0, 0),
                                     color: "#8F8F8F",
 
                                 }
@@ -528,7 +528,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Work package 2',
                                     id: 'Work package 2',
                                     from: new Date(2016, 3, 8, 8, 0, 0),
-                                    to: new Date(2016, 3, 14, 8, 0, 0),
+                                    to: new Date(2016, 3, 14, 17, 0, 0),
                                     color: "#8F8F8F",
                                 }
                             ],
@@ -546,7 +546,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Control account 2',
                                     id: 'Control account 2',
                                     from: new Date(2016, 3, 15, 8, 0, 0),
-                                    to: new Date(2016, 3, 21, 8, 0, 0),
+                                    to: new Date(2016, 3, 21, 17, 0, 0),
                                     color: "#8F8F8F",
 
                                 }
@@ -566,7 +566,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Control account 3',
                                     id: 'Control account 3',
                                     from: new Date(2016, 3, 22, 8, 0, 0),
-                                    to: new Date(2016, 3, 28, 8, 0, 0),
+                                    to: new Date(2016, 3, 28, 17, 0, 0),
                                     color: "#8F8F8F",
 
                                 }
@@ -598,7 +598,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Control account 4',
                                     id: 'Control account 4',
                                     from: new Date(2016, 3, 17, 8, 0, 0),
-                                    to: new Date(2016, 3, 23, 8, 0, 0),
+                                    to: new Date(2016, 3, 23, 17, 0, 0),
                                     color: "#8F8F8F",
                                 }
                             ],
@@ -617,7 +617,7 @@ angular.module('angularGanttDemoApp')
                                     name: 'Control account 5',
                                     id: 'Control account 5',
                                     from: new Date(2016, 3, 24, 8, 0, 0),
-                                    to: new Date(2016, 3, 30, 8, 0, 0),
+                                    to: new Date(2016, 3, 30, 17, 0, 0),
                                     color: "#8F8F8F",
                                 }
                             ],

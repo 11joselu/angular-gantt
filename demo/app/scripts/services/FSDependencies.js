@@ -12,57 +12,6 @@ angular.module('angularGanttDemoApp')
         var utils = new Utils();
 
         /**
-         * Update task predecessors on resize or move event
-         * @return {[type]} [description]
-         */
-        var updatePre = function(getAllPred, data, toTask) {
-            return utils.updateAllLag(getAllPred, data, toTask)
-        };
-
-        /**
-         * Set String to precedessors column
-         * @param {[type]} data [array of all data task]
-         * @param {[type]} lag  [is lag values]
-         */
-        var setLagValue = function(data, lag, update, toTask){
-
-            var fromTaskIdx = lag.fromTaskIdx;
-            var toTaskIdx = lag.toTaskIdx;
-            var diff = lag.diff - utils.DAY;
-            var _data = data[toTaskIdx].data;
-            var _str = fromTaskIdx + "FS";
-            var _endStr = "", _sp = "";
-
-            if (_data.predecessors) {
-                var getAllPred = utils.getPredecessorsValues(_data.predecessors);
-
-                if (utils.isInArray(getAllPred.parent, fromTaskIdx)) {
-                    if (update) {
-                        var days = updatePre(getAllPred, data, toTask);
-                        _data.predecessors = days.join(";");
-                    }
-                    return;
-                } else {
-                    _sp = ";";
-                }
-            }
-
-
-
-            if (diff > 0) {
-                _endStr = " +" + diff + "d";
-            } else {
-                if (diff < 0) {
-                    _endStr = "" + diff + "d";
-                }
-            }
-
-            _data.predecessors = (_data.predecessors) ? _data.predecessors : "";
-            _data.predecessors += _sp + _str + _endStr;
-        };
-
-
-        /**
          * Constructor of task dependencias
          * @param {[Dependency]} dependency [dependency event values]
          * @param {[Task]} fromTask   [depend only in case resize or move]
@@ -84,24 +33,6 @@ angular.module('angularGanttDemoApp')
                 return days + " d";
             };
 
-            /**
-             * Return index of predecessors and parent dependencies
-             * @param  {[Array of Objects]} data     [All taks data]
-             * @param  {[Task]} fromTask [From task dependencies]
-             * @param  {[Task]} toTask   [To task dependencies]
-             * @return {[Object]}  Object
-             */
-            this.getLag = function(data, fromTask, toTask) {
-                var fromTaskIdx = utils.getIndexTask(data, this.fromTask);
-                var toTaskIdx = utils.getIndexTask(data, this.toTask);
-                var diff = utils.difference(toTask.from, fromTask.to, 'days');
-
-                return {
-                    fromTaskIdx: fromTaskIdx,
-                    toTaskIdx: toTaskIdx,
-                    diff: diff
-                }
-            };
 
             /**
              * Add to task days
@@ -127,11 +58,58 @@ angular.module('angularGanttDemoApp')
                     this.toTask.from.add(1, 'days');
                     this.toTask.to.add(1, 'days');
                 }
+
                 // Test if values are at the weekend
                 var task = utils.setMonday(this.toTask);
                 this.toTask.from = task.from;
                 this.toTask.to = task.to;
             }
+
+            var setPredecessor = function(data, fromTask, toTask, parentMove) {
+
+               var toIndex = utils.getIndexTask(data, fromTask);
+               var idx = utils.getIndexTask(data, toTask);
+
+               var diff = utils.difference(toTask.from, fromTask.to, 'days');
+
+               if (diff > 0) {
+                   diff -= 1;
+               }
+
+               if (parentMove) { diff = Math.abs(diff) }
+
+               // data[idx].data.predecessors = idx;
+               setText(data[idx].data, toIndex, diff, parentMove);
+
+               function getString(idx, days) {
+                   var str = idx .toString();
+                   if (days > 0) {
+                       str += "FS +" + days + "d";
+                   } else {
+                       if (days < 0) {
+                           str += "FS " + days + "d";
+                       }
+                   }
+
+                   return str;
+               };
+
+               function setText(data, idx, days, move) {
+
+                   if (!data.predecessors) {
+                       data.predecessors = getString(idx, days);
+
+                   } else {
+                       var pred = utils.getPredecessorsValues(data.predecessors);
+                       var _indexParent = pred.parent.indexOf(idx);
+                       pred.days[_indexParent] = diff;
+
+                       data.predecessors = pred.parent.map(function(value, index) {
+                           return getString(value, pred.days[index]);
+                       }).join(";");
+                   }
+               }
+            };
 
             /**
              * Set and update all tasks dependencies
@@ -139,42 +117,67 @@ angular.module('angularGanttDemoApp')
              * @param {[Api events]} api  [Container of all api events]
              */
             this.setDate = function(data, api, update) {
+                var self = this;
+                if (utils.sameDependencies(this.fromTask, this.toTask)) {
+                    return;
+                }
 
-               if(!utils.sameDependencies(this.fromTask, this.toTask)) {
-                    var greater = utils.greaterThan(this.fromTask.to, this.toTask.from);
-                    if(greater < 0 ) {
-                        // Move toTask at the end of fromTask
-                        if (utils.isBetween(this.fromTask, this.toTask)) {
-                            this.setValues();
-                        }
+                var greater = utils.greaterThan(this.fromTask.to, this.toTask.from);
+                if (greater >= 0) {
+                    var fromIdx = utils.getIndexTask(data, this.fromTask);
+                    var toIdx = utils.getIndexTask(data, this.toTask);
+
+                    if (utils.hasPredecessors(data[toIdx])) {
+                        var predecessors = utils.getPredecessorsValues(data[toIdx].data.predecessors);
+                        this.setLag(predecessors, fromIdx);
+                    } else {
+                        this.setValues();
                     }
 
-                    if(greater > 0) {
-                        var taskIndex = utils.getIndexTask(data, this.toTask);
-                        var taskData = data[taskIndex].data;
-                        var date = angular.copy(this.fromTask.to);
-                        // Allow negatives lag
-                        if(taskData.predecessors) {
-                            var predecessors = utils.getPredecessorsValues(taskData.predecessors)
-                            if(predecessors.days) {
-                                var number = Number(predecessors.days[0]);
-                                // Only add lag with negative numbers.
-                                if(number < 0) {
-                                    date.subtract(Math.abs(number), 'days');
-                                }
+                    setPredecessor(data, this.fromTask, this.toTask);
 
-                            }
-                        }
-                        // Set new Date of task with lags
-                        this.setValues(date);
-                    }
+                } else {
+                    // update lag value from childs
+                    setPredecessor(data, this.fromTask, this.toTask, true);
+                }
 
-                    // set lag values
-                    var lag = this.getLag(data, this.fromTask, this.toTask);
-                    setLagValue(data, lag, update, this.toTask);
-               }
-                    // update tree table
-                    api.columns.generate();
+                api.columns.generate();
+            };
+
+            this.setLag = function(arrayPred, fromIdx) {
+                var idx = arrayPred.parent.indexOf(fromIdx);
+                var lag = arrayPred.days[idx];
+
+                var fromTsk = angular.copy(this.fromTask);
+                var toTsk = angular.copy(this.toTask);
+
+                if (lag < 0) {
+                    lag = Math.abs(lag);
+                    fromTsk.to.subtract(lag, 'days');
+                    var newDate = angular.copy(toTsk);
+
+                    var days = Math.abs(utils.difference(toTsk.from, toTsk.to, 'days'));
+
+                    toTsk.from = angular.copy(fromTsk.to);
+
+                    console.log(lag);
+                    toTsk.to.add(lag, 'days');
+
+                    var newDays = Math.abs(utils.difference(toTsk.from, toTsk.to, 'days'));
+
+                    console.log(newDays - days);
+
+                    toTsk.to.subtract(newDays - days, 'days');
+
+                    var tsk = utils.setMonday(toTsk);
+                    this.toTask.from = tsk.from;
+                    this.toTask.to = tsk.to;
+
+
+                } else {
+                    this.setValues();
+                }
+
             };
 
             /**

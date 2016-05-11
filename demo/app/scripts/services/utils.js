@@ -18,12 +18,12 @@
        * @param  {[Date]} dateTwo
        * @return {[Number]}
        */
-      this.greaterThan = function greaterThan(dateOne, dateTwo) {
+      this.greaterThan = function greaterThan(to, frm) {
 
-        if(dateOne.diff(dateTwo) > 0) {
+        if(to.diff(frm) > 0) {
           return 1;
         } else {
-          if(dateOne.diff(dateTwo) === 0) {
+          if(to.diff(frm) === 0) {
             return 0;
           }
         }
@@ -143,7 +143,6 @@
        */
       this.getIndexTask = function(data, task) {
         for (var i = 0; i < data.length; i++) {
-
           if (data[i].name && (data[i].name === task.name)) {
             return i;
           }
@@ -158,6 +157,8 @@
             }
           }
         }
+
+        return -1;
       };
 
       /**
@@ -189,6 +190,18 @@
 
       };
 
+      function getString(idx, days) {
+           var str = idx .toString();
+           if (days > 0) {
+               str += "FS +" + days + "d";
+           } else {
+               if (days < 0) {
+                   str += "FS -" + days + "d";
+               }
+           }
+
+           return str;
+       };
       /**
        * Update all lag columns values
        * @param  {[Array]} _allPred [Array of predecessors values]
@@ -196,26 +209,8 @@
        * @param  {[Taks]} model    [description]
        * @return {[Array]} Array of strings
        */
-      this.updateAllLag = function(_allPred, data, model) {
-         var self = this;
-         return _allPred.parent.map(function(parentIndex) {
-            var _str = parentIndex + "FS";
-            var _endStr = "", _sp = "";
-            var fromTask = (data[parentIndex].tasks) ?
-                            data[parentIndex].tasks[0] :
-                            data[parentIndex];
+      this.updateAllLag = function(data, task) {
 
-            var diff = self.difference(model.from, fromTask.to, 'days');
-            if (diff > 0) {
-                _endStr = " +" + diff + "d";
-            } else {
-                if (diff < 0) {
-                    _endStr = "" + diff + "d";
-                }
-            }
-
-            return  _sp + _str + _endStr;
-         });
       }
 
       /**
@@ -254,8 +249,10 @@
               }
             }
 
-            task.from = this.getHours(task.from, 8);
-            task.to = this.getHours(task.to, 17);
+            var fromHours = this.getHours(task.from, 8);
+            var toHours = this.getHours(task.to, 17);
+            task.from = fromHours.date;
+            task.to = toHours.date;
 
             return task;
 
@@ -290,6 +287,7 @@
       // TO DO
       this.getHours = function(date, min) {
         var _date = angular.copy(date);
+        var updated = false;
         var nextDay = angular.copy(date);
         nextDay.set('hours', min).set('minutes', 0).set('milliseconds', 0).add(1, 'days');
 
@@ -303,11 +301,19 @@
             _date.hour(min);
             _date.minutes(0);
             _date.milliseconds(0);
+            updated = false;
+
         } else {
-            _date.set('hours', min).set('minutes', 0).set('milliseconds', 0)
+            // reset time
+            _date.set('hours', min).set('minutes', 0).set('milliseconds', 0);
+            updated = true;
         }
 
-        return _date;
+        return {
+            date: _date,
+            updated: updated
+        }
+
       };
 
     };
