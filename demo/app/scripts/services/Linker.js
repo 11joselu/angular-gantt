@@ -4,6 +4,9 @@ var module = angular.module('angularGanttDemoApp');
 
 module.factory('Linker', ['Utils', 'FSDependencies', Linker]);
 
+/**
+ * Linker class
+ */
 function Linker(Utils, Dependencies) {
     var utils = new Utils();
 
@@ -13,6 +16,11 @@ function Linker(Utils, Dependencies) {
         link.data   = data;
         link.api    = api;
 
+        /**
+         * Link all array task to first selected task
+         * @param  {[Array of tasks]} links
+         * @return Array of tasks
+         */
         link.linkTaks = function(links) {
             if (links.length === 0) { return []};
 
@@ -34,6 +42,7 @@ function Linker(Utils, Dependencies) {
                             to: links[i].model.id
                         });
 
+                        // Create new dependencies FS
                         var dependencies = new Dependencies(null, fromTask.model, links[i].model);
                         dependencies.setDate(link.data, link.api);
 
@@ -43,9 +52,9 @@ function Linker(Utils, Dependencies) {
                     }
 
 
-                // removeClasses(links[i]);
+                    // removeClasses(links[i]);
 
-                // api.dependencies.refresh();
+                    // api.dependencies.refresh();
                 }
 
                 return links;
@@ -54,10 +63,17 @@ function Linker(Utils, Dependencies) {
             return links;
         };
 
+        // Remove all selected classes
         var removeClasses = function(task) {
             task.row.model.classes = [];
         }
 
+        /**
+         * Search for toTask at fromTask dependencies
+         * @param  {[Array of objects]}  dependencies
+         * @param  {[Task]}  task
+         * @return {Boolean}
+         */
         var isIn = function(dependencies, task) {
             for(var i = 0; i < dependencies.length; i++) {
                 if (dependencies[i].to === task.model.id) {
@@ -68,6 +84,13 @@ function Linker(Utils, Dependencies) {
             return false;
         }
 
+        /**
+         * Remove all selected task from predecessors values
+         * @param  {[Array of data]} data
+         * @param  {[Tasj]} fromTask     [description]
+         * @param  {[Dependency Id]} dependencyID [description]
+         * @return
+         */
         var removeFromPredecessors = function(data, fromTask, dependencyID) {
             var dependencyIdx = utils.getIndexTask(data, dependencyID);
 
@@ -85,7 +108,12 @@ function Linker(Utils, Dependencies) {
             }
         };
 
-
+        /**
+         * Remove all dependencies from fromTask
+         * @param  {[Array of selected tasks]} links
+         * @param  {[API event]} api
+         * @return {[Array of selected tasks]}
+         */
         link.unLinkTasks = function(links, api) {
             if (links.length === 0) {return []};
 

@@ -66,6 +66,14 @@ angular.module('angularGanttDemoApp')
             dep.toTask.to = task.to;
         }
 
+
+        /**
+         * Set predecessors columns
+         * @param {[type]} data       [Array data]
+         * @param {[Task]} fromTask
+         * @param {[Task]} toTask
+         * @param {[Boolean} parentMove
+         */
         var setPredecessor = function(data, fromTask, toTask, parentMove) {
 
             var toIndex = utils.getIndexTask(data, fromTask);
@@ -82,7 +90,9 @@ angular.module('angularGanttDemoApp')
             // data[idx].data.predecessors = idx;
             setText(data[idx].data, toIndex, diff, parentMove);
 
-
+            /**
+             * Set text for ToTask
+             */
             function setText(data, idx, days, move) {
 
                 if (!data.predecessors) {
@@ -140,6 +150,11 @@ angular.module('angularGanttDemoApp')
             api.columns.generate();
         };
 
+        /**
+         * Set lag difference for every task
+         * @param {[Array of string]} arrayPred
+         * @param {[Integer]} fromIdx
+         */
         dep.setLag = function(arrayPred, fromIdx) {
             var idx = arrayPred.parent.indexOf(fromIdx);
             var lag = arrayPred.days[idx];
@@ -160,7 +175,8 @@ angular.module('angularGanttDemoApp')
 
                 var newDays = Math.abs(utils.difference(toTsk.from, toTsk.to, 'days'));
 
-
+                // if Parent dependencies has no updated (reset hours)
+                // restore same From-Task date
                 toTsk.to.subtract(newDays - days, 'days');
 
                 var tsk = utils.setMonday(toTsk);

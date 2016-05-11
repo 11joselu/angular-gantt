@@ -9,6 +9,11 @@
  */
 angular.module('angularGanttDemoApp')
     .factory('ViewService', [function () {
+        /**
+         * View controller class
+         * @param {[type]} control [description]
+         * @param {[type]} plan    [description]
+         */
         var View = function (control, plan) {
             var view        = this;
 
@@ -19,6 +24,10 @@ angular.module('angularGanttDemoApp')
                 return moment(obj.from).diff(obj.to) === 0;
             };
 
+            /**
+             * Concat all planed task to Control task
+             * @return {[type]} [description]
+             */
             view.concat = function() {
 
                 for (var i = 0; i < view.plan.length; i++) {
@@ -35,6 +44,10 @@ angular.module('angularGanttDemoApp')
                 }
             };
 
+            /**
+             * Return concatenated array
+             * @return {[type]} [description]
+             */
             view.getConcatenated = function() {
                 return view.control;
             }
