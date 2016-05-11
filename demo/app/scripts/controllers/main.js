@@ -144,7 +144,7 @@ angular.module('angularGanttDemoApp')
             baseline: false,
             sortMode: undefined,
             sideMode: 'TreeTable',
-            daily: false,
+            daily: true,
             maxHeight: false,
             width: true,
             zoom: 1,
