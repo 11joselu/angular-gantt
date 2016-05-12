@@ -35,7 +35,7 @@ function Linker(Utils, Dependencies) {
 
                 for (var i = 1; i < links.length; i++) {
 
-                    if (!isIn(fromTask.model.dependencies, links[i])) {
+                    if (!isIn(fromTask.model, links[i]) || !isIn(links[i], fromTask)) {
 
 
                         fromTask.model.dependencies.push({
@@ -74,9 +74,10 @@ function Linker(Utils, Dependencies) {
          * @param  {[Task]}  task
          * @return {Boolean}
          */
-        var isIn = function(dependencies, task) {
-            for(var i = 0; i < dependencies.length; i++) {
-                if (dependencies[i].to === task.model.id) {
+        var isIn = function(model, task) {
+            if (!model.dependencies) { return false;}
+            for(var i = 0; i < model.dependencies.length; i++) {
+                if (model.dependencies[i].to === task.model.id) {
                     return true;
                 }
             }
@@ -87,7 +88,7 @@ function Linker(Utils, Dependencies) {
         /**
          * Remove all selected task from predecessors values
          * @param  {[Array of data]} data
-         * @param  {[Tasj]} fromTask     [description]
+         * @param  {[Task]} fromTask     [description]
          * @param  {[Dependency Id]} dependencyID [description]
          * @return
          */
@@ -109,6 +110,24 @@ function Linker(Utils, Dependencies) {
         };
 
         /**
+         * Remove dependencies from Task model
+         * @param  {[Array]} data     Array of data
+         * @param  {[Task]} link     [Task model]
+         * @param  {[Task]} fromTask
+         * @return {[Array]} taskDepen [new Task dependencies]
+         */
+        var removeFromDependencies = function(data, link, fromTask) {
+            var taskDepend = link.model.dependencies;
+            for (var dep = 0; dep < taskDepend.length; dep ++) {
+                if (taskDepend[dep].to === fromTask.model.id) {
+                    removeFromPredecessors(data, fromTask, taskDepend[dep].to);
+                    taskDepend.splice(dep, 1);
+                }
+            }
+            return taskDepend;
+        };
+
+        /**
          * Remove all dependencies from fromTask
          * @param  {[Array of selected tasks]} links
          * @param  {[API event]} api
@@ -125,9 +144,17 @@ function Linker(Utils, Dependencies) {
                 for (var i = 0; i < dependencies.length; i++ ) {
 
                     for(var j = 0; j < links.length; j++) {
+                        // Case when first selected Task is 'FromTask'
                         if (dependencies[i].to === links[j].model.id) {
                             removeFromPredecessors(link.data, fromTask, dependencies[i].to);
                             dependencies.splice(i, 1);
+                        } else {
+                            // Case when first selected Task is 'toTask' with dependencies
+                            if (links[j].model.dependencies) {
+                                var taskDepend = removeFromDependencies(link.data, links[j], fromTask);
+
+                                links[j].model.dependencies = angular.copy(taskDepend);
+                            }
                         }
 
                     // removeClasses(links[j]);
@@ -135,6 +162,16 @@ function Linker(Utils, Dependencies) {
                 }
 
                 fromTask.model.dependencies = dependencies;
+
+            } else {
+                // Case when selected task is 'toTask' WITHOUT dependencies
+                for (var i = 1; i < links.length; i++) {
+                    if (links[i].model.dependencies) {
+                        var taskDepend = removeFromDependencies(link.data, links[i], fromTask);
+
+                        links[i].model.dependencies = angular.copy(taskDepend);
+                    }
+                }
             }
 
             // return [];

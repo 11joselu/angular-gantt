@@ -34,10 +34,8 @@ angular.module('angularGanttDemoApp')
                     dependencies.setDate(data, api, true);
                     dependencies.updateChildTasks(data, api);
                 }
-
                 return;
             }
-
             if (!resize.model.isMilestone) {
                 var task = utils.setMonday(resize.task.model);
                 resize.model.from = task.from;

@@ -33,6 +33,12 @@
             return -1;
         };
 
+        /**
+         * Get Predecessors column values
+         * @param  {[Integer]} idx  [description]
+         * @param  {[Integer]} days [description]
+         * @return {[String]}      String concatenate values
+         */
         util.getString = function (idx, days) {
             var str = idx .toString();
             if (days > 0) {
