@@ -227,8 +227,8 @@ angular.module('angularGanttDemoApp')
             timeFrames: {
                 'day': {
                     start: moment('8:00', 'HH:mm'),
-                    end: moment('20:00', 'HH:mm'),
-                    color: '#ACFFA3',
+                    end: moment('17:00', 'HH:mm'),
+                    color: '#BEFFC0',
                     working: true,
                     default: true
                 },
@@ -239,11 +239,11 @@ angular.module('angularGanttDemoApp')
                     default: true
                 },
                 'closed': {
-                    working: false,
+                    working: true,
                     default: true
                 },
                 'weekend': {
-                    working: false
+                    working: true
                 },
                 'holiday': {
                     working: false,
