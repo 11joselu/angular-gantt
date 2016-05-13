@@ -82,7 +82,7 @@
 
             pushGroup: function(gr) {
                 var found = groups.some(function(group) {
-                    return group.model.name === gr.model.name;
+                    return group.row.model.name === gr.row.model.name;
                 });
 
                 if(!found) {

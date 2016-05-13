@@ -198,10 +198,10 @@ angular.module('angularGanttDemoApp')
                 },
                 'from': function(from) {
                     // from.format('lll')
-                    return from !== undefined ? from.format('DD/MM/YYYY') : undefined;
+                    return from !== undefined ? from.format('DD/MM/YYYY hh:mm') : undefined;
                 },
                 'to': function(to) {
-                    return to !== undefined ? to.format('DD/MM/YYYY') : undefined;
+                    return to !== undefined ? to.format('DD/MM/YYYY hh:mm') : undefined;
                 }
             },
             treeHeaderContent: '<i></i> {{getHeader()}}',
@@ -314,7 +314,11 @@ angular.module('angularGanttDemoApp')
                     api.tasks.on.rowChange($scope, addEventName('tasks.on.rowChange', logTaskEvent));
                     api.tasks.on.remove($scope, addEventName('tasks.on.remove', logTaskEvent));
 
-                    api.side.setWidth(300)
+                    api.side.setWidth(300);
+
+                    api.groups.on.move($scope, function(task) {
+                        console.log(task);
+                    });
 
                     if (api.tasks.on.moveBegin) {
                         api.tasks.on.moveBegin($scope, addEventName('tasks.on.moveBegin', function(evt, task) {
