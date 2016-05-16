@@ -32,7 +32,6 @@ angular.module('angularGanttDemoApp')
                 for(var i = 0; i < resize.model.dependencies.length; i++) {
                     var toTask = utils.findTask(data, resize.model.dependencies[i]);
                     var taskGroup = false;
-                    console.log(resize.model.dependencies[i]);
                     if (!toTask) {
                         toTask = utils.findTaskGroup(data, resize.model.dependencies[i]);
                         taskGroup = true;

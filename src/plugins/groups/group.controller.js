@@ -8,14 +8,12 @@
          */
         var hasChange = function(taskGroup, api) {
             var arrTaskGroups = arrays.getGroup();
-
             for (var i = 0;  i < arrTaskGroups.length; i++) {
-                if (taskGroup.row.model.id === arrTaskGroups[i].row.model.id) {
-                    if ((taskGroup.left !== arrTaskGroups[i].left ||
-                        taskGroup.width !== arrTaskGroups[i].width) &&
+                if (arrTaskGroups[i] && taskGroup.row.model.id === arrTaskGroups[i].row.model.id) {
+                    if ((taskGroup.from !== arrTaskGroups[i].from ||
+                        taskGroup.to !== arrTaskGroups[i].to) &&
                         !$scope.isResizing) {
-                        api.groups.raise.move(arrTaskGroups[i]);
-                        // set new value
+                        api.groups.raise.move(taskGroup);
                         arrTaskGroups[i] = taskGroup;
                     }
                 }
@@ -39,6 +37,7 @@
 
                 if ($scope.taskGroup.descendants.length > 0) {
                     arrays.pushGroup($scope.taskGroup);
+
                     if (angular.isUndefined($scope.taskGroup.model)) {
                         $scope.taskGroup.model = {};
                     }
@@ -47,8 +46,6 @@
                     $scope.taskGroup.model.from = $scope.taskGroup.row.from;
                     $scope.taskGroup.model.to = $scope.taskGroup.row.to;
                 }
-
-                hasChange($scope.taskGroup, $scope.gantt.api);
 
             } else {
                 $scope.taskGroup = undefined;
@@ -87,25 +84,30 @@
             }
         });
 
+        $scope.gantt.api.tasks.on.moveEnd($scope, function() {
+            if ($scope.taskGroup.descendants.length > 0) {
+                hasChange($scope.taskGroup, $scope.gantt.api);
+            }
+        });
+
+         $scope.gantt.api.tasks.on.resizeEnd($scope, function() {
+            if ($scope.taskGroup.descendants.length > 0) {
+                hasChange($scope.taskGroup, $scope.gantt.api);
+            }
+        });
+
         var removeWatch = $scope.pluginScope.$watch('display', function() {
-            arrays.resetGroup();
+            // arrays.resetGroup();
             updateTaskGroup()
         });
 
         $scope.$watchCollection('gantt.rowsManager.filteredRows', updateTaskGroup);
 
-        $scope.gantt.api.columns.on.refresh($scope, function() {
-            arrays.resetGroup();
-            updateTaskGroup();
-        });
+        $scope.gantt.api.columns.on.refresh($scope, updateTaskGroup);
 
         $scope.gantt.api.data.on.clear($scope, function() {
             arrays.resetGroup();
         });
-
-        $scope.gantt.api.tasks.on.change($scope, function() {
-            arrays.resetGroup();
-        })
 
         $scope.$on('$destroy', removeWatch);
     }]);

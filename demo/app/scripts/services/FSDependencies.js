@@ -149,6 +149,8 @@ angular.module('angularGanttDemoApp')
                     setPredecessor(data, dep.fromTask, dep.toTask);
 
                 }
+            } else {
+                console.log('is TaskGroup', this.toTask);
             }
 
             setPredecessor(data, dep.fromTask, dep.toTask, true);

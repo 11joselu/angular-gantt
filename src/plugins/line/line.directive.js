@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-    angular.module('gantt.line').directive('ganttTaskBaseLine', [function() {
+    angular.module('gantt.line').directive('ganttTaskBaseLine', ['moment', function(moment) {
         return {
             restrict: 'E',
             templateUrl: function(tElement, tAttrs) {

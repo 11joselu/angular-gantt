@@ -340,10 +340,8 @@
             }
 
         };
+    };
 
-};
-
-
-return Utils;
+    return Utils;
 }
 

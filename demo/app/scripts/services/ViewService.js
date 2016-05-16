@@ -8,7 +8,7 @@
  * Service in the angularGanttDemoApp.
  */
 angular.module('angularGanttDemoApp')
-    .factory('ViewService', [function () {
+    .factory('MenuService', [function () {
         /**
          * View controller class
          * @param {[type]} control [description]
