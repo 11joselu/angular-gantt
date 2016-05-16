@@ -317,7 +317,9 @@ angular.module('angularGanttDemoApp')
                     api.side.setWidth(300);
 
                     api.groups.on.move($scope, function(task) {
-                        console.log(task);
+                        var resizeTask = new Resize(task, true);
+                            resizeTask.updateDependencies($scope.data, api);
+                            $scope.api.columns.generate();
                     });
 
                     if (api.tasks.on.moveBegin) {

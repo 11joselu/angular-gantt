@@ -158,6 +158,14 @@
             }
         };
 
+        util.findTaskGroup = function(data, dependency) {
+            for(var i = 0; i < data.length; i++) {
+                if (data[i].id === dependency.to) {
+                    return data[i];
+                }
+            }
+        };
+
       /**
        * Return index of Task
        * @param  {[Array]} data [Array of tasks]
@@ -230,17 +238,6 @@
 
             return str;
         };
-
-        /**
-        * Update all lag columns values
-        * @param  {[Array]} _allPred [Array of predecessors values]
-        * @param  {[Array]} data     [description]
-        * @param  {[Taks]} model    [description]
-        * @return {[Array]} Array of strings
-        */
-        util.updateAllLag = function(data, task) {
-
-        }
 
         /**
         * Return if task has predecessors

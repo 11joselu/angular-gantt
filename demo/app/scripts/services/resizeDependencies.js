@@ -11,11 +11,12 @@ angular.module('angularGanttDemoApp')
 .factory('ResizeDependencies', ['FSDependencies', 'Utils', function (Dependencies, Utils) {
     var utils = new Utils();
 
-    var Resize = function(task) {
+    var Resize = function(task, isTaskGroup) {
         var resize      = this;
 
-        resize.task     = task;
-        resize.model    = task.model;
+        resize.task         = task;
+        resize.model        = task.model;
+        resize.isTaskGroup  = isTaskGroup;
         /**
         * Update all task dependencies
         * @param  {[Array]} data [Array of taks]
@@ -30,8 +31,15 @@ angular.module('angularGanttDemoApp')
                 resize.model = angular.copy(task);
                 for(var i = 0; i < resize.model.dependencies.length; i++) {
                     var toTask = utils.findTask(data, resize.model.dependencies[i]);
+                    var taskGroup = false;
+                    console.log(resize.model.dependencies[i]);
+                    if (!toTask) {
+                        toTask = utils.findTaskGroup(data, resize.model.dependencies[i]);
+                        taskGroup = true;
+                    }
+
                     var dependencies = new Dependencies(null, resize.model, toTask);
-                    dependencies.setDate(data, api, true);
+                    dependencies.setDate(data, api, taskGroup);
                     dependencies.updateChildTasks(data, api);
                 }
                 return;
@@ -53,12 +61,16 @@ angular.module('angularGanttDemoApp')
         */
         resize.updateDuration = function(data) {
             var task = utils.setMonday(resize.model);
+            if (!resize.isTaskGroup) {
+                // Warning: resize.model lose references
+                var taskIndex = utils.getIndexTask(data, resize.model);
+                data[taskIndex].tasks[0] = angular.copy(task);
 
-            // Warning: resize.model lose references
-            var taskIndex = utils.getIndexTask(data, resize.model);
-            data[taskIndex].tasks[0] = angular.copy(task);
+                data[taskIndex].data.duration = Math.abs(utils.difference(resize.model.from, resize.model.to, 'days')) + " d";
+            } else {
+                resize.model.data.duration =  Math.abs(utils.difference(resize.model.from, resize.model.to, 'days')) + " d";
+            }
 
-            data[taskIndex].data.duration = Math.abs(utils.difference(resize.model.from, resize.model.to, 'days')) + " d";
 
             return task;
         };

@@ -39,6 +39,13 @@
 
                 if ($scope.taskGroup.descendants.length > 0) {
                     arrays.pushGroup($scope.taskGroup);
+                    if (angular.isUndefined($scope.taskGroup.model)) {
+                        $scope.taskGroup.model = {};
+                    }
+
+                    $scope.taskGroup.model = $scope.taskGroup.row.model;
+                    $scope.taskGroup.model.from = $scope.taskGroup.row.from;
+                    $scope.taskGroup.model.to = $scope.taskGroup.row.to;
                 }
 
                 hasChange($scope.taskGroup, $scope.gantt.api);

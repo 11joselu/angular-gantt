@@ -122,31 +122,36 @@ angular.module('angularGanttDemoApp')
         * @param {[Array of tasks]} data [Tasks values]
         * @param {[Api events]} api  [Container of all api events]
         */
-        dep.setDate = function(data, api, update) {
+        dep.setDate = function(data, api, taskGroups) {
+            // Test if toTask is TaskGroup
+            if (angular.isUndefined(taskGroups)) {
+                taskGroups = (dep.toTask.children && dep.toTask.children.length > 0);
+            }
+
             var self = dep;
             if (utils.sameDependencies(dep.fromTask, dep.toTask)) {
                 return;
             }
 
-            var greater = utils.greaterThan(dep.fromTask.to, dep.toTask.from);
-            if (greater >= 0) {
-                var fromIdx = utils.getIndexTask(data, dep.fromTask);
-                var toIdx = utils.getIndexTask(data, dep.toTask);
+            if (!taskGroups) {
+                var greater = utils.greaterThan(dep.fromTask.to, dep.toTask.from);
+                if (greater >= 0) {
+                    var fromIdx = utils.getIndexTask(data, dep.fromTask);
+                    var toIdx = utils.getIndexTask(data, dep.toTask);
 
-                if (utils.hasPredecessors(data[toIdx])) {
-                    var predecessors = utils.getPredecessorsValues(data[toIdx].data.predecessors);
-                    dep.setLag(predecessors, fromIdx);
-                } else {
-                    dep.setValues();
+                    if (utils.hasPredecessors(data[toIdx])) {
+                        var predecessors = utils.getPredecessorsValues(data[toIdx].data.predecessors);
+                        dep.setLag(predecessors, fromIdx);
+                    } else {
+                        dep.setValues();
+                    }
+
+                    setPredecessor(data, dep.fromTask, dep.toTask);
+
                 }
-
-                setPredecessor(data, dep.fromTask, dep.toTask);
-
-            } else {
-                // update lag value from childs
-                setPredecessor(data, dep.fromTask, dep.toTask, true);
             }
 
+            setPredecessor(data, dep.fromTask, dep.toTask, true);
             api.columns.generate();
         };
 
