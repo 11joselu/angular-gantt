@@ -63,6 +63,15 @@ angular.module('angularGanttDemoApp')
             };
         };
 
+        vm.identTask = function() {
+            var ident = new Linker(vm.data, vm.api);
+            if (toLink.length === 0) {
+                ident.identTask(taskSelected);
+            } else {
+                ident.identTask(toLink);
+            }
+        };
+
         vm.linkTasks = function() {
             var linker = new Linker(vm.data, vm.api);
             toLink = linker.linkTaks(toLink);

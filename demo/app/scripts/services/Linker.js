@@ -10,6 +10,35 @@ module.factory('Linker', ['Utils', 'FSDependencies', Linker]);
 function Linker(Utils, Dependencies) {
     var utils = new Utils();
 
+    var isIn = function(selected, task) {
+        if (!angular.isArray(selected)) {
+            selected = [selected];
+        }
+
+        for (var i = 0, len = selected.length; i < len; i++) {
+            if (selected[i].name === task.name || selected[i].id === task.id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    var getParents = function(data) {
+        var tree = {};
+        var project = null;
+
+
+
+        return tree;
+    };
+
+    var setNewChild = function(parents, parentChild, child) {
+        for (var key in parents) {
+
+        }
+    };
+
     var Linker = function(data, api) {
         var link    = this;
 
@@ -176,6 +205,18 @@ function Linker(Utils, Dependencies) {
 
             // return [];
             return links;
+        }
+    };
+
+    Linker.prototype.identTask = function(links) {
+        if (!links) {return;}
+
+        var parents = getParents(this.data);
+        for (var key in parents) {
+            // console.log(parents[key]);
+            if (parents[key].indexOf(links.model.id) >= 0) {
+                // console.log(key, links)
+            }
         }
     };
 
