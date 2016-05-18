@@ -85,7 +85,7 @@ angular.module('angularGanttDemoApp')
             baseline: false,
             sortMode: undefined,
             sideMode: 'TreeTable',
-            daily: true,
+            daily: false,
             maxHeight: false,
             width: true,
             zoom: 1,
@@ -197,8 +197,6 @@ angular.module('angularGanttDemoApp')
 
                 api.core.on.ready($scope, function() {
                     // Log various events to console
-
-
                     api.side.setWidth(300);
 
                     api.groups.on.move($scope, function(task) {

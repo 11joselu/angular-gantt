@@ -287,6 +287,7 @@
                         if(!groupsTask.$element) {
                             groupsTask.$element = groupsTask.getContentElement();
                         }
+
                         var endpointObject = self.plumb.addEndpoint(groupsTask.$element, self.pluginScope.endpoints[i]);
                             endpointObject.setVisible(false, true, true); // hide endpoint
                             endpointObject.$task = groupsTask;

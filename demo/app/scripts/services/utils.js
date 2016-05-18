@@ -150,7 +150,7 @@
                     var childTask = data[i].tasks;
                     for(var j=0; j < childTask.length; j++) {
 
-                        if(childTask[j].id === obj.to) {
+                        if(childTask[j].id === obj.to || childTask[j].name === obj.to) {
                             return childTask[j];
                         }
                     }
@@ -160,7 +160,7 @@
 
         util.findTaskGroup = function(data, dependency) {
             for(var i = 0; i < data.length; i++) {
-                if (data[i].id === dependency.to) {
+                if (data[i].id === dependency.to || data[i].name === dependency.to) {
                     return data[i];
                 }
             }

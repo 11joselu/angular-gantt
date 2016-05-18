@@ -145,16 +145,43 @@ angular.module('angularGanttDemoApp')
                     } else {
                         dep.setValues();
                     }
-
-                    setPredecessor(data, dep.fromTask, dep.toTask);
-
                 }
+
+                setPredecessor(data, dep.fromTask, dep.toTask, true);
+
             } else {
-                console.log('is TaskGroup', this.toTask);
+                updateChildGroup(data, dep.toTask, api);
             }
 
-            setPredecessor(data, dep.fromTask, dep.toTask, true);
             api.columns.generate();
+        };
+
+        var updateChildGroup = function(data, toTask, inside) {
+            var greater = utils.greaterThan(dep.fromTask.to, toTask.from);
+            if (greater >= 0) {
+                for (var i = 0; i < toTask.children.length; i++) {
+                    var task = utils.findTask(data, {to: toTask.children[i]});
+
+                    if (!task) {
+                        task = utils.findTaskGroup(data, {to: toTask.children[i]});
+                    }
+
+                    var taskGrDiff = Math.abs(utils.difference(dep.fromTask.to, toTask.from, 'days'));
+
+                    var taskDiff = Math.abs(utils.difference(toTask.from, task.from, 'days'));
+
+                    if (!task.children) {
+                        task.from.add((taskGrDiff + taskDiff), 'days');
+                        task.to.add((taskGrDiff + taskDiff), 'days');
+                        var tsk = utils.setMonday(task);
+                        task.from = tsk.from;
+                        task.to = tsk.to;
+                    } else {
+                        updateChildGroup(data, task, true);
+                    }
+                }
+
+            }
         };
 
         /**
@@ -246,7 +273,6 @@ angular.module('angularGanttDemoApp')
             .join(";");
 
             api.columns.generate();
-
         };
     };
 

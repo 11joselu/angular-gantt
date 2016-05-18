@@ -96,17 +96,7 @@
 
             resetGroup: function() {
                 return groups = [];
-            },
-
-            removeTask: function(task, taskGroup) {
-                for (var i = 0; i < groups.length; i++) {
-                    if (groups[i].tasks && groups[i].tasks.indexOf(task) >= 0) {
-                        console.log(task, taskGroup);
-                        groups.splice(i, 1);
-                        return;
-                    }
-                }
-            },
+            }
         };
     }]);
 }());

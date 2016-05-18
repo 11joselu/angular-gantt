@@ -123,9 +123,12 @@
                                 </div>
                             </div>
 
+                            <button ng-click="ganttChartCtrl.options.daily = !ganttChartCtrl.options.daily">Daily</button>
+
                             <div class="panel-collapse" bs-collapse-target>
                                 <div class="panel-body">
                                     <div gantt
+                                         column-magnet="'1 day'"
                                          data="ganttChartCtrl.data"
                                          timespans="ganttChartCtrl.timespans"
                                          show-side="ganttChartCtrl.options.labelsEnabled"
@@ -134,7 +137,7 @@
                                          filter-row="{'name': ganttChartCtrl.options.filterRow}"
                                          sort-mode="ganttChartCtrl.options.sortMode"
                                          view-scale="ganttChartCtrl.options.scale"
-                                         column-width="getColumnWidth(ganttChartCtrl.options.width, ganttChartCtrl.options.scale, ganttChartCtrl.options.zoom)"
+                                         column-width="ganttChartCtrl.getColumnWidth(ganttChartCtrl.options.width, ganttChartCtrl.options.scale, ganttChartCtrl.options.zoom)"
                                          auto-expand="ganttChartCtrl.options.autoExpand"
                                          task-out-of-range="ganttChartCtrl.options.taskOutOfRange"
                                          from-date = "ganttChartCtrl.options.fromDate"
