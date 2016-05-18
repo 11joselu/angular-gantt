@@ -75,7 +75,6 @@ angular.module('angularGanttDemoApp')
          * @param {[Boolean} parentMove
          */
         var setPredecessor = function(data, fromTask, toTask, parentMove) {
-
             var toIndex = utils.getIndexTask(data, fromTask);
             var idx = utils.getIndexTask(data, toTask);
 
@@ -85,7 +84,7 @@ angular.module('angularGanttDemoApp')
                 diff -= 1;
             }
 
-            if (parentMove) { diff = Math.abs(diff) }
+            // if (parentMove) { diff = Math.abs(diff) }
 
             // data[idx].data.predecessors = idx;
             setText(data[idx].data, toIndex, diff, parentMove);
@@ -195,7 +194,6 @@ angular.module('angularGanttDemoApp')
 
             var fromTsk = angular.copy(dep.fromTask);
             var toTsk = angular.copy(dep.toTask);
-
             if (lag < 0) {
                 lag = Math.abs(lag);
                 fromTsk.to.subtract(lag, 'days');

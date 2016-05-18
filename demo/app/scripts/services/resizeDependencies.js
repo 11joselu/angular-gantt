@@ -43,11 +43,10 @@ angular.module('angularGanttDemoApp')
                 }
                 return;
             }
-            if (!resize.model.isMilestone) {
-                var task = utils.setMonday(resize.task.model);
-                resize.model.from = task.from;
-                resize.model.to = task.to;
-            }
+
+            var task = utils.setMonday(resize.task.model);
+            resize.model.from = task.from;
+            resize.model.to = task.to;
 
             resize.updatePredecessors(data);
             api.columns.generate();

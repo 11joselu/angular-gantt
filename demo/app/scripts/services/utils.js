@@ -282,6 +282,12 @@
 
                 return task;
 
+            } else {
+                // set Milestones to 8 am
+                var fromHours = util.getHours(taskModel.from, 8);
+                var toHours = util.getHours(taskModel.to, 8);
+                taskModel.from = fromHours.date;
+                taskModel.to = toHours.date;
             }
 
             return taskModel;
