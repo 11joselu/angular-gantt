@@ -170,7 +170,6 @@ angular.module('angularGanttDemoApp')
                     var taskDiff = Math.abs(utils.difference(toTask.from, task.from, 'days'));
 
                     if (!task.children) {
-                        debugger;
                         task.from.add((taskGrDiff + taskDiff), 'days');
                         task.to.add((taskGrDiff + taskDiff), 'days');
                         var tsk = utils.setMonday(task);

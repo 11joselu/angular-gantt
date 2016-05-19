@@ -64,12 +64,20 @@ angular.module('angularGanttDemoApp')
         };
 
         vm.identTask = function() {
-            var ident = new Linker(vm.data, vm.api);
+           /* var ident = new Linker(vm.data, vm.api);
+            var newData;
             if (toLink.length === 0) {
-                ident.identTask(taskSelected);
+               newData =  ident.identTask(taskSelected);
             } else {
-                ident.identTask(toLink);
+                newData = ident.identTask(toLink);
             }
+            var data = angular.copy(vm.data);
+            data[newData.index] = angular.copy(newData.task);
+            vm.data = [];*/
+            // vm.data = data;
+            // console.log(newData);
+            // vm.api.data.raise.change();
+            // console.log(vm.api);
         };
 
         vm.linkTasks = function() {

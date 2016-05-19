@@ -24,25 +24,57 @@ function Linker(Utils, Dependencies) {
         return false;
     }
 
-    var getParents = function(data) {
-        var tree = {};
-        var project = null;
+    var createTree = function(list, task) {
+        var treeList = [];
+        var lookup = {};
+        list.forEach(function(obj, index) {
+            var newObj = {
+                _index: index,
+                id: obj.id,
+                data: obj.data,
+                name: obj.name,
+                children: obj.children
+            }
 
+            lookup[newObj.id] = newObj;
 
+            newObj.childrenTask = newObj.childrenTask || [];
 
-        return tree;
+            if (newObj.data.parent != null) {
+                lookup[newObj.data.parent].childrenTask.push(newObj);
+            } else {
+                treeList.push(newObj);
+            }
+        });
+
+        return treeList;
     };
 
-    var setNewChild = function(parents, parentChild, child) {
-        for (var key in parents) {
+    var searchParent = function(objectChild, id) {
 
+        var childrenTask = objectChild.childrenTask;
+
+        for (var i = 0, length = childrenTask.length; i < length; i++) {
+
+            var children = childrenTask[i];
+
+            if (children.id == id) {
+                return objectChild;
+            } else {
+                var tree = searchParent(children, id);
+                if (tree) {
+                    return tree;
+                }
+
+            }
         }
     };
+
 
     var Linker = function(data, api) {
         var link    = this;
 
-        link.data   = data;
+        link.data   = angular.copy(data);
         link.api    = api;
 
         /**
@@ -208,15 +240,65 @@ function Linker(Utils, Dependencies) {
         }
     };
 
-    Linker.prototype.identTask = function(links) {
+    var updateData = function(data, parent, globalParent, id) {
+        console.log(parent, globalParent);
+        if (!globalParent) { return false; }
+
+        var currentParent = data[parent._index];
+        var nextParent = data[globalParent._index];
+        currentParent.children.splice(currentParent.children.indexOf(id), 1);
+        nextParent.children.push(id);
+
+        return data;
+    };
+
+
+/*
+    {
+        name: 'Control account 1',
+        id: 'Control account 1',
+        children: [
+            'Milestone 3',
+            'Work package 1',
+            'Work package 2'
+        ],
+        data: {
+            wbs: 2.2,
+            duration: '4 d',
+            account: true
+        }
+    },*/
+    var turnToParent = function(activity, children) {
+        return {
+            name: activity.model.name,
+            id: activity.model.id,
+            children: [1323],
+            data: {
+                wbs: '13.321',
+                duration: '3d',
+                account: false,
+            }
+        }
+    };
+
+    Linker.prototype.identTask = function(links, data) {
         if (!links) {return;}
 
-        var parents = getParents(this.data);
-        for (var key in parents) {
-            // console.log(parents[key]);
-            if (parents[key].indexOf(links.model.id) >= 0) {
-                // console.log(key, links)
-            }
+        var parents = createTree(this.data);
+        var parent = searchParent(parents[0], links.model.id);
+        var index = parent.children.indexOf(links.model.id);
+        var taskIndex = parent.childrenTask[index];
+        console.log(taskIndex);
+        var task = this.data[taskIndex._index];
+
+        if (index === 0) {
+            return false;
+        }
+        var newD = turnToParent(links);
+
+        return {
+            index: taskIndex._index,
+            task: newD
         }
     };
 

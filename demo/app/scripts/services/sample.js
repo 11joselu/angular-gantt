@@ -12,25 +12,6 @@ angular.module('angularGanttDemoApp')
         return {
             getSampleData: function() {
                 return [
-                        // this is a project
-                        {
-                            name: 'Development',
-                            children: [
-                                'Milestone',
-                                'Node 1',
-                                'Control account 3',
-                                'Node 2'
-                            ],
-                            data: {
-                                account: true,
-                                wbs: 0,
-                                package: true,
-                                duration: '21 d',
-                                isProject: true,
-                            },
-                            dependencies: false
-                        },
-
                         // this is a milestone
                         {
                             name: 'Milestone',
@@ -185,6 +166,24 @@ angular.module('angularGanttDemoApp')
                         },
 
                         {
+                            name: 'Development',
+                            children: [
+                                'Milestone',
+                                'Node 1',
+                                'Control account 3',
+                                'Node 2'
+                            ],
+                            data: {
+                                account: true,
+                                wbs: 0,
+                                package: true,
+                                duration: '21 d',
+                                isProject: true,
+                            },
+                            dependencies: false
+                        },
+
+                        {
                             name: 'Activity 2',
                             tasks: [
                                 {
@@ -336,6 +335,7 @@ angular.module('angularGanttDemoApp')
                         // this is a project
                         {
                             name: 'Development',
+                            id: 'dev',
                             children: [
                                 1,
                                 2,
@@ -375,7 +375,7 @@ angular.module('angularGanttDemoApp')
                              data: {
                                 wbs: 1,
                                 duration: '0 d',
-                                parent: 1
+                                parent: 'dev'
                             }
                         },
 
@@ -391,7 +391,7 @@ angular.module('angularGanttDemoApp')
                             data: {
                                 wbs: 2,
                                 duration: '14 d',
-                                parent: 1
+                                parent: 'dev'
                             }
                         },
 
@@ -556,6 +556,7 @@ angular.module('angularGanttDemoApp')
                                 wbs: "2.2.3",
                                 duration: '5 d',
                                 package: true,
+                                parent: 2
                             }
                         },
 
@@ -598,7 +599,7 @@ angular.module('angularGanttDemoApp')
                                 account: true,
                                 package: true,
                                 duration: '5 d',
-                                parent: 1
+                                parent: 'dev'
                             }
                         },
 
@@ -612,7 +613,7 @@ angular.module('angularGanttDemoApp')
                             data: {
                                 wbs: "4",
                                 duration: '10 d',
-                                parent: 1
+                                parent: 'dev'
                             }
                         },
 
