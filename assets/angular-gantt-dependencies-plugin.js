@@ -203,7 +203,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                         });
 
                         api.groups.on.displayed(scope, debounce(function(groups) {
-                            console.log(groups);
                             ganttArrays.set(groups);
                             manager.setGroups(groups);
                             manager.refresh(groups);
@@ -213,6 +212,10 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                             manager.plumb.revalidate(groups.$element[0]);
                             manager.setTask(groups, true);
                         }));
+
+                        api.data.on.change(scope, function() {
+                            manager.refreshGroups();
+                        });
                     }
                 };
             }]);

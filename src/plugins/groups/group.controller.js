@@ -2,14 +2,15 @@
     'use strict';
     angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils', 'ganttArrays', function($scope, TaskGroup, utils, ganttArrays) {
         var hasChange = function(taskGroup, api) {
-            var arrTaskGroups = ganttArrays.getGroup();
-            for (var i = 0;  i < arrTaskGroups.length; i++) {
-                if (taskGroup.row.model.id === arrTaskGroups[i].row.model.id) {
-                    if ( (taskGroup.left !== arrTaskGroups[i].left ||
-                          taskGroup.width !== arrTaskGroups[i].width) &&
-                          !$scope.sideResize) {
-                        ganttArrays.updateGroupValue(i, taskGroup);
-                        api.groups.raise.move(arrTaskGroups[i]);
+            if (!$scope.isMoving) {
+                var arrTaskGroups = ganttArrays.getGroup();
+                for (var i = 0;  i < arrTaskGroups.length; i++) {
+                    if (taskGroup.row.model.id === arrTaskGroups[i].row.model.id) {
+                        if ( (taskGroup.left !== arrTaskGroups[i].left ||
+                              taskGroup.width !== arrTaskGroups[i].width)) {
+                            ganttArrays.updateGroupValue(i, taskGroup);
+                            api.groups.raise.move(arrTaskGroups[i]);
+                        }
                     }
                 }
             }
@@ -52,6 +53,24 @@
                     }
                 }
             }
+        });
+
+        $scope.gantt.api.tasks.on.moveBegin($scope, function() {
+            $scope.isMoving = true;
+        });
+
+        $scope.gantt.api.tasks.on.moveEnd($scope, function() {
+            $scope.isMoving = false;
+            updateTaskGroup();
+        });
+
+        $scope.gantt.api.tasks.on.resizeBegin($scope, function() {
+            $scope.isMoving = true;
+        });
+
+        $scope.gantt.api.tasks.on.resizeEnd($scope, function() {
+            $scope.isMoving = false;
+            updateTaskGroup();
         });
 
         var removeWatch = $scope.pluginScope.$watch('display', updateTaskGroup);
