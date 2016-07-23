@@ -2439,7 +2439,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 (function(){
     'use strict';
-    angular.module('gantt').factory('GanttRow', ['GanttTask', 'moment', '$filter', function(Task, moment, $filter) {
+    angular.module('gantt').factory('GanttRow', ['GanttTask', 'moment', '$filter', 'GanttTasksGroupModel', function(Task, moment, $filter, GanttTasksGroupModel) {
         var Row = function(rowsManager, model) {
             this.rowsManager = rowsManager;
             this.model = model;
@@ -2451,6 +2451,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             this.tasks = [];
             this.filteredTasks = [];
             this.visibleTasks = [];
+            this.groups = [];
+            this.groupsMap = {};
         };
 
         Row.prototype.addTaskImpl = function(task, viewOnly) {
@@ -2467,6 +2469,19 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             }
 
         };
+
+        Row.prototype.addGroupImpl = function(task, viewOnly) {
+            this.groupsMap[task.model.id] = task;
+            this.groups.push(task);
+            /*if (!viewOnly) {
+                if (this.model.groups === undefined) {
+                    this.model.groups = [];
+                }
+                if (this.model.groups.indexOf(task.model) === -1) {
+                    this.model.groups.push(task.model);
+                }
+            }*/
+        }
 
         // Adds a task to a specific row. Merges the task if there is already one with the same id
         Row.prototype.addTask = function(taskModel, viewOnly) {
@@ -2498,6 +2513,33 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             }
 
             return task;
+        };
+
+        Row.prototype.addGroupTask = function(taskModel, viewOnly) {
+            var group, isUpdate = false;
+
+            this.rowsManager.gantt.objectModel.cleanTask(taskModel);
+
+            if (taskModel in this.groupsMap) {
+                group = this.groupsMap[taskModel.id];
+
+                if (group.model === taskModel) {
+                    return group;
+                }
+                group.model = taskModel;
+                isUpdate = true;
+            } else {
+                var group = new GanttTasksGroupModel(this, taskModel);
+                this.addGroupImpl(group, viewOnly);
+            }
+
+            if (!viewOnly) {
+                /*if (isUpdate) {
+                    this.rowsManager.gantt.api.tasks.raise.change(task);
+                } else {
+                    this.rowsManager.gantt.api.tasks.raise.add(task);
+                }*/
+            }
         };
 
         // Removes the task from the existing row and adds it to he current one
@@ -2680,7 +2722,18 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 (function() {
     'use strict';
-    angular.module('gantt').factory('GanttRowsManager', ['GanttRow', 'ganttArrays', '$filter', '$timeout', 'moment', function(Row, arrays, $filter, $timeout, moment) {
+    angular.module('gantt').factory('GanttRowsManager', ['GanttRow', 'ganttArrays', '$filter', '$timeout', 'moment', 'GanttHierarchy', function(Row, arrays, $filter, $timeout, moment, Hierarchy) {
+
+        var updateGroups = function(groups) {
+            var hierarchy = new Hierarchy();
+
+            for (var i = 0; i < groups.length; i++) {
+                hierarchy.refresh(groups[i].rowsManager.filteredRows);
+                groups[i].descendants   = hierarchy.descendants(groups[i].row);
+                groups[i].ancestors     = hierarchy.ancestors(groups[i].row);
+            }
+        };
+
         var RowsManager = function(gantt) {
             var self = this;
 
@@ -2756,6 +2809,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             this.gantt.api.registerEvent('tasks', 'filter');
 
             this.gantt.api.registerEvent('tasks', 'displayed');
+            this.gantt.api.registerEvent('groups', 'displayed');
 
             this.gantt.api.registerEvent('rows', 'add');
             this.gantt.api.registerEvent('rows', 'change');
@@ -2823,6 +2877,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 }
 
                 row.updateVisibleTasks();
+            } else {
+                row.addGroupTask(rowModel);
             }
 
             if (isUpdate) {
@@ -3053,6 +3109,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             var filteredTasks = [];
             var tasks = [];
             var visibleTasks = [];
+            var groups = [];
 
             for (var i = 0; i < this.rows.length; i++) {
                 var row = this.rows[i];
@@ -3061,9 +3118,13 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 filteredTasks = filteredTasks.concat(row.filteredTasks);
                 visibleTasks = visibleTasks.concat(row.visibleTasks);
                 tasks = tasks.concat(row.tasks);
+                groups = groups.concat(row.groups);
             }
 
             this.gantt.api.tasks.raise.displayed(tasks, filteredTasks, visibleTasks);
+
+            updateGroups(groups);
+            this.gantt.api.groups.raise.displayed(groups);
 
             var filterEvent = !angular.equals(oldFilteredTasks, filteredTasks);
 
@@ -3318,6 +3379,35 @@ Github: https://github.com/angular-gantt/angular-gantt.git
     }]);
 }());
 
+
+(function() {
+    'use strict';
+
+    angular.module('gantt').factory('GanttTasksGroupModel', ['ganttUtils', 'GanttTask', '$timeout',  function(utils, Task, $timeout) {
+        var TaskGroup = function(row, model) {
+            var self            = this;
+            this.rowsManager    = row.rowsManager;
+            this.row            = row;
+            this.model          = model;
+
+            this.getContentElement = function() {
+                if (this.row.$element !== undefined) {
+                    var contentElement = this.row.$element[0].querySelector('.gantt-task-group');
+                    if (contentElement !== undefined) {
+                        contentElement = angular.element(contentElement);
+                    }
+                    return contentElement;
+                }
+            };
+        };
+
+        TaskGroup.prototype.clone = function() {
+            return new TaskGroup(this.row, angular.copy(this.model));
+        };
+
+        return TaskGroup;
+    }]);
+}());
 
 (function(){
     'use strict';
@@ -3770,6 +3860,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 (function(){
     'use strict';
     angular.module('gantt').service('ganttArrays', [function() {
+        var groups = [];
+
         return {
             moveToIndex: function(array, oldIndex, newIndex) {
                 if (newIndex >= array.length) {
@@ -3846,6 +3938,29 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     return true;
                 }
                 return false;
+            },
+            pushGroup: function(gr) {
+                var found = groups.some(function(group) {
+                        return group.row.model.name === gr.row.model.name;
+                });
+
+                if(!found) {
+                     groups.push(gr);
+                }
+            },
+            getGroup: function() {
+                  return groups;
+            },
+            resetGroup: function() {
+                 groups = [];
+            },
+            set: function(arr) {
+                groups = arr;
+            },
+            updateGroupValue: function(index, newValue) {
+                if (newValue.row.model.dependencies) {
+                    groups[index].model.dependencies = newValue.row.model.dependencies;
+                }
             }
         };
     }]);

@@ -255,6 +255,14 @@ angular.module('angularGanttDemoApp')
                                 event.stopPropagation();
                                 logTaskEvent('task-click', directiveScope.task);
                             });
+
+                            element.bind('dblclick', function(event) {
+                                event.stopPropagation();
+                                var copy = angular.copy($scope.data);
+                                logTaskEvent('task-dblclick', directiveScope.task);
+                                $scope.removeData();
+                                api.data.raise.change();
+                            });
                             element.bind('mousedown touchstart', function(event) {
                                 event.stopPropagation();
                                 $scope.live.row = directiveScope.task.row.model;
@@ -484,5 +492,27 @@ angular.module('angularGanttDemoApp')
         $scope.$watchCollection('live.row.tasks', function() {
             $scope.live.rowJson = angular.toJson($scope.live.row, true);
         });
+        var dependencies = [];
+        var deleted = false;
+        $scope.removeData =  function() {
+            if (!deleted) {
+                dependencies = angular.copy($scope.data[5].dependencies);
+                delete $scope.data[5].dependencies;
+                deleted = true;
+            } else {
+                $scope.data[5].dependencies = dependencies;
+            }
+            $scope.api.data.raise.change();
+        };
+
+        var dataToRemove = [];
+        var deleteTask = function (task) {
+            if (!$scope.options.readOnly) {
+                dataToRemove = [{'id': task.row.model.id, 'tasks': [{'id': task.model.id}]} ];
+                $scope.api.data.remove(dataToRemove);
+                dataToRemove = undefined;
+                $scope.api.groups.refresh();
+            }
+        }
 
     }]);

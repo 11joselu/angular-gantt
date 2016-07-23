@@ -1,8 +1,8 @@
 (function() {
     'use strict';
     angular.module('gantt.dependencies', ['gantt', 'gantt.dependencies.templates']).directive('ganttDependencies',
-        ['$timeout', '$document', 'ganttDebounce', 'GanttDependenciesManager', 'GanttDependenciesChecker',
-            function($timeout, $document, debounce, DependenciesManager, DependenciesChecker) {
+        ['$timeout', '$document', 'ganttDebounce', 'GanttDependenciesManager', 'GanttDependenciesChecker', 'ganttArrays',
+            function($timeout, $document, debounce, DependenciesManager, DependenciesChecker,ganttArrays) {
                 return {
                     restrict: 'E',
                     require: '^gantt',
@@ -158,6 +158,7 @@
 
                         api.rows.on.displayed(scope, function() {
                             manager.refresh();
+                            manager.refreshGroups();
                         });
 
                         api.tasks.on.viewChange(scope, function(task) {
@@ -194,7 +195,17 @@
                             }
                         });
 
+                        api.groups.on.displayed(scope, debounce(function(groups) {
+                            console.log(groups);
+                            ganttArrays.set(groups);
+                            manager.setGroups(groups);
+                            manager.refresh(groups);
+                        }));
 
+                        api.groups.on.move(scope, debounce(function(groups) {
+                            manager.plumb.revalidate(groups.$element[0]);
+                            manager.setTask(groups, true);
+                        }));
                     }
                 };
             }]);

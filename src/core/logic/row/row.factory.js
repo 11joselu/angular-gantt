@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-    angular.module('gantt').factory('GanttRow', ['GanttTask', 'moment', '$filter', function(Task, moment, $filter) {
+    angular.module('gantt').factory('GanttRow', ['GanttTask', 'moment', '$filter', 'GanttTasksGroupModel', function(Task, moment, $filter, GanttTasksGroupModel) {
         var Row = function(rowsManager, model) {
             this.rowsManager = rowsManager;
             this.model = model;
@@ -12,6 +12,8 @@
             this.tasks = [];
             this.filteredTasks = [];
             this.visibleTasks = [];
+            this.groups = [];
+            this.groupsMap = {};
         };
 
         Row.prototype.addTaskImpl = function(task, viewOnly) {
@@ -28,6 +30,19 @@
             }
 
         };
+
+        Row.prototype.addGroupImpl = function(task, viewOnly) {
+            this.groupsMap[task.model.id] = task;
+            this.groups.push(task);
+            /*if (!viewOnly) {
+                if (this.model.groups === undefined) {
+                    this.model.groups = [];
+                }
+                if (this.model.groups.indexOf(task.model) === -1) {
+                    this.model.groups.push(task.model);
+                }
+            }*/
+        }
 
         // Adds a task to a specific row. Merges the task if there is already one with the same id
         Row.prototype.addTask = function(taskModel, viewOnly) {
@@ -59,6 +74,33 @@
             }
 
             return task;
+        };
+
+        Row.prototype.addGroupTask = function(taskModel, viewOnly) {
+            var group, isUpdate = false;
+
+            this.rowsManager.gantt.objectModel.cleanTask(taskModel);
+
+            if (taskModel in this.groupsMap) {
+                group = this.groupsMap[taskModel.id];
+
+                if (group.model === taskModel) {
+                    return group;
+                }
+                group.model = taskModel;
+                isUpdate = true;
+            } else {
+                var group = new GanttTasksGroupModel(this, taskModel);
+                this.addGroupImpl(group, viewOnly);
+            }
+
+            if (!viewOnly) {
+                /*if (isUpdate) {
+                    this.rowsManager.gantt.api.tasks.raise.change(task);
+                } else {
+                    this.rowsManager.gantt.api.tasks.raise.add(task);
+                }*/
+            }
         };
 
         // Removes the task from the existing row and adds it to he current one

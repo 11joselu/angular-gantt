@@ -43,6 +43,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 }
 
                 ganttCtrl.gantt.api.registerMethod('groups', 'refresh', refresh, this);
+                ganttCtrl.gantt.api.registerEvent('groups', 'move');
+                ganttCtrl.gantt.api.registerEvent('groups', 'moveEnd');
                 ganttCtrl.gantt.$scope.$watchCollection('gantt.rowsManager.filteredRows', function() {
                     refresh();
                 });
@@ -76,10 +78,23 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 (function(){
     'use strict';
-    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils', function($scope, TaskGroup, utils) {
+    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils', 'ganttArrays', function($scope, TaskGroup, utils, ganttArrays) {
+        var hasChange = function(taskGroup, api) {
+            var arrTaskGroups = ganttArrays.getGroup();
+            for (var i = 0;  i < arrTaskGroups.length; i++) {
+                if (taskGroup.row.model.id === arrTaskGroups[i].row.model.id) {
+                    if ( (taskGroup.left !== arrTaskGroups[i].left ||
+                          taskGroup.width !== arrTaskGroups[i].width) &&
+                          !$scope.sideResize) {
+                        ganttArrays.updateGroupValue(i, taskGroup);
+                        api.groups.raise.move(arrTaskGroups[i]);
+                    }
+                }
+            }
+        };
+
         var updateTaskGroup = function() {
             var rowGroups = $scope.row.model.groups;
-
             if (typeof(rowGroups) === 'boolean') {
                 rowGroups = {enabled: rowGroups};
             }
@@ -91,6 +106,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
                 $scope.row.setFromTo();
                 $scope.row.setFromToByValues($scope.taskGroup.from, $scope.taskGroup.to);
+                hasChange($scope.taskGroup, $scope.gantt.api);
             } else {
                 $scope.taskGroup = undefined;
                 $scope.display = undefined;

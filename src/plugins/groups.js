@@ -36,6 +36,8 @@
                 }
 
                 ganttCtrl.gantt.api.registerMethod('groups', 'refresh', refresh, this);
+                ganttCtrl.gantt.api.registerEvent('groups', 'move');
+                ganttCtrl.gantt.api.registerEvent('groups', 'moveEnd');
                 ganttCtrl.gantt.$scope.$watchCollection('gantt.rowsManager.filteredRows', function() {
                     refresh();
                 });

@@ -1,6 +1,17 @@
 (function() {
     'use strict';
-    angular.module('gantt').factory('GanttRowsManager', ['GanttRow', 'ganttArrays', '$filter', '$timeout', 'moment', function(Row, arrays, $filter, $timeout, moment) {
+    angular.module('gantt').factory('GanttRowsManager', ['GanttRow', 'ganttArrays', '$filter', '$timeout', 'moment', 'GanttHierarchy', function(Row, arrays, $filter, $timeout, moment, Hierarchy) {
+
+        var updateGroups = function(groups) {
+            var hierarchy = new Hierarchy();
+
+            for (var i = 0; i < groups.length; i++) {
+                hierarchy.refresh(groups[i].rowsManager.filteredRows);
+                groups[i].descendants   = hierarchy.descendants(groups[i].row);
+                groups[i].ancestors     = hierarchy.ancestors(groups[i].row);
+            }
+        };
+
         var RowsManager = function(gantt) {
             var self = this;
 
@@ -76,6 +87,7 @@
             this.gantt.api.registerEvent('tasks', 'filter');
 
             this.gantt.api.registerEvent('tasks', 'displayed');
+            this.gantt.api.registerEvent('groups', 'displayed');
 
             this.gantt.api.registerEvent('rows', 'add');
             this.gantt.api.registerEvent('rows', 'change');
@@ -143,6 +155,8 @@
                 }
 
                 row.updateVisibleTasks();
+            } else {
+                row.addGroupTask(rowModel);
             }
 
             if (isUpdate) {
@@ -373,6 +387,7 @@
             var filteredTasks = [];
             var tasks = [];
             var visibleTasks = [];
+            var groups = [];
 
             for (var i = 0; i < this.rows.length; i++) {
                 var row = this.rows[i];
@@ -381,9 +396,13 @@
                 filteredTasks = filteredTasks.concat(row.filteredTasks);
                 visibleTasks = visibleTasks.concat(row.visibleTasks);
                 tasks = tasks.concat(row.tasks);
+                groups = groups.concat(row.groups);
             }
 
             this.gantt.api.tasks.raise.displayed(tasks, filteredTasks, visibleTasks);
+
+            updateGroups(groups);
+            this.gantt.api.groups.raise.displayed(groups);
 
             var filterEvent = !angular.equals(oldFilteredTasks, filteredTasks);
 
