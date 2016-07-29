@@ -36,6 +36,7 @@
             this.pluginScope.$watch('readOnly', function(newValue, oldValue) {
                 if (newValue !== oldValue) {
                     self.setTasks(self.tasksList);
+                    self.setTasks(self.groupsList);
                     self.refresh();
                 }
             });
@@ -434,7 +435,6 @@
              */
             this.getDependencies = function() {
                 var allDependencies = [];
-
                 angular.forEach(this.dependenciesFrom, function(dependencies) {
                     for (var i = 0; i < dependencies.length; i++) {
                         if (!(dependencies[i] in allDependencies)) {
@@ -442,7 +442,6 @@
                         }
                     }
                 });
-
                 return allDependencies;
             };
 
@@ -491,7 +490,6 @@
 
                 try {
                     var tasksDependencies;
-                    var i;
                     if (tasks && !angular.isArray(tasks)) {
                         tasks = [tasks];
                     }
@@ -510,8 +508,8 @@
                             });
                         });
                     }
-
-                    for (i = 0; i < tasksDependencies.length; i++) {
+                    console.log(tasksDependencies);
+                    for (var i = 0; i < tasksDependencies.length; i++) {
                         self.removeDependency(tasksDependencies[i]);
                     }
 
@@ -524,6 +522,7 @@
             };
 
             this.api.registerMethod('dependencies', 'refresh', this.refresh, this);
+            this.api.registerMethod('groupsDependencies', 'refresh', this.refreshGroups, this);
         };
         return DependenciesManager;
     }]);

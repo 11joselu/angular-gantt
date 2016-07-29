@@ -501,8 +501,9 @@ angular.module('angularGanttDemoApp')
                 deleted = true;
             } else {
                 $scope.data[5].dependencies = dependencies;
+                deleted = false;
             }
-            $scope.api.data.raise.change();
+            $scope.api.groupsDependencies.refresh();
         };
 
         var dataToRemove = [];
