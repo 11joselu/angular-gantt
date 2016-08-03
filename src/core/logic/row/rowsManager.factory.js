@@ -75,6 +75,10 @@
             this.gantt.api.registerEvent('tasks', 'remove');
             this.gantt.api.registerEvent('tasks', 'filter');
 
+            this.gantt.api.registerEvent('groups', 'add');
+            this.gantt.api.registerEvent('groups', 'change');
+            this.gantt.api.registerEvent('groups', 'displayed');
+
             this.gantt.api.registerEvent('tasks', 'displayed');
 
             this.gantt.api.registerEvent('rows', 'add');
@@ -143,6 +147,8 @@
                 }
 
                 row.updateVisibleTasks();
+            } else {
+                row.addGroup(rowModel);
             }
 
             if (isUpdate) {
@@ -373,7 +379,7 @@
             var filteredTasks = [];
             var tasks = [];
             var visibleTasks = [];
-
+            var groups = [];
             for (var i = 0; i < this.rows.length; i++) {
                 var row = this.rows[i];
                 oldFilteredTasks = oldFilteredTasks.concat(row.filteredTasks);
@@ -381,6 +387,10 @@
                 filteredTasks = filteredTasks.concat(row.filteredTasks);
                 visibleTasks = visibleTasks.concat(row.visibleTasks);
                 tasks = tasks.concat(row.tasks);
+                if (row.groups.length > 0) {
+                    groups = groups.concat(row.groups);
+                }
+                console.log(groups, tasks);
             }
 
             this.gantt.api.tasks.raise.displayed(tasks, filteredTasks, visibleTasks);

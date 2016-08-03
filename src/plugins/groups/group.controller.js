@@ -2,6 +2,7 @@
     'use strict';
     angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils', function($scope, TaskGroup, utils) {
         var updateTaskGroup = function() {
+            console.log('called');
             var rowGroups = $scope.row.model.groups;
 
             if (typeof(rowGroups) === 'boolean') {
