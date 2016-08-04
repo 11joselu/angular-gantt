@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('gantt').factory('GanttTaskGroup', ['ganttUtils', 'GanttTask', function(utils, Task) {
+    angular.module('gantt').factory('GanttTaskGroup', ['ganttUtils', 'GanttTask', '$timeout', function(utils, Task, $timeout) {
         var TaskGroup = function(row, pluginScope) {
             var self = this;
 
@@ -90,6 +90,26 @@
                 self.width = row.rowsManager.gantt.getPositionByDate(self.to) - self.left;
             }
         };
+
+        TaskGroup.prototype.createModel = function() {
+            this.model = this.row.model;
+            this.model.from = this.from;
+            this.model.to = this.to;
+            this.getContentElement();
+        };
+
+        TaskGroup.prototype.getContentElement = function() {
+            if (this.row.$element) {
+                this.$rowElement = this.row.$element
+                var contentElement = this.row.$element[0].querySelector('.gantt-task-group');
+                if (contentElement) {
+                    this.$element = contentElement;
+                }
+            }
+
+            return angular.element(this.$element);
+        };
+
         return TaskGroup;
     }]);
 }());

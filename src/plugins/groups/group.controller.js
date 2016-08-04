@@ -1,8 +1,7 @@
 (function(){
     'use strict';
-    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils', function($scope, TaskGroup, utils) {
+    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils',  function($scope, TaskGroup, utils) {
         var updateTaskGroup = function() {
-            console.log('called');
             var rowGroups = $scope.row.model.groups;
 
             if (typeof(rowGroups) === 'boolean') {
@@ -16,6 +15,9 @@
 
                 $scope.row.setFromTo();
                 $scope.row.setFromToByValues($scope.taskGroup.from, $scope.taskGroup.to);
+                $scope.taskGroup.createModel();
+
+                $scope.gantt.api.groups.raise.viewChange($scope.taskGroup);
             } else {
                 $scope.taskGroup = undefined;
                 $scope.display = undefined;
@@ -33,6 +35,7 @@
                     var descendants = $scope.pluginScope.hierarchy.descendants($scope.row);
                     if (descendants.indexOf(task.row) > -1) {
                         updateTaskGroup();
+                        $scope.gantt.api.groups.raise.displayed($scope.taskGroup);
                         if(!$scope.$$phase && !$scope.$root.$$phase) {
                             $scope.$digest();
                         }
@@ -41,7 +44,15 @@
             }
         });
 
-        var removeWatch = $scope.pluginScope.$watch('display', updateTaskGroup);
+        $scope.gantt.api.groups.on.add($scope, function(groups) {
+            console.log('Add: ', groups);
+        });
+
+
+        var removeWatch = $scope.pluginScope.$watch('display', function(){
+            updateTaskGroup();
+            $scope.gantt.api.groups.raise.displayed([$scope.taskGroup]);
+        });
 
         $scope.$watchCollection('gantt.rowsManager.filteredRows', updateTaskGroup);
 

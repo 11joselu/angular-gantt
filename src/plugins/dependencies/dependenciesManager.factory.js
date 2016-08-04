@@ -214,7 +214,7 @@
                 return true;
             };
 
-            var addTaskEndpoints = function(task) {
+            var addTaskEndpoints = function(task, isTaskGroup) {
                 if (!task.dependencies) {
                     task.dependencies = {};
                 }
@@ -313,23 +313,22 @@
              *
              * @param task
              */
-            this.setTask = function(task) {
-                self.plumb.setSuspendDrawing(true);
-                try {
-                    var oldTask = self.tasks[task.model.id];
-                    if (oldTask !== undefined) {
-                        disconnectTaskDependencies(oldTask);
-                        removeTaskMouseHandler(oldTask);
-                        removeTaskEndpoint(oldTask);
+            this.setGroups = function(groups) {
+                angular.forEach(self.groups, function(group) {
+                    removeTaskMouseHandler(group);
+                    removeTaskEndpoint(group);
+                });
+
+                var newTasks = {};
+                var tasksList = [];
+                for (var i = 0; i < groups.length; i++) {
+                    var group = groups[i];
+                    if (isTaskEnabled(group)) {
+                        newTasks[group.model.id] = group;
+                        tasksList.push(group);
+                        addTaskEndpoints(group, true);
+                        addTaskMouseHandler(group);
                     }
-                    if (isTaskEnabled(task)) {
-                        self.tasks[task.model.id] = task;
-                        addTaskEndpoints(task);
-                        addTaskMouseHandler(task);
-                        connectTaskDependencies(task);
-                    }
-                } finally {
-                    self.plumb.setSuspendDrawing(false, true);
                 }
             };
 

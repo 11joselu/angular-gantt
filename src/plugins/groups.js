@@ -44,21 +44,23 @@
                     if (directiveName === 'ganttRow') {
                         var taskGroupScope = rowScope.$new();
                         taskGroupScope.pluginScope = scope;
+                        if (taskGroupScope.row.model.children || taskGroupScope.row.model.parent) {
+                            var ifElement = $document[0].createElement('div');
+                            angular.element(ifElement).attr('data-ng-if', 'pluginScope.enabled');
 
-                        var ifElement = $document[0].createElement('div');
-                        angular.element(ifElement).attr('data-ng-if', 'pluginScope.enabled');
+                            var taskGroupElement = $document[0].createElement('gantt-task-group');
+                            if (attrs.templateUrl !== undefined) {
+                                angular.element(taskGroupElement).attr('data-template-url', attrs.templateUrl);
+                            }
+                            if (attrs.template !== undefined) {
+                                angular.element(taskGroupElement).attr('data-template', attrs.template);
+                            }
 
-                        var taskGroupElement = $document[0].createElement('gantt-task-group');
-                        if (attrs.templateUrl !== undefined) {
-                            angular.element(taskGroupElement).attr('data-template-url', attrs.templateUrl);
+                            angular.element(ifElement).append(taskGroupElement);
+
+                            rowElement.append($compile(ifElement)(taskGroupScope));
                         }
-                        if (attrs.template !== undefined) {
-                            angular.element(taskGroupElement).attr('data-template', attrs.template);
-                        }
 
-                        angular.element(ifElement).append(taskGroupElement);
-
-                        rowElement.append($compile(ifElement)(taskGroupScope));
                     }
                 });
             }

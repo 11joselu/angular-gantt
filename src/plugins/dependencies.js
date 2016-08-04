@@ -169,11 +169,20 @@
                             }
                         });
 
+                        api.groups.on.viewChange(scope, function(group) {
+                            //console.log(group);
+                        });
+
                         api.tasks.on.viewRowChange(scope, function(task) {
                             manager.setTask(task);
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([task]);
                             }
+                        });
+
+                        api.groups.on.displayed(scope, function(groups) {
+                            console.log("Displayed: ", groups);
+                            manager.setGroups(groups);
                         });
 
                         api.dependencies.on.add(scope, function(dependency) {
@@ -193,8 +202,6 @@
                                 checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
                             }
                         });
-
-
                     }
                 };
             }]);
