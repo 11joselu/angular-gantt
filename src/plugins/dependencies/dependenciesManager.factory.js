@@ -13,6 +13,8 @@
             this.api.registerEvent('dependencies', 'add');
             this.api.registerEvent('dependencies', 'change');
             this.api.registerEvent('dependencies', 'remove');
+            this.api.registerEvent('dependencies', 'checker');
+            this.api.registerEvent('dependencies', 'checked');
 
             this.plumb = jsPlumb.getInstance();
             this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
@@ -22,6 +24,8 @@
 
             this.tasksList = [];
             this.tasks = {};
+            this.groupsList = [];
+            this.groups = {};
 
             this.events = new DependenciesEvents(this);
 
@@ -188,15 +192,30 @@
                 return dependencies;
             };
 
+            var collect = function collect() {
+              var ret = {};
+              var len = arguments.length;
+              for (var i=0; i<len; i++) {
+                for (var p in arguments[i]) {
+                  if (arguments[i].hasOwnProperty(p)) {
+                    ret[p] = arguments[i][p];
+                  }
+                }
+              }
+              return ret;
+            }
+
             this.setDraggingConnection = function(connection) {
+                var allTask = collect(self.tasks, self.groups);
                 if (connection) {
                     self.draggingConnection = connection;
-                    angular.forEach(self.tasks, function(task) {
+
+                    angular.forEach(allTask, function(task) {
                         task.dependencies.mouseHandler.release();
                     });
                 } else {
                     self.draggingConnection = undefined;
-                    angular.forEach(self.tasks, function(task) {
+                    angular.forEach(allTask, function(task) {
                         task.dependencies.mouseHandler.install();
                     });
                 }
@@ -288,6 +307,19 @@
                 self.tasksList = tasks;
             };
 
+            this.setGroups = function(groups) {
+
+                for (var i = 0; i < groups.length; i++) {
+                    var group = groups[i];
+                    if (isTaskEnabled(group)) {
+                        self.groups[group.model.id] = group;
+                        self.groupsList.push(group);
+                        addTaskEndpoints(group, true);
+                        addTaskMouseHandler(group);
+                    }
+                }
+            };
+
             var disconnectTaskDependencies = function(task) {
                 var dependencies = self.getTaskDependencies(task);
                 if (dependencies) {
@@ -313,22 +345,23 @@
              *
              * @param task
              */
-            this.setGroups = function(groups) {
-                angular.forEach(self.groups, function(group) {
-                    removeTaskMouseHandler(group);
-                    removeTaskEndpoint(group);
-                });
-
-                var newTasks = {};
-                var tasksList = [];
-                for (var i = 0; i < groups.length; i++) {
-                    var group = groups[i];
-                    if (isTaskEnabled(group)) {
-                        newTasks[group.model.id] = group;
-                        tasksList.push(group);
-                        addTaskEndpoints(group, true);
-                        addTaskMouseHandler(group);
+            this.setTask = function(task) {
+                self.plumb.setSuspendDrawing(true);
+                try {
+                    var oldTask = self.tasks[task.model.id];
+                    if (oldTask !== undefined) {
+                        disconnectTaskDependencies(oldTask);
+                        removeTaskMouseHandler(oldTask);
+                        removeTaskEndpoint(oldTask);
                     }
+                    if (isTaskEnabled(task)) {
+                        self.tasks[task.model.id] = task;
+                        addTaskEndpoints(task);
+                        addTaskMouseHandler(task);
+                        connectTaskDependencies(task);
+                    }
+                } finally {
+                    self.plumb.setSuspendDrawing(false, true);
                 }
             };
 
@@ -339,7 +372,9 @@
              * @returns {*}
              */
             this.getTask = function(taskId) {
-                return self.tasks[taskId];
+                if (self.tasks[taskId]) return self.tasks[taskId];
+
+                return self.groups[taskId];
             };
 
             var getSourceEndpoints = function(task) {
@@ -415,38 +450,53 @@
                 self.plumb.setSuspendDrawing(true);
 
                 try {
-                    var tasksDependencies;
-                    var i;
-                    if (tasks && !angular.isArray(tasks)) {
-                        tasks = [tasks];
-                    }
+                  var tasksDependencies;
+                  var i;
+                  if (tasks && !angular.isArray(tasks)) {
+                    tasks = [tasks];
+                  }
 
-                    if (tasks === undefined) {
-                        tasks = this.tasks;
-                        tasksDependencies = this.getDependencies();
-                    } else {
-                        tasksDependencies = [];
-                        angular.forEach(tasks, function(task) {
-                            var taskDependencies = self.getTaskDependencies(task);
-                            angular.forEach(taskDependencies, function(taskDependency) {
-                                if (!(taskDependency in tasksDependencies)) {
-                                    tasksDependencies.push(taskDependency);
-                                }
-                            });
-                        });
-                    }
-
-                    for (i = 0; i < tasksDependencies.length; i++) {
-                        self.removeDependency(tasksDependencies[i]);
-                    }
-
+                  if (tasks === undefined) {
+                    tasks = this.tasks;
+                    tasksDependencies = this.getDependencies();
+                  } else {
+                    tasksDependencies = [];
                     angular.forEach(tasks, function(task) {
-                        self.addDependenciesFromTask(task);
+                      var taskDependencies = self.getTaskDependencies(task);
+                      angular.forEach(taskDependencies, function(taskDependency) {
+                        if (!(taskDependency in tasksDependencies)) {
+                          tasksDependencies.push(taskDependency);
+                        }
+                      });
                     });
+                  }
+
+                angular.forEach(self.groups, function(task) {
+                    var taskDependencies = self.getTaskDependencies(task);
+                    angular.forEach(taskDependencies, function(taskDependency) {
+                      if (!(taskDependency in tasksDependencies)) {
+                        tasksDependencies.push(taskDependency);
+                      }
+                    });
+                });
+
+                  for (i = 0; i < tasksDependencies.length; i++) {
+                    self.removeDependency(tasksDependencies[i]);
+                  }
+
+
+                  angular.forEach(tasks, function(task) {
+                    self.addDependenciesFromTask(task);
+                  });
+
+                  angular.forEach(self.groups, function(task) {
+                    self.addDependenciesFromTask(task);
+                  });
+
                 } finally {
-                    self.plumb.setSuspendDrawing(false, true);
+                  self.plumb.setSuspendDrawing(false, true);
                 }
-            };
+              };
 
             this.api.registerMethod('dependencies', 'refresh', this.refresh, this);
         };

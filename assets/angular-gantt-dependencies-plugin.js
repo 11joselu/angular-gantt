@@ -176,11 +176,26 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                             }
                         });
 
+                        api.groups.on.viewChange(scope, function(group) {
+                            //console.log(group);
+                        });
+
                         api.tasks.on.viewRowChange(scope, function(task) {
                             manager.setTask(task);
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([task]);
                             }
+                        });
+
+                        api.groups.on.displayed(scope, function(groups) {
+                            console.log("Displayed: ", groups);
+                            manager.setGroups(groups);
+                        });
+
+                        api.groups.on.viewChange(scope, function(group) {
+                          if (group.$element) {
+                            manager.plumb.revalidate(group.$element[0]);
+                          }
                         });
 
                         api.dependencies.on.add(scope, function(dependency) {
@@ -200,8 +215,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                                 checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
                             }
                         });
-
-
                     }
                 };
             }]);
@@ -220,8 +233,11 @@ Github: https://github.com/angular-gantt/angular-gantt.git
         var GanttDependenciesChecker = function(manager) {
             function handleTaskConflict(conflictsList, task) {
                 if (!(task.model.id in conflictsList) && task.$element) {
-                    task.$element.addClass('gantt-task-conflict');
-                    conflictsList[task.model.id] = task;
+                    try {
+                        task.$element.addClass('gantt-task-conflict');
+                        conflictsList[task.model.id] = task;
+                    }catch(e) {
+                    }
                 }
             }
 
@@ -229,7 +245,11 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 for (var i = 0, l = allTasks.length; i < l; i++) {
                     var task = allTasks[i];
                     if (!(task.model.id in conflictsList) && task.$element) {
-                        task.$element.removeClass('gantt-task-conflict');
+                        try {
+                            task.$element.removeClass('gantt-task-conflict');
+                        }catch(e){
+
+                        }
                     }
                 }
             }
@@ -433,6 +453,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             this.api.registerEvent('dependencies', 'add');
             this.api.registerEvent('dependencies', 'change');
             this.api.registerEvent('dependencies', 'remove');
+            this.api.registerEvent('dependencies', 'checker');
+            this.api.registerEvent('dependencies', 'checked');
 
             this.plumb = jsPlumb.getInstance();
             this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
@@ -442,6 +464,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
             this.tasksList = [];
             this.tasks = {};
+            this.groupsList = [];
+            this.groups = {};
 
             this.events = new DependenciesEvents(this);
 
@@ -608,15 +632,30 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 return dependencies;
             };
 
+            var collect = function collect() {
+              var ret = {};
+              var len = arguments.length;
+              for (var i=0; i<len; i++) {
+                for (var p in arguments[i]) {
+                  if (arguments[i].hasOwnProperty(p)) {
+                    ret[p] = arguments[i][p];
+                  }
+                }
+              }
+              return ret;
+            }
+
             this.setDraggingConnection = function(connection) {
+                var allTask = collect(self.tasks, self.groups);
                 if (connection) {
                     self.draggingConnection = connection;
-                    angular.forEach(self.tasks, function(task) {
+
+                    angular.forEach(allTask, function(task) {
                         task.dependencies.mouseHandler.release();
                     });
                 } else {
                     self.draggingConnection = undefined;
-                    angular.forEach(self.tasks, function(task) {
+                    angular.forEach(allTask, function(task) {
                         task.dependencies.mouseHandler.install();
                     });
                 }
@@ -634,7 +673,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 return true;
             };
 
-            var addTaskEndpoints = function(task) {
+            var addTaskEndpoints = function(task, isTaskGroup) {
                 if (!task.dependencies) {
                     task.dependencies = {};
                 }
@@ -708,6 +747,19 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 self.tasksList = tasks;
             };
 
+            this.setGroups = function(groups) {
+
+                for (var i = 0; i < groups.length; i++) {
+                    var group = groups[i];
+                    if (isTaskEnabled(group)) {
+                        self.groups[group.model.id] = group;
+                        self.groupsList.push(group);
+                        addTaskEndpoints(group, true);
+                        addTaskMouseHandler(group);
+                    }
+                }
+            };
+
             var disconnectTaskDependencies = function(task) {
                 var dependencies = self.getTaskDependencies(task);
                 if (dependencies) {
@@ -760,7 +812,9 @@ Github: https://github.com/angular-gantt/angular-gantt.git
              * @returns {*}
              */
             this.getTask = function(taskId) {
-                return self.tasks[taskId];
+                if (self.tasks[taskId]) return self.tasks[taskId];
+
+                return self.groups[taskId];
             };
 
             var getSourceEndpoints = function(task) {
@@ -836,38 +890,53 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 self.plumb.setSuspendDrawing(true);
 
                 try {
-                    var tasksDependencies;
-                    var i;
-                    if (tasks && !angular.isArray(tasks)) {
-                        tasks = [tasks];
-                    }
+                  var tasksDependencies;
+                  var i;
+                  if (tasks && !angular.isArray(tasks)) {
+                    tasks = [tasks];
+                  }
 
-                    if (tasks === undefined) {
-                        tasks = this.tasks;
-                        tasksDependencies = this.getDependencies();
-                    } else {
-                        tasksDependencies = [];
-                        angular.forEach(tasks, function(task) {
-                            var taskDependencies = self.getTaskDependencies(task);
-                            angular.forEach(taskDependencies, function(taskDependency) {
-                                if (!(taskDependency in tasksDependencies)) {
-                                    tasksDependencies.push(taskDependency);
-                                }
-                            });
-                        });
-                    }
-
-                    for (i = 0; i < tasksDependencies.length; i++) {
-                        self.removeDependency(tasksDependencies[i]);
-                    }
-
+                  if (tasks === undefined) {
+                    tasks = this.tasks;
+                    tasksDependencies = this.getDependencies();
+                  } else {
+                    tasksDependencies = [];
                     angular.forEach(tasks, function(task) {
-                        self.addDependenciesFromTask(task);
+                      var taskDependencies = self.getTaskDependencies(task);
+                      angular.forEach(taskDependencies, function(taskDependency) {
+                        if (!(taskDependency in tasksDependencies)) {
+                          tasksDependencies.push(taskDependency);
+                        }
+                      });
                     });
+                  }
+
+                angular.forEach(self.groups, function(task) {
+                    var taskDependencies = self.getTaskDependencies(task);
+                    angular.forEach(taskDependencies, function(taskDependency) {
+                      if (!(taskDependency in tasksDependencies)) {
+                        tasksDependencies.push(taskDependency);
+                      }
+                    });
+                });
+
+                  for (i = 0; i < tasksDependencies.length; i++) {
+                    self.removeDependency(tasksDependencies[i]);
+                  }
+
+
+                  angular.forEach(tasks, function(task) {
+                    self.addDependenciesFromTask(task);
+                  });
+
+                  angular.forEach(self.groups, function(task) {
+                    self.addDependenciesFromTask(task);
+                  });
+
                 } finally {
-                    self.plumb.setSuspendDrawing(false, true);
+                  self.plumb.setSuspendDrawing(false, true);
                 }
-            };
+              };
 
             this.api.registerMethod('dependencies', 'refresh', this.refresh, this);
         };

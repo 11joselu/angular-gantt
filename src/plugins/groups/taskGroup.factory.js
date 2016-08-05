@@ -93,8 +93,8 @@
 
         TaskGroup.prototype.createModel = function() {
             this.model = this.row.model;
-            this.model.from = this.from;
-            this.model.to = this.to;
+            this.model.from = this.row.from;
+            this.model.to = this.row.to;
             this.getContentElement();
         };
 
@@ -103,7 +103,7 @@
                 this.$rowElement = this.row.$element
                 var contentElement = this.row.$element[0].querySelector('.gantt-task-group');
                 if (contentElement) {
-                    this.$element = contentElement;
+                    this.$element = [contentElement];
                 }
             }
 

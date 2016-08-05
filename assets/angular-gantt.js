@@ -2373,51 +2373,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
         }]);
 }());
 
-(function() {
-    'use strict';
-    angular.module('gantt').factory('GanttGroup', ['moment', function(moment) {
-        var Group = function(row, model) {
-            this.rowsManager = row.rowsManager;
-            this.row = row;
-            this.model = model;
-        };
-
-        Group.prototype.getContentElement = function() {
-            if (this.$element !== undefined) {
-                var contentElement = this.$element[0].querySelector('.gantt-task-content');
-                if (contentElement !== undefined) {
-                    contentElement = angular.element(contentElement);
-                }
-                return contentElement;
-            }
-        };
-
-        Group.prototype.setFrom = function(x, magnetEnabled) {
-            this.model.from = this.rowsManager.gantt.getDateByPosition(x, magnetEnabled);
-        };
-
-        Group.prototype.setTo = function(x, magnetEnabled) {
-            this.model.to = this.rowsManager.gantt.getDateByPosition(x, magnetEnabled);
-        };
-
-        Group.prototype.clone = function() {
-            return new Group(this.row, angular.copy(this.model));
-        };
-
-        Group.prototype.updatePosAndSize = function() {
-            var oldViewLeft = this.left;
-            var oldViewWidth = this.width;
-
-            this.modelLeft = this.rowsManager.gantt.getPositionByDate(this.model.from);
-            this.modelWidth = this.rowsManager.gantt.getPositionByDate(this.model.to) - this.modelLeft;
-
-        };
-
-        return Group;
-    }]);
-}());
-
-
 (function(){
     'use strict';
     angular.module('gantt').factory('GanttObjectModel', ['ganttUtils', 'moment', function(utils, moment) {
@@ -2484,7 +2439,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 (function(){
     'use strict';
-    angular.module('gantt').factory('GanttRow', ['GanttTask', 'GanttGroup', 'moment', '$filter', function(Task, Group, moment, $filter) {
+    angular.module('gantt').factory('GanttRow', ['GanttTask', 'moment', '$filter', function(Task, moment, $filter) {
         var Row = function(rowsManager, model) {
             this.rowsManager = rowsManager;
             this.model = model;
@@ -2513,19 +2468,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 }
             }
 
-        };
-
-         Row.prototype.addGroupImpl = function(group, viewOnly) {
-            this.groupsMap[group.model.id] = group;
-            this.groups.push(group);
-            /*if (!viewOnly) {
-                if (this.model.tasks === undefined) {
-                    this.model.tasks = [];
-                }
-                if (this.model.tasks.indexOf(group.model) === -1) {
-                    this.model.tasks.push(group.model);
-                }
-            }*/
         };
 
         // Adds a task to a specific row. Merges the task if there is already one with the same id
@@ -2575,9 +2517,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
                 group.model = groupModel;
                 isUpdate = true;
-            } else {
-                group = new Group(this, groupModel);
-                this.addGroupImpl(group, viewOnly);
             }
 
             if (!viewOnly) {
@@ -2849,6 +2788,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             this.gantt.api.registerEvent('groups', 'add');
             this.gantt.api.registerEvent('groups', 'change');
             this.gantt.api.registerEvent('groups', 'displayed');
+            this.gantt.api.registerEvent('groups', 'viewChange');
 
             this.gantt.api.registerEvent('tasks', 'displayed');
 
@@ -3150,7 +3090,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             var filteredTasks = [];
             var tasks = [];
             var visibleTasks = [];
-            var groups = [];
             for (var i = 0; i < this.rows.length; i++) {
                 var row = this.rows[i];
                 oldFilteredTasks = oldFilteredTasks.concat(row.filteredTasks);
@@ -3158,10 +3097,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 filteredTasks = filteredTasks.concat(row.filteredTasks);
                 visibleTasks = visibleTasks.concat(row.visibleTasks);
                 tasks = tasks.concat(row.tasks);
-                if (row.groups.length > 0) {
-                    groups = groups.concat(row.groups);
-                }
-                console.log(groups, tasks);
             }
 
             this.gantt.api.tasks.raise.displayed(tasks, filteredTasks, visibleTasks);

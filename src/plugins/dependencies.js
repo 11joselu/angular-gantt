@@ -185,6 +185,12 @@
                             manager.setGroups(groups);
                         });
 
+                        api.groups.on.viewChange(scope, function(group) {
+                          if (group.$element) {
+                            manager.plumb.revalidate(group.$element[0]);
+                          }
+                        });
+
                         api.dependencies.on.add(scope, function(dependency) {
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([dependency.getFromTask(), dependency.getToTask()]);

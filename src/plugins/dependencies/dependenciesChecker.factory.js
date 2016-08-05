@@ -10,8 +10,11 @@
         var GanttDependenciesChecker = function(manager) {
             function handleTaskConflict(conflictsList, task) {
                 if (!(task.model.id in conflictsList) && task.$element) {
-                    task.$element.addClass('gantt-task-conflict');
-                    conflictsList[task.model.id] = task;
+                    try {
+                        task.$element.addClass('gantt-task-conflict');
+                        conflictsList[task.model.id] = task;
+                    }catch(e) {
+                    }
                 }
             }
 
@@ -19,7 +22,11 @@
                 for (var i = 0, l = allTasks.length; i < l; i++) {
                     var task = allTasks[i];
                     if (!(task.model.id in conflictsList) && task.$element) {
-                        task.$element.removeClass('gantt-task-conflict');
+                        try {
+                            task.$element.removeClass('gantt-task-conflict');
+                        }catch(e){
+
+                        }
                     }
                 }
             }

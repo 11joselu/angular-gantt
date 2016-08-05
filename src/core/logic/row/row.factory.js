@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-    angular.module('gantt').factory('GanttRow', ['GanttTask', 'GanttGroup', 'moment', '$filter', function(Task, Group, moment, $filter) {
+    angular.module('gantt').factory('GanttRow', ['GanttTask', 'moment', '$filter', function(Task, moment, $filter) {
         var Row = function(rowsManager, model) {
             this.rowsManager = rowsManager;
             this.model = model;
@@ -29,19 +29,6 @@
                 }
             }
 
-        };
-
-         Row.prototype.addGroupImpl = function(group, viewOnly) {
-            this.groupsMap[group.model.id] = group;
-            this.groups.push(group);
-            /*if (!viewOnly) {
-                if (this.model.tasks === undefined) {
-                    this.model.tasks = [];
-                }
-                if (this.model.tasks.indexOf(group.model) === -1) {
-                    this.model.tasks.push(group.model);
-                }
-            }*/
         };
 
         // Adds a task to a specific row. Merges the task if there is already one with the same id
@@ -91,9 +78,6 @@
 
                 group.model = groupModel;
                 isUpdate = true;
-            } else {
-                group = new Group(this, groupModel);
-                this.addGroupImpl(group, viewOnly);
             }
 
             if (!viewOnly) {

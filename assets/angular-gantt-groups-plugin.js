@@ -51,21 +51,23 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     if (directiveName === 'ganttRow') {
                         var taskGroupScope = rowScope.$new();
                         taskGroupScope.pluginScope = scope;
+                        if (taskGroupScope.row.model.children || taskGroupScope.row.model.parent) {
+                            var ifElement = $document[0].createElement('div');
+                            angular.element(ifElement).attr('data-ng-if', 'pluginScope.enabled');
 
-                        var ifElement = $document[0].createElement('div');
-                        angular.element(ifElement).attr('data-ng-if', 'pluginScope.enabled');
+                            var taskGroupElement = $document[0].createElement('gantt-task-group');
+                            if (attrs.templateUrl !== undefined) {
+                                angular.element(taskGroupElement).attr('data-template-url', attrs.templateUrl);
+                            }
+                            if (attrs.template !== undefined) {
+                                angular.element(taskGroupElement).attr('data-template', attrs.template);
+                            }
 
-                        var taskGroupElement = $document[0].createElement('gantt-task-group');
-                        if (attrs.templateUrl !== undefined) {
-                            angular.element(taskGroupElement).attr('data-template-url', attrs.templateUrl);
+                            angular.element(ifElement).append(taskGroupElement);
+
+                            rowElement.append($compile(ifElement)(taskGroupScope));
                         }
-                        if (attrs.template !== undefined) {
-                            angular.element(taskGroupElement).attr('data-template', attrs.template);
-                        }
 
-                        angular.element(ifElement).append(taskGroupElement);
-
-                        rowElement.append($compile(ifElement)(taskGroupScope));
                     }
                 });
             }
@@ -76,9 +78,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 (function(){
     'use strict';
-    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils', function($scope, TaskGroup, utils) {
+    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils',  function($scope, TaskGroup, utils) {
         var updateTaskGroup = function() {
-            console.log('called');
             var rowGroups = $scope.row.model.groups;
 
             if (typeof(rowGroups) === 'boolean') {
@@ -92,6 +93,9 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
                 $scope.row.setFromTo();
                 $scope.row.setFromToByValues($scope.taskGroup.from, $scope.taskGroup.to);
+                $scope.taskGroup.createModel();
+
+                $scope.gantt.api.groups.raise.viewChange($scope.taskGroup);
             } else {
                 $scope.taskGroup = undefined;
                 $scope.display = undefined;
@@ -109,6 +113,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     var descendants = $scope.pluginScope.hierarchy.descendants($scope.row);
                     if (descendants.indexOf(task.row) > -1) {
                         updateTaskGroup();
+                        $scope.gantt.api.groups.raise.displayed($scope.taskGroup);
                         if(!$scope.$$phase && !$scope.$root.$$phase) {
                             $scope.$digest();
                         }
@@ -117,7 +122,15 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             }
         });
 
-        var removeWatch = $scope.pluginScope.$watch('display', updateTaskGroup);
+        $scope.gantt.api.groups.on.add($scope, function(groups) {
+            console.log('Add: ', groups);
+        });
+
+
+        var removeWatch = $scope.pluginScope.$watch('display', function(){
+            updateTaskGroup();
+            $scope.gantt.api.groups.raise.displayed([$scope.taskGroup]);
+        });
 
         $scope.$watchCollection('gantt.rowsManager.filteredRows', updateTaskGroup);
 
@@ -140,7 +153,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 (function() {
     'use strict';
 
-    angular.module('gantt').factory('GanttTaskGroup', ['ganttUtils', 'GanttTask', function(utils, Task) {
+    angular.module('gantt').factory('GanttTaskGroup', ['ganttUtils', 'GanttTask', '$timeout', function(utils, Task, $timeout) {
         var TaskGroup = function(row, pluginScope) {
             var self = this;
 
@@ -229,6 +242,26 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 self.width = row.rowsManager.gantt.getPositionByDate(self.to) - self.left;
             }
         };
+
+        TaskGroup.prototype.createModel = function() {
+            this.model = this.row.model;
+            this.model.from = this.row.from;
+            this.model.to = this.row.to;
+            this.getContentElement();
+        };
+
+        TaskGroup.prototype.getContentElement = function() {
+            if (this.row.$element) {
+                this.$rowElement = this.row.$element
+                var contentElement = this.row.$element[0].querySelector('.gantt-task-group');
+                if (contentElement) {
+                    this.$element = [contentElement];
+                }
+            }
+
+            return angular.element(this.$element);
+        };
+
         return TaskGroup;
     }]);
 }());
@@ -256,7 +289,6 @@ angular.module('gantt.groups.templates', []).run(['$templateCache', function($te
         '        <gantt-task ng-repeat="task in taskGroup.promotedTasks"></gantt-task>\n' +
         '    </div>\n' +
         '    <div class="gantt-task-group"\n' +
-        '         ng-if="taskGroup.showGrouping"\n' +
         '         ng-style="{\'left\': taskGroup.left + \'px\', \'width\': taskGroup.width + \'px\'}">\n' +
         '        <div class="gantt-task-group-left-main"></div>\n' +
         '        <div class="gantt-task-group-right-main"></div>\n' +

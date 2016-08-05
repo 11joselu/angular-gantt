@@ -232,11 +232,26 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                             }
                         });
 
+                        api.groups.on.viewChange(scope, function(group) {
+                            //console.log(group);
+                        });
+
                         api.tasks.on.viewRowChange(scope, function(task) {
                             manager.setTask(task);
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([task]);
                             }
+                        });
+
+                        api.groups.on.displayed(scope, function(groups) {
+                            console.log("Displayed: ", groups);
+                            manager.setGroups(groups);
+                        });
+
+                        api.groups.on.viewChange(scope, function(group) {
+                          if (group.$element) {
+                            manager.plumb.revalidate(group.$element[0]);
+                          }
                         });
 
                         api.dependencies.on.add(scope, function(dependency) {
@@ -256,8 +271,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                                 checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
                             }
                         });
-
-
                     }
                 };
             }]);
@@ -419,21 +432,23 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     if (directiveName === 'ganttRow') {
                         var taskGroupScope = rowScope.$new();
                         taskGroupScope.pluginScope = scope;
+                        if (taskGroupScope.row.model.children || taskGroupScope.row.model.parent) {
+                            var ifElement = $document[0].createElement('div');
+                            angular.element(ifElement).attr('data-ng-if', 'pluginScope.enabled');
 
-                        var ifElement = $document[0].createElement('div');
-                        angular.element(ifElement).attr('data-ng-if', 'pluginScope.enabled');
+                            var taskGroupElement = $document[0].createElement('gantt-task-group');
+                            if (attrs.templateUrl !== undefined) {
+                                angular.element(taskGroupElement).attr('data-template-url', attrs.templateUrl);
+                            }
+                            if (attrs.template !== undefined) {
+                                angular.element(taskGroupElement).attr('data-template', attrs.template);
+                            }
 
-                        var taskGroupElement = $document[0].createElement('gantt-task-group');
-                        if (attrs.templateUrl !== undefined) {
-                            angular.element(taskGroupElement).attr('data-template-url', attrs.templateUrl);
+                            angular.element(ifElement).append(taskGroupElement);
+
+                            rowElement.append($compile(ifElement)(taskGroupScope));
                         }
-                        if (attrs.template !== undefined) {
-                            angular.element(taskGroupElement).attr('data-template', attrs.template);
-                        }
 
-                        angular.element(ifElement).append(taskGroupElement);
-
-                        rowElement.append($compile(ifElement)(taskGroupScope));
                     }
                 });
             }
@@ -1672,8 +1687,11 @@ Github: https://github.com/angular-gantt/angular-gantt.git
         var GanttDependenciesChecker = function(manager) {
             function handleTaskConflict(conflictsList, task) {
                 if (!(task.model.id in conflictsList) && task.$element) {
-                    task.$element.addClass('gantt-task-conflict');
-                    conflictsList[task.model.id] = task;
+                    try {
+                        task.$element.addClass('gantt-task-conflict');
+                        conflictsList[task.model.id] = task;
+                    }catch(e) {
+                    }
                 }
             }
 
@@ -1681,7 +1699,11 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 for (var i = 0, l = allTasks.length; i < l; i++) {
                     var task = allTasks[i];
                     if (!(task.model.id in conflictsList) && task.$element) {
-                        task.$element.removeClass('gantt-task-conflict');
+                        try {
+                            task.$element.removeClass('gantt-task-conflict');
+                        }catch(e){
+
+                        }
                     }
                 }
             }
@@ -1885,6 +1907,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             this.api.registerEvent('dependencies', 'add');
             this.api.registerEvent('dependencies', 'change');
             this.api.registerEvent('dependencies', 'remove');
+            this.api.registerEvent('dependencies', 'checker');
+            this.api.registerEvent('dependencies', 'checked');
 
             this.plumb = jsPlumb.getInstance();
             this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
@@ -1894,6 +1918,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
             this.tasksList = [];
             this.tasks = {};
+            this.groupsList = [];
+            this.groups = {};
 
             this.events = new DependenciesEvents(this);
 
@@ -2060,15 +2086,30 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 return dependencies;
             };
 
+            var collect = function collect() {
+              var ret = {};
+              var len = arguments.length;
+              for (var i=0; i<len; i++) {
+                for (var p in arguments[i]) {
+                  if (arguments[i].hasOwnProperty(p)) {
+                    ret[p] = arguments[i][p];
+                  }
+                }
+              }
+              return ret;
+            }
+
             this.setDraggingConnection = function(connection) {
+                var allTask = collect(self.tasks, self.groups);
                 if (connection) {
                     self.draggingConnection = connection;
-                    angular.forEach(self.tasks, function(task) {
+
+                    angular.forEach(allTask, function(task) {
                         task.dependencies.mouseHandler.release();
                     });
                 } else {
                     self.draggingConnection = undefined;
-                    angular.forEach(self.tasks, function(task) {
+                    angular.forEach(allTask, function(task) {
                         task.dependencies.mouseHandler.install();
                     });
                 }
@@ -2086,7 +2127,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 return true;
             };
 
-            var addTaskEndpoints = function(task) {
+            var addTaskEndpoints = function(task, isTaskGroup) {
                 if (!task.dependencies) {
                     task.dependencies = {};
                 }
@@ -2160,6 +2201,19 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 self.tasksList = tasks;
             };
 
+            this.setGroups = function(groups) {
+
+                for (var i = 0; i < groups.length; i++) {
+                    var group = groups[i];
+                    if (isTaskEnabled(group)) {
+                        self.groups[group.model.id] = group;
+                        self.groupsList.push(group);
+                        addTaskEndpoints(group, true);
+                        addTaskMouseHandler(group);
+                    }
+                }
+            };
+
             var disconnectTaskDependencies = function(task) {
                 var dependencies = self.getTaskDependencies(task);
                 if (dependencies) {
@@ -2212,7 +2266,9 @@ Github: https://github.com/angular-gantt/angular-gantt.git
              * @returns {*}
              */
             this.getTask = function(taskId) {
-                return self.tasks[taskId];
+                if (self.tasks[taskId]) return self.tasks[taskId];
+
+                return self.groups[taskId];
             };
 
             var getSourceEndpoints = function(task) {
@@ -2288,38 +2344,53 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 self.plumb.setSuspendDrawing(true);
 
                 try {
-                    var tasksDependencies;
-                    var i;
-                    if (tasks && !angular.isArray(tasks)) {
-                        tasks = [tasks];
-                    }
+                  var tasksDependencies;
+                  var i;
+                  if (tasks && !angular.isArray(tasks)) {
+                    tasks = [tasks];
+                  }
 
-                    if (tasks === undefined) {
-                        tasks = this.tasks;
-                        tasksDependencies = this.getDependencies();
-                    } else {
-                        tasksDependencies = [];
-                        angular.forEach(tasks, function(task) {
-                            var taskDependencies = self.getTaskDependencies(task);
-                            angular.forEach(taskDependencies, function(taskDependency) {
-                                if (!(taskDependency in tasksDependencies)) {
-                                    tasksDependencies.push(taskDependency);
-                                }
-                            });
-                        });
-                    }
-
-                    for (i = 0; i < tasksDependencies.length; i++) {
-                        self.removeDependency(tasksDependencies[i]);
-                    }
-
+                  if (tasks === undefined) {
+                    tasks = this.tasks;
+                    tasksDependencies = this.getDependencies();
+                  } else {
+                    tasksDependencies = [];
                     angular.forEach(tasks, function(task) {
-                        self.addDependenciesFromTask(task);
+                      var taskDependencies = self.getTaskDependencies(task);
+                      angular.forEach(taskDependencies, function(taskDependency) {
+                        if (!(taskDependency in tasksDependencies)) {
+                          tasksDependencies.push(taskDependency);
+                        }
+                      });
                     });
+                  }
+
+                angular.forEach(self.groups, function(task) {
+                    var taskDependencies = self.getTaskDependencies(task);
+                    angular.forEach(taskDependencies, function(taskDependency) {
+                      if (!(taskDependency in tasksDependencies)) {
+                        tasksDependencies.push(taskDependency);
+                      }
+                    });
+                });
+
+                  for (i = 0; i < tasksDependencies.length; i++) {
+                    self.removeDependency(tasksDependencies[i]);
+                  }
+
+
+                  angular.forEach(tasks, function(task) {
+                    self.addDependenciesFromTask(task);
+                  });
+
+                  angular.forEach(self.groups, function(task) {
+                    self.addDependenciesFromTask(task);
+                  });
+
                 } finally {
-                    self.plumb.setSuspendDrawing(false, true);
+                  self.plumb.setSuspendDrawing(false, true);
                 }
-            };
+              };
 
             this.api.registerMethod('dependencies', 'refresh', this.refresh, this);
         };
@@ -2584,9 +2655,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 (function(){
     'use strict';
-    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils', function($scope, TaskGroup, utils) {
+    angular.module('gantt.groups').controller('GanttGroupController', ['$scope', 'GanttTaskGroup', 'ganttUtils',  function($scope, TaskGroup, utils) {
         var updateTaskGroup = function() {
-            console.log('called');
             var rowGroups = $scope.row.model.groups;
 
             if (typeof(rowGroups) === 'boolean') {
@@ -2600,6 +2670,9 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
                 $scope.row.setFromTo();
                 $scope.row.setFromToByValues($scope.taskGroup.from, $scope.taskGroup.to);
+                $scope.taskGroup.createModel();
+
+                $scope.gantt.api.groups.raise.viewChange($scope.taskGroup);
             } else {
                 $scope.taskGroup = undefined;
                 $scope.display = undefined;
@@ -2617,6 +2690,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     var descendants = $scope.pluginScope.hierarchy.descendants($scope.row);
                     if (descendants.indexOf(task.row) > -1) {
                         updateTaskGroup();
+                        $scope.gantt.api.groups.raise.displayed($scope.taskGroup);
                         if(!$scope.$$phase && !$scope.$root.$$phase) {
                             $scope.$digest();
                         }
@@ -2625,7 +2699,15 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             }
         });
 
-        var removeWatch = $scope.pluginScope.$watch('display', updateTaskGroup);
+        $scope.gantt.api.groups.on.add($scope, function(groups) {
+            console.log('Add: ', groups);
+        });
+
+
+        var removeWatch = $scope.pluginScope.$watch('display', function(){
+            updateTaskGroup();
+            $scope.gantt.api.groups.raise.displayed([$scope.taskGroup]);
+        });
 
         $scope.$watchCollection('gantt.rowsManager.filteredRows', updateTaskGroup);
 
@@ -2648,7 +2730,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 (function() {
     'use strict';
 
-    angular.module('gantt').factory('GanttTaskGroup', ['ganttUtils', 'GanttTask', function(utils, Task) {
+    angular.module('gantt').factory('GanttTaskGroup', ['ganttUtils', 'GanttTask', '$timeout', function(utils, Task, $timeout) {
         var TaskGroup = function(row, pluginScope) {
             var self = this;
 
@@ -2737,6 +2819,26 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 self.width = row.rowsManager.gantt.getPositionByDate(self.to) - self.left;
             }
         };
+
+        TaskGroup.prototype.createModel = function() {
+            this.model = this.row.model;
+            this.model.from = this.row.from;
+            this.model.to = this.row.to;
+            this.getContentElement();
+        };
+
+        TaskGroup.prototype.getContentElement = function() {
+            if (this.row.$element) {
+                this.$rowElement = this.row.$element
+                var contentElement = this.row.$element[0].querySelector('.gantt-task-group');
+                if (contentElement) {
+                    this.$element = [contentElement];
+                }
+            }
+
+            return angular.element(this.$element);
+        };
+
         return TaskGroup;
     }]);
 }());
@@ -3547,7 +3649,6 @@ angular.module('gantt.groups.templates', []).run(['$templateCache', function($te
         '        <gantt-task ng-repeat="task in taskGroup.promotedTasks"></gantt-task>\n' +
         '    </div>\n' +
         '    <div class="gantt-task-group"\n' +
-        '         ng-if="taskGroup.showGrouping"\n' +
         '         ng-style="{\'left\': taskGroup.left + \'px\', \'width\': taskGroup.width + \'px\'}">\n' +
         '        <div class="gantt-task-group-left-main"></div>\n' +
         '        <div class="gantt-task-group-right-main"></div>\n' +
