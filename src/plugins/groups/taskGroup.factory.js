@@ -91,11 +91,26 @@
             }
         };
 
+        var isIn = function(groups, taskGr) {
+            return groups.some(function(taskGroup) {
+                if (taskGroup.model.id === taskGr.model.id ||
+                    taskGroup.model.name === taskGr.model.name) {
+                    return true;
+                }
+
+                return false;
+            });
+        };
+
         TaskGroup.prototype.createModel = function() {
             this.model = this.row.model;
             this.model.from = this.row.from;
             this.model.to = this.row.to;
             this.getContentElement();
+            console.log('called', this.row);
+            if (!isIn(this.row.groups, this)) {
+                this.row.groups.push(this);
+            }
         };
 
         TaskGroup.prototype.getContentElement = function() {
