@@ -18,7 +18,7 @@
     </div>
 </div>
 <ol ui-tree-nodes ng-class="{hidden: collapsed}" ng-model="childrenRows">
-    <li ng-repeat="row in childrenRows" ui-tree-node>
+    <li ng-repeat="row in childrenRows" ui-tree-node data-collapsed="$parent.toCollapse(row)">
         <div ng-include="'plugins/tree/treeBodyChildren.tmpl.html'"></div>
     </li>
 </ol>

@@ -12,7 +12,8 @@
                 header: '=?',
                 content: '=?',
                 headerContent: '=?',
-                keepAncestorOnFilterRow: '=?'
+                keepAncestorOnFilterRow: '=?',
+                preCollapsedRows: '=?'
             },
             link: function(scope, element, attrs, ganttCtrl) {
                 var api = ganttCtrl.gantt.api;
@@ -38,6 +39,10 @@
 
                 if (scope.keepAncestorOnFilterRow === undefined) {
                     scope.keepAncestorOnFilterRow = false;
+                }
+
+                if (scope.preCollapsedRows === undefined) {
+                    scope.preCollapsedRows = [];
                 }
 
                 api.directives.on.new(scope, function(directiveName, sideContentScope, sideContentElement) {

@@ -75,6 +75,12 @@ Take care to define a non-recursive hierarchy model, and check that a row is att
 
     default: `false`
 
+  #### collapsed-rows
+
+    Pre-collapse rows.
+
+    Type: `array`
+
 ## API
 
 ### Methods

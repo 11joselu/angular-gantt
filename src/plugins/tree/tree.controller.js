@@ -1,10 +1,20 @@
 (function() {
     'use strict';
-    angular.module('gantt.tree').controller('GanttTreeController', ['$scope', '$filter', 'GanttHierarchy', function($scope, $filter, Hierarchy) {
+    angular.module('gantt.tree').controller('GanttTreeController', ['$scope', '$filter', 'GanttHierarchy', 'ganttArrays', function($scope, $filter, Hierarchy, arrays) {
         $scope.rootRows = [];
 
         $scope.getHeader = function() {
             return $scope.pluginScope.header;
+        };
+
+        $scope.toCollapse = function(row) {
+
+            if (!angular.isDefined(row.model.children)) {
+
+                return false;
+            }
+
+            return arrays.isInArray($scope.pluginScope.preCollapsedRows, row.model.id)
         };
 
         var hierarchy = new Hierarchy();
