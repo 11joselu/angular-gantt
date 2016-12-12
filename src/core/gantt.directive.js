@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-    angular.module('gantt', ['gantt.templates', 'angularMoment'])
+    angular.module('gantt', ['gantt.templates', 'angularMoment', 'vs-repeat'])
         .directive('gantt', ['Gantt', 'ganttEnableNgAnimate', '$timeout', '$templateCache', function(Gantt, enableNgAnimate, $timeout, $templateCache) {
         return {
             restrict: 'A',

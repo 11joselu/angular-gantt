@@ -11,11 +11,14 @@
     <gantt-scrollable-header>
         <gantt-header gantt-element-height-listener="$parent.ganttHeaderHeight">
             <gantt-header-columns>
-                <div ng-repeat="header in gantt.columnsManager.visibleHeaders track by $index">
-                    <div class="gantt-header-row" ng-class="{'gantt-header-row-last': $last, 'gantt-header-row-first': $first}">
-                        <gantt-column-header ng-repeat="column in header"></gantt-column-header>
+                <div vs-repeat>   
+                    <div ng-repeat="header in gantt.columnsManager.visibleHeaders track by $index">
+                        <div class="gantt-header-row" ng-class="{'gantt-header-row-last': $last, 'gantt-header-row-first': $first}">
+                            <gantt-column-header ng-repeat="column in header"></gantt-column-header>
+                        </div>
                     </div>
                 </div>
+                
             </gantt-header-columns>
         </gantt-header>
     </gantt-scrollable-header>
