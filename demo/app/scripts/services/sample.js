@@ -36,7 +36,7 @@ angular.module('angularGanttDemoApp')
                         'tasks': [{
                             'name': 'Project Management',
                             'id': 5072,
-                            'progress': 0,
+                            'progress': 20,
                             'from': '2016-12-04T23:00:00.000Z',
                             'to': '2017-03-09T23:00:00.000Z',
                             'base': {
@@ -89,7 +89,7 @@ angular.module('angularGanttDemoApp')
                         'data': {
                             'isControlAccount': false,
                             'workPackage': true,
-                            'progress': 0,
+                            'progress': 50,
                             'canDelete': false,
                             'plan': {
                             'from': '2016-12-04T23:00:00.000Z',
@@ -209,7 +209,7 @@ angular.module('angularGanttDemoApp')
                         'tasks': [{
                             'name': 'Analysis & Consulting',
                             'id': 5074,
-                            'progress': 0,
+                            'progress': 50,
                             'from': '2016-12-05T23:00:00.000Z',
                             'to': '2017-01-05T23:00:00.000Z',
                             'base': {

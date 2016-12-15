@@ -44,13 +44,24 @@
                     ng-class-odd="'gantt-row-odd'"
                     ng-class-even="'gantt-row-even'">
                     
-                    <gantt-task-group-component class="gantt-task-group" ng-if="row.model.children"></gantt-task-group-component>
+                    <gantt-task-group-component 
+                        class="gantt-task-group" 
+                        ng-if="row.model.children">
+                    </gantt-task-group-component>
 
                     <gantt-task-component
                         ng-repeat="task in row.visibleTasks track by task.model.id" 
                         task="task"
                         class="gantt-task">
+                        <gantt-task-progress-component></gantt-task-progress-component>
+                        <gantt-task-milestones-component></gantt-task-milestones-component>
                     </gantt-task-component>
+
+                    <gantt-task-line-component
+                        ng-repeat="task in row.visibleTasks track by task.model.id" 
+                        ng-if="!row.model.children"
+                        task="task">
+                    </gantt-task-line-component>
 
                 </gantt-row-component>
 
@@ -180,4 +191,20 @@
             </div>
         </div>
     </script>
+
+
+    <script type="text/ng-template" id="template/ganttTaskMilestoneItem.tmpl.html">
+        <div class="task-milestones-container" tooltip-template="'template/milestoneTooltip.tmpl.html'" 
+            tooltip-placement="top-right">
+            <span class="gantt-task-milestone-item milestone-item-top"></span>
+            <span class="gantt-task-milestone-item milestone-item-bottom"></span>
+        </div>
+    </script>
+
+
+    <script type="text/ng-template" id="template/milestoneTooltip.tmpl.html">
+        <p>{{::$ctrl.item.name}}</p>
+        <span>{{::$ctrl.getDate()}}</span>
+    </script>
+
 </div>

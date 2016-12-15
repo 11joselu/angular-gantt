@@ -5,6 +5,7 @@
             bindings: {
                 task: '='
             },
+            transclude: true,
             controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
             function ControllerFn($scope, $element, $attrs, GanttComponentService) {
                 var self = this;
@@ -55,6 +56,7 @@
                         '<gantt-task-background-component class="gantt-task-background"></gantt-task-background-component>',
                         '<gantt-task-foreground-component class="gantt-task-foreground"></gantt-task-foreground-component>',
                         '<gantt-task-content-component class="gantt-task-content"></gantt-task-content-component>',
+                        '<ng-transclude></ng-transclude>'
                       ].join('')
         
         });

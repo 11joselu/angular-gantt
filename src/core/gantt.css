@@ -410,3 +410,46 @@
 .gantt-task-overview .gantt-task-content {
     display: none;
 }
+
+.gantt-task-base-line {
+    height: 20%;
+    bottom: 5px;
+    background: #979797;
+    position: absolute;
+    min-width: 0.6em;
+}
+
+.gantt-task-progress {
+    position: absolute;
+    overflow: hidden;
+    bottom: 0px;
+    height: 6px;
+    border-radius: 2px;
+}
+
+.gantt-task-milestones {
+    height: 20%;
+    bottom: 5px;
+    position: absolute;
+}
+
+.gantt-task-milestone-item {
+    width: 1em;
+    height: 1em;
+    position: relative;
+    display: block;
+    border: 7px solid transparent;
+    top: -4px;
+}
+
+.gantt-task-milestone-item.milestone-item-top {
+    border-bottom: 7px solid #5FA2DD;
+}
+.gantt-task-milestone-item.milestone-item-bottom {
+    border-top: 7px solid #5FA2DD;
+}
+
+.task-milestones-container {
+    position: relative;
+    top: -10px;
+}
