@@ -13,6 +13,8 @@
             this.customFilteredRows = [];
             this.visibleRows = [];
             this.rowsTaskWatchers = [];
+            this._indexMap = {};
+
 
             this._defaultFilterImpl = function(sortedRows, filterRow, filterRowComparator) {
                 return $filter('filter')(sortedRows, filterRow, filterRowComparator);
@@ -77,12 +79,20 @@
 
             this.gantt.api.registerEvent('tasks', 'displayed');
 
+            this.gantt.api.registerEvent('groups', 'add');
+            this.gantt.api.registerEvent('groups', 'change');
+            this.gantt.api.registerEvent('groups', 'displayed');
+            this.gantt.api.registerEvent('groups', 'viewChange');
+            this.gantt.api.registerEvent('groups', 'revalidate');
+
             this.gantt.api.registerEvent('rows', 'add');
             this.gantt.api.registerEvent('rows', 'change');
             this.gantt.api.registerEvent('rows', 'remove');
             this.gantt.api.registerEvent('rows', 'move');
 
             this.gantt.api.registerEvent('rows', 'displayed');
+            this.gantt.api.registerEvent('rows', 'refresh');
+
 
             this.gantt.api.registerEvent('rows', 'filter');
 
@@ -97,7 +107,7 @@
             this.visibleRows = [];
         };
 
-        RowsManager.prototype.addRow = function(rowModel, modelOrderChanged) {
+        RowsManager.prototype.addRow = function(rowModel, modelOrderChanged, rowIndex) {
             // Copy to new row (add) or merge with existing (update)
             var row, i, l, isUpdate = false;
 
@@ -114,6 +124,13 @@
                     this.visibleRows.push(row);
                 }
 
+                row.rowIndex = rowIndex;
+                this._indexMap[rowModel.id] = rowIndex;
+
+                if (rowModel.groups !== undefined && rowModel.groups.length > 0) {
+                    row.addGroupTask(rowModel);
+                }
+
                 if (row.model === rowModel) {
                     return;
                 }
@@ -127,13 +144,20 @@
                 row.model = rowModel;
                 isUpdate = true;
             } else {
-                row = new Row(this, rowModel);
+                row = new Row(this, rowModel, rowIndex);
                 this.rowsMap[rowModel.id] = row;
                 this.rows.push(row);
                 this.sortedRows.push(row);
                 this.filteredRows.push(row);
                 this.customFilteredRows.push(row);
                 this.visibleRows.push(row);
+
+                if (row.model.data._indexMap) {
+                    this._indexMap = row.model.data._indexMap;
+                    delete row.model.data._indexMap;
+                } else {
+                    this._indexMap[rowModel.id] = rowIndex;
+                }
             }
 
             if (rowModel.tasks !== undefined && rowModel.tasks.length > 0) {
@@ -376,7 +400,7 @@
             var tasks = [];
             var visibleTasks = [];
 
-            for (var i = 0; i < this.rows.length; i++) {
+            for (var i = 0, len = this.rows.length; i < len; i++) {
                 var row = this.rows[i];
                 oldFilteredTasks = oldFilteredTasks.concat(row.filteredTasks);
                 row.updateVisibleTasks();

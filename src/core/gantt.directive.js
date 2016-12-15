@@ -1,6 +1,6 @@
 (function(){
     'use strict';
-    angular.module('gantt', ['gantt.templates', 'angularMoment', 'vs-repeat'])
+    angular.module('gantt', ['gantt.templates', 'angularMoment'])
         .directive('gantt', ['Gantt', 'ganttEnableNgAnimate', '$timeout', '$templateCache', function(Gantt, enableNgAnimate, $timeout, $templateCache) {
         return {
             restrict: 'A',
@@ -77,6 +77,13 @@
                 });
             }
         };
-    }]);
+    }])
+    .directive('logger', function() {
+        return {
+            restrict: 'A',
+            controller: ['$scope', function($scope) {
+                console.log($scope);
+            }]
+        };
+    });
 }());
-

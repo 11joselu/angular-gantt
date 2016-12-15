@@ -47,6 +47,7 @@
                 this.api.registerEvent('data', 'load');
                 this.api.registerEvent('data', 'remove');
                 this.api.registerEvent('data', 'clear');
+                this.api.registerEvent('data', 'updateIndex');
 
                 this.api.registerMethod('core', 'getDateByPosition', this.getDateByPosition, this);
                 this.api.registerMethod('core', 'getPositionByDate', this.getPositionByDate, this);
@@ -201,10 +202,14 @@
                             self.rowsManager.resetNonModelLists();
                         }
 
+                        self.rowsManager._indexMap = {};
+
                         for (var j = 0, k = newData.length; j < k; j++) {
                             var rowData = newData[j];
-                            self.rowsManager.addRow(rowData, modelOrderChanged);
+                            self.rowsManager.addRow(rowData, modelOrderChanged, j);
                         }
+
+                        self.api.data.raise.updateIndex(self.rowsManager._indexMap, self.rowsManager.rowsMap);
 
                         self.api.data.raise.change(newData, oldData);
 

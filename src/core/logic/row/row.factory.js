@@ -1,7 +1,7 @@
 (function(){
     'use strict';
     angular.module('gantt').factory('GanttRow', ['GanttTask', 'moment', '$filter', function(Task, moment, $filter) {
-        var Row = function(rowsManager, model) {
+        var Row = function(rowsManager, model, indexRow) {
             this.rowsManager = rowsManager;
             this.model = model;
 
@@ -12,6 +12,7 @@
             this.tasks = [];
             this.filteredTasks = [];
             this.visibleTasks = [];
+            this.rowIndex = indexRow;
         };
 
         Row.prototype.addTaskImpl = function(task, viewOnly) {
@@ -111,6 +112,24 @@
             }
         };
 
+        Row.prototype.addClasses = function() {
+            if (this.$element !== undefined) {
+                var classes = this.model.classes;
+
+                if (angular.isArray(classes)) {
+                    classes = classes.join(' ');
+                }
+
+                this.$element.addClass(classes);
+            }
+        };
+
+        Row.prototype.updateHeight = function() {
+            if (this.model.height && this.$element) {
+                this.$element.css({height: this.model.height});
+            }
+        };
+
         // Remove the specified task from the row
         Row.prototype.removeTask = function(taskId, viewOnly, silent) {
             if (taskId in this.tasksMap) {
@@ -207,6 +226,16 @@
                 }
             }
 
+            if (this.isDaily()) {
+
+                if (this.from && this.to) {
+                    this.from = this.from.startOf('day');
+                    this.to = this.to.endOf('day');
+                }
+
+            }
+
+
         };
 
         Row.prototype.sortTasks = function() {
@@ -222,6 +251,12 @@
             }
             return clone;
         };
+
+        Row.prototype.isDaily = function() {
+
+            return this.rowsManager.gantt.options.value('daily');
+        };
+
 
         return Row;
     }]);

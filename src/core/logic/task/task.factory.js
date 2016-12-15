@@ -108,6 +108,18 @@
             }
         };
 
+        Task.prototype.addClasses = function() {
+            if (this.$element !== undefined) {
+                var classes = this.model.classes;
+                
+                if (angular.isArray(classes)) {
+                    classes = classes.join(' ');
+                }
+
+                this.$element.addClass(classes);
+            }
+        };
+
         Task.prototype.getBackgroundElement = function() {
             if (this.$element !== undefined) {
                 var backgroundElement = this.$element[0].querySelector('.gantt-task-background');

@@ -8,6 +8,7 @@
                     require: '^gantt',
                     scope: {
                         enabled: '=?',
+                        hierarchy: '=?',
                         readOnly: '=?',
                         jsPlumbDefaults: '=?',
                         endpoints: '=?',
@@ -30,6 +31,10 @@
 
                         if (scope.readOnly === undefined) {
                             scope.readOnly = false;
+                        }
+
+                        if (scope.hierarchy === undefined) {
+                            scope.hierarchy = true;
                         }
 
                         if (scope.jsPlumbDefaults === undefined) {
@@ -126,13 +131,15 @@
                                     allTasks.push.apply(allTasks, rows[i].tasks);
                                 }
                                 if (scope.conflictChecker && scope.enabled) {
-                                    checker.refresh(allTasks);
+                                    var tasksChecker = checker.refresh(allTasks);
+                                    api.dependencies.raise.checked(tasksChecker);
                                 } else {
                                     checker.clear(allTasks);
                                 }
 
                             }
                         });
+
 
                         api.directives.on.new(scope, function(directiveName, directiveScope, directiveElement) {
                             if (directiveName === 'ganttBody') {
@@ -173,18 +180,53 @@
                             manager.setTask(task);
                             if (scope.conflictChecker && scope.enabled) {
                                 checker.refresh([task]);
+                                var tasksChecker = checker.refresh([task]);
+                                api.dependencies.raise.checked(tasksChecker);
                             }
                         });
 
                         api.dependencies.on.add(scope, function(dependency) {
+                            if (scope.hierarchy) {
+                                var hasRemoved = manager.denyDropIntoChild(dependency, api);
+
+                                if (hasRemoved) {
+                                  // emit remove Event History
+                                  api.dependencies.raise.onChild(dependency);
+                                }
+                            }
+
                             if (scope.conflictChecker && scope.enabled) {
-                                checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
+                                var taskChecker = checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
+                                if (taskChecker) {
+                                    api.dependencies.raise.checked(taskChecker);
+                                }
+                            }
+                        });
+
+                        api.groups.on.displayed(scope, function(groups) {
+                            manager.setGroups(groups);
+                        });
+
+                        api.groups.on.viewChange(scope, function(group) {
+                            if (group.$element) {
+                                manager.plumb.revalidate(group.$element[0]);
+                            }
+                        });
+
+                        api.groups.on.change(scope, function(group) {
+                            manager.removeGroup(group);
+                        });
+
+                        api.dependencies.on.checker(scope, function() {
+                            if (scope.enabled) {
+                                api.dependencies.raise.checked(manager.getDependencies());
                             }
                         });
 
                         api.dependencies.on.change(scope, function(dependency) {
                             if (scope.conflictChecker && scope.enabled) {
-                                checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
+                                var tasksChecker = checker.refresh([dependency.getFromTask(), dependency.getToTask()]);
+                                api.dependencies.raise.checked(tasksChecker );
                             }
                         });
 

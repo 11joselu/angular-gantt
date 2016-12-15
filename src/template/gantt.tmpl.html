@@ -1,49 +1,62 @@
 <div class="gantt unselectable" ng-cloak gantt-scroll-manager gantt-element-width-listener="ganttElementWidth">
+    
     <gantt-side>
         <gantt-side-background>
         </gantt-side-background>
-        <gantt-side-content>
-        </gantt-side-content>
+        <gantt-side-content></gantt-side-content>
         <div gantt-resizer="gantt.side.$element" gantt-resizer-event-topic="side" gantt-resizer-enabled="{{$parent.gantt.options.value('allowSideResizing')}}" resizer-width="sideWidth" class="gantt-resizer">
             <div ng-show="$parent.gantt.options.value('allowSideResizing')" class="gantt-resizer-display"></div>
         </div>
     </gantt-side>
+    
     <gantt-scrollable-header>
         <gantt-header gantt-element-height-listener="$parent.ganttHeaderHeight">
             <gantt-header-columns>
-                <div vs-repeat>   
-                    <div ng-repeat="header in gantt.columnsManager.visibleHeaders track by $index">
-                        <div class="gantt-header-row" ng-class="{'gantt-header-row-last': $last, 'gantt-header-row-first': $first}">
-                            <gantt-column-header ng-repeat="column in header"></gantt-column-header>
-                        </div>
+                <div ng-repeat="header in gantt.columnsManager.visibleHeaders track by $index">
+                    <div class="gantt-header-row" ng-class="{'gantt-header-row-last': $last, 'gantt-header-row-first': $first}">
+                        <gantt-column-header ng-repeat="column in header"></gantt-column-header>
                     </div>
                 </div>
-                
             </gantt-header-columns>
         </gantt-header>
     </gantt-scrollable-header>
+
     <gantt-scrollable>
+
         <gantt-body>
-            <gantt-body-background>
-                <gantt-row-background ng-repeat="row in gantt.rowsManager.visibleRows track by row.model.id"></gantt-row-background>
-            </gantt-body-background>
             <gantt-body-foreground>
-                <div class="gantt-current-date-line" ng-show="currentDate === 'line' && gantt.currentDateManager.position >= 0 && gantt.currentDateManager.position <= gantt.width" ng-style="{'left': gantt.currentDateManager.position + 'px' }"></div>
+                <div class="gantt-current-date-line" ng-if="currentDate === 'line' && gantt.currentDateManager.position >= 0 && gantt.currentDateManager.position <= gantt.width" ng-style="{'left': gantt.currentDateManager.position + 'px' }"></div>
             </gantt-body-foreground>
+
             <gantt-body-columns>
                 <gantt-column ng-repeat="column in gantt.columnsManager.visibleColumns">
                     <gantt-time-frame ng-repeat="timeFrame in column.visibleTimeFrames"></gantt-time-frame>
                 </gantt-column>
             </gantt-body-columns>
+            
             <div ng-if="gantt.columnsManager.visibleColumns == 0" style="background-color: #808080"></div>
+            
             <gantt-body-rows>
-                <gantt-timespan ng-repeat="timespan in gantt.timespansManager.timespans track by timespan.model.id"></gantt-timespan>
-                <gantt-row ng-repeat="row in gantt.rowsManager.visibleRows track by row.model.id">
-                    <gantt-task ng-repeat="task in row.visibleTasks track by task.model.id">
-                    </gantt-task>
-                </gantt-row>
+                <gantt-row-component class="gantt-row gantt-row-height gantt-block" 
+                    ng-repeat="row in gantt.rowsManager.visibleRows"
+                    row="row"
+                    gantt-instance="gantt"
+                    ng-class-odd="'gantt-row-odd'"
+                    ng-class-even="'gantt-row-even'">
+                    
+                    <gantt-task-group-component class="gantt-task-group" ng-if="row.model.children"></gantt-task-group-component>
+
+                    <gantt-task-component
+                        ng-repeat="task in row.visibleTasks track by task.model.id" 
+                        task="task"
+                        class="gantt-task">
+                    </gantt-task-component>
+
+                </gantt-row-component>
+
             </gantt-body-rows>
         </gantt-body>
+
     </gantt-scrollable>
 
     <!-- Plugins -->
@@ -63,7 +76,7 @@
     <!-- Header template -->
     <script type="text/ng-template" id="template/ganttHeader.tmpl.html">
         <div ng-transclude class="gantt-header"
-             ng-show="gantt.columnsManager.columns.length > 0 && gantt.columnsManager.headers.length > 0"></div>
+             ng-show="$parent.gantt.columnsManager.columns.length > 0 && $parent.gantt.columnsManager.headers.length > 0"></div>
     </script>
 
     <!-- Side template -->
@@ -130,31 +143,6 @@
         </div>
     </script>
 
-    <!-- Task template -->
-    <script type="text/ng-template" id="template/ganttTask.tmpl.html">
-        <div class="gantt-task" ng-class="task.model.classes">
-            <gantt-task-background></gantt-task-background>
-            <gantt-task-foreground></gantt-task-foreground>
-            <gantt-task-content></gantt-task-content>
-        </div>
-    </script>
-
-    <script type="text/ng-template" id="template/ganttTaskBackground.tmpl.html">
-        <div class="gantt-task-background" ng-style="{'background-color': task.model.color}"></div>
-    </script>
-
-    <script type="text/ng-template" id="template/ganttTaskForeground.tmpl.html">
-        <div class="gantt-task-foreground">
-            <div ng-if="task.truncatedRight" class="gantt-task-truncated-right">&gt;</div>
-            <div ng-if="task.truncatedLeft" class="gantt-task-truncated-left">&lt;</div>
-        </div>
-    </script>
-
-    <!-- Task content template -->
-    <script type="text/ng-template" id="template/ganttTaskContent.tmpl.html">
-        <div class="gantt-task-content" unselectable="on"><span unselectable="on" gantt-bind-compile-html="getTaskContent()"/></div>
-    </script>
-
 
     <!-- Row background template -->
     <script type="text/ng-template" id="template/ganttRowBackground.tmpl.html">
@@ -169,16 +157,6 @@
         </div>
     </script>
 
-    <!-- Row template -->
-    <script type="text/ng-template" id="template/ganttRow.tmpl.html">
-        <div class="gantt-row gantt-row-height"
-             ng-class="row.model.classes"
-             ng-class-odd="'gantt-row-odd'"
-             ng-class-even="'gantt-row-even'"
-             ng-style="{'height': row.model.height}">
-            <div ng-transclude class="gantt-row-content"></div>
-        </div>
-    </script>
 
     <!-- Side background template -->
     <script type="text/ng-template" id="template/ganttSideBackground.tmpl.html">
@@ -189,13 +167,13 @@
             <div class="gantt-side-background-body" ng-style="getMaxHeightCss()">
                 <div gantt-vertical-scroll-receiver>
                     <div class="gantt-row gantt-row-height "
-                         ng-class-odd="'gantt-row-odd'"
-                         ng-class-even="'gantt-row-even'"
-                         ng-class="row.model.classes"
-                         ng-repeat="row in gantt.rowsManager.visibleRows track by row.model.id"
-                         ng-style="{'height': row.model.height}">
+                        ng-class-odd="'gantt-row-odd'"
+                        ng-class-even="'gantt-row-even'"
+                        ng-class="row.model.classes" ganttSideBackground
+                        ng-repeat="row in gantt.rowsManager.visibleRows"
+                        ng-style="{'height': row.model.height}">
                         <div gantt-row-label class="gantt-row-label gantt-row-background"
-                             ng-style="{'background-color': row.model.color}">
+                            ng-style="{'background-color': row.model.color}">
                         </div>
                     </div>
                 </div>

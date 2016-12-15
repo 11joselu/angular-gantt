@@ -13,6 +13,9 @@
             this.api.registerEvent('dependencies', 'add');
             this.api.registerEvent('dependencies', 'change');
             this.api.registerEvent('dependencies', 'remove');
+            this.api.registerEvent('dependencies', 'checker');
+            this.api.registerEvent('dependencies', 'checked');
+            this.api.registerEvent('dependencies', 'onChild');
 
             this.plumb = jsPlumb.getInstance();
             this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
@@ -208,12 +211,16 @@
                 if (connection) {
                     self.draggingConnection = connection;
                     angular.forEach(self.tasks, function(task) {
-                        task.dependencies.mouseHandler.release();
+                        if (!task.row.model.data.readOnly) {
+                            task.dependencies.mouseHandler.release();
+                        }
                     });
                 } else {
                     self.draggingConnection = undefined;
                     angular.forEach(self.tasks, function(task) {
-                        task.dependencies.mouseHandler.install();
+                        if (!task.row.model.data.readOnly) {
+                            task.dependencies.mouseHandler.install();
+                        }
                     });
                 }
             };
@@ -265,7 +272,7 @@
                     task.dependencies = {};
                 }
 
-                if (!self.pluginScope.readOnly) {
+                if (!self.pluginScope.readOnly && !task.row.model.data.readOnly) {
                     task.dependencies.mouseHandler = new TaskMouseHandler(self, task);
                     task.dependencies.mouseHandler.install();
                 }
@@ -425,6 +432,18 @@
                 return allDependencies;
             };
 
+            this.getToTaskDependencies = function(task) {
+                var dependencies = [];
+                if (task) {
+                  var toDependencies = self.dependenciesTo[task.model.id];
+                  if (toDependencies) {
+                    dependencies = dependencies.concat(toDependencies);
+                  }
+                }
+
+                return dependencies;
+            };
+
             /**
              * Refresh jsplumb status based on tasks dependencies models.
              */
@@ -465,6 +484,27 @@
                 }
             };
 
+
+              this.denyDrop = function(dependency) {
+                return ganttUtils.denyDrop(dependency);
+              };
+
+              this.denyDropIntoChild = function(dependency, api) {
+                return ganttUtils.denyDropIntoChild(dependency, api);
+              };
+
+              this.getRowDependency = function() {
+
+                if (arguments[0]) {
+
+                  return self.getTaskDependencies(arguments[0]);
+                }
+
+                return []
+              };
+
+            this.api.registerMethod('dependencies', 'refresh', this.refresh, this);
+            this.api.registerMethod('dependencies', 'getRowDependency', this.getRowDependency, this);
             this.api.registerMethod('dependencies', 'refresh', this.refresh, this);
         };
         return DependenciesManager;

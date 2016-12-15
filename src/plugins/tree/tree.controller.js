@@ -142,7 +142,7 @@
 
         var expandRow = function(rowId) {
             var row;
-            if (typeof rowId === 'string') {
+            if (typeof rowId === 'string' || typeof  rowId === 'number') {
                 row = $scope.gantt.rowsManager.rowsMap[rowId];
             } else {
                 row = rowId;
@@ -159,7 +159,7 @@
 
         var collapseRow = function(rowId) {
             var row;
-            if (typeof rowId === 'string') {
+            if (typeof rowId === 'string' || typeof  rowId === 'number') {
                 row = $scope.gantt.rowsManager.rowsMap[rowId];
             } else {
                 row = rowId;
@@ -219,6 +219,15 @@
         $scope.gantt.api.registerMethod('tree', 'collapseAll', collapseAll, $scope);
         $scope.gantt.api.registerMethod('tree', 'expandAll', expandAll, $scope);
     }]).controller('GanttTreeNodeController', ['$scope', function($scope) {
+        delete $scope.row._parentRow;
+
+        if ($scope.$parentNodeScope) {
+
+            if ($scope.$parentNodeScope.row.model.id !== $scope.row.model.id) {
+                $scope.row._parentRow = $scope.$parentNodeScope.row;
+            }
+        }
+
         $scope.$parent.nodeScopes[$scope.row.model.id] = $scope;
         $scope.$on('$destroy', function() {
             delete $scope.$parent.nodeScopes[$scope.row.model.id];
@@ -248,6 +257,23 @@
             return !$scope.$parent.childrenRows || $scope.$parent.childrenRows.length === 0;
         };
 
+
+        $scope.isMilestone = function() {
+          if ($scope.row.model.tasks) {
+            return (angular.isDefined($scope.row.model.tasks[0].isMilestone) && $scope.row.model.tasks[0].isMilestone) || (angular.isDefined($scope.row.model.data.isMilestonesGantt) && $scope.row.model.data.isMilestonesGantt);
+          }
+
+          return false;
+        };
+
+        $scope.isControlAccount = function() {
+          return $scope.row.model.data.isControlAccount;
+        };
+
+        $scope.isWorkPackage = function() {
+          return $scope.row.model.data.workPackage;
+        };
+
         $scope.getValue = function() {
             return $scope.row.model.name;
         };
@@ -265,6 +291,12 @@
                 content = '{{row.model.name}}';
             }
             return content;
+        };
+
+
+        $scope.getRowIndex = function() {
+
+            return $scope.row.rowIndex;
         };
 
         $scope.$watch('collapsed', function(newValue) {

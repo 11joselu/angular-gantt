@@ -10,78 +10,509 @@
 angular.module('angularGanttDemoApp')
     .service('Sample', function Sample() {
         return {
-            getSampleData: function() {
-                return [
-                        // Order is optional. If not specified it will be assigned automatically
-                        {name: 'Milestones', height: '3em', sortable: false, drawTask: false, classes: 'gantt-row-milestone', color: '#45607D', tasks: [
-                            // Dates can be specified as string, timestamp or javascript date object. The data attribute can be used to attach a custom object
-                            {name: 'Kickoff', color: '#93C47D', from: '2013-10-07T09:00:00', to: '2013-10-07T10:00:00', data: 'Can contain any custom data or object'},
-                            {name: 'Concept approval', color: '#93C47D', from: new Date(2013, 9, 18, 18, 0, 0), to: new Date(2013, 9, 18, 18, 0, 0), est: new Date(2013, 9, 16, 7, 0, 0), lct: new Date(2013, 9, 19, 0, 0, 0)},
-                            {name: 'Development finished', color: '#93C47D', from: new Date(2013, 10, 15, 18, 0, 0), to: new Date(2013, 10, 15, 18, 0, 0)},
-                            {name: 'Shop is running', color: '#93C47D', from: new Date(2013, 10, 22, 12, 0, 0), to: new Date(2013, 10, 22, 12, 0, 0)},
-                            {name: 'Go-live', color: '#93C47D', from: new Date(2013, 10, 29, 16, 0, 0), to: new Date(2013, 10, 29, 16, 0, 0)}
-                        ], data: 'Can contain any custom data or object'},
-                        {name: 'Status meetings', tasks: [
-                            {name: 'Demo #1', color: '#9FC5F8', from: new Date(2013, 9, 25, 15, 0, 0), to: new Date(2013, 9, 25, 18, 30, 0)},
-                            {name: 'Demo #2', color: '#9FC5F8', from: new Date(2013, 10, 1, 15, 0, 0), to: new Date(2013, 10, 1, 18, 0, 0)},
-                            {name: 'Demo #3', color: '#9FC5F8', from: new Date(2013, 10, 8, 15, 0, 0), to: new Date(2013, 10, 8, 18, 0, 0)},
-                            {name: 'Demo #4', color: '#9FC5F8', from: new Date(2013, 10, 15, 15, 0, 0), to: new Date(2013, 10, 15, 18, 0, 0)},
-                            {name: 'Demo #5', color: '#9FC5F8', from: new Date(2013, 10, 24, 9, 0, 0), to: new Date(2013, 10, 24, 10, 0, 0)}
-                        ]},
-                        {name: 'Kickoff', movable: {allowResizing: false}, tasks: [
-                            {name: 'Day 1', color: '#9FC5F8', from: new Date(2013, 9, 7, 9, 0, 0), to: new Date(2013, 9, 7, 17, 0, 0),
-                                progress: {percent: 100, color: '#3C8CF8'}, movable: false},
-                            {name: 'Day 2', color: '#9FC5F8', from: new Date(2013, 9, 8, 9, 0, 0), to: new Date(2013, 9, 8, 17, 0, 0),
-                                progress: {percent: 100, color: '#3C8CF8'}},
-                            {name: 'Day 3', color: '#9FC5F8', from: new Date(2013, 9, 9, 8, 30, 0), to: new Date(2013, 9, 9, 12, 0, 0),
-                                progress: {percent: 100, color: '#3C8CF8'}}
-                        ]},
-                        {name: 'Create concept', tasks: [
-                            {name: 'Create concept', priority: 20, content: '<i class="fa fa-cog" ng-click="scope.handleTaskIconClick(task.model)"></i> {{task.model.name}}', color: '#F1C232', from: new Date(2013, 9, 10, 8, 0, 0), to: new Date(2013, 9, 16, 18, 0, 0), est: new Date(2013, 9, 8, 8, 0, 0), lct: new Date(2013, 9, 18, 20, 0, 0),
-                                progress: 100}
-                        ]},
-                        {name: 'Finalize concept', tasks: [
-                            {id: 'Finalize concept', name: 'Finalize concept', priority: 10, color: '#F1C232', from: new Date(2013, 9, 17, 8, 0, 0), to: new Date(2013, 9, 18, 18, 0, 0),
-                                progress: 100}
-                        ]},
-                        {name: 'Development', children: ['Sprint 1', 'Sprint 2', 'Sprint 3', 'Sprint 4'], content: '<i class="fa fa-file-code-o" ng-click="scope.handleRowIconClick(row.model)"></i> {{row.model.name}}'},
-                        {name: 'Sprint 1', tooltips: false, tasks: [
-                            {id: 'Product list view', name: 'Product list view', color: '#F1C232', from: new Date(2013, 9, 21, 8, 0, 0), to: new Date(2013, 9, 25, 15, 0, 0),
-                                progress: 25, dependencies: [{to: 'Order basket'}, {from: 'Finalize concept'}]}
-                        ]},
-                        {name: 'Sprint 2', tasks: [
-                            {id: 'Order basket', name: 'Order basket', color: '#F1C232', from: new Date(2013, 9, 28, 8, 0, 0), to: new Date(2013, 10, 1, 15, 0, 0),
-                                dependencies: {to: 'Checkout'}}
-                        ]},
-                        {name: 'Sprint 3', tasks: [
-                            {id: 'Checkout', name: 'Checkout', color: '#F1C232', from: new Date(2013, 10, 4, 8, 0, 0), to: new Date(2013, 10, 8, 15, 0, 0),
-                                dependencies: {to: 'Login & Signup & Admin Views'}}
-                        ]},
-                        {name: 'Sprint 4', tasks: [
-                            {id: 'Login & Signup & Admin Views', name: 'Login & Signup & Admin Views', color: '#F1C232', from: new Date(2013, 10, 11, 8, 0, 0), to: new Date(2013, 10, 15, 15, 0, 0),
-                                dependencies: [{to: 'HW'}, {to: 'SW / DNS/ Backups'}]}
-                        ]},
-                        {name: 'Hosting'},
-                        {name: 'Setup', tasks: [
-                            {id: 'HW', name: 'HW', color: '#F1C232', from: new Date(2013, 10, 18, 8, 0, 0), to: new Date(2013, 10, 18, 12, 0, 0)}
-                        ]},
-                        {name: 'Config', tasks: [
-                            {id: 'SW / DNS/ Backups', name: 'SW / DNS/ Backups', color: '#F1C232', from: new Date(2013, 10, 18, 12, 0, 0), to: new Date(2013, 10, 21, 18, 0, 0)}
-                        ]},
-                        {name: 'Server', parent: 'Hosting', children: ['Setup', 'Config']},
-                        {name: 'Deployment', parent: 'Hosting', tasks: [
-                            {name: 'Depl. & Final testing', color: '#F1C232', from: new Date(2013, 10, 21, 8, 0, 0), to: new Date(2013, 10, 22, 12, 0, 0), 'classes': 'gantt-task-deployment'}
-                        ]},
-                        {name: 'Workshop', tasks: [
-                            {name: 'On-side education', color: '#F1C232', from: new Date(2013, 10, 24, 9, 0, 0), to: new Date(2013, 10, 25, 15, 0, 0)}
-                        ]},
-                        {name: 'Content', tasks: [
-                            {name: 'Supervise content creation', color: '#F1C232', from: new Date(2013, 10, 26, 9, 0, 0), to: new Date(2013, 10, 29, 16, 0, 0)}
-                        ]},
-                        {name: 'Documentation', tasks: [
-                            {name: 'Technical/User documentation', color: '#F1C232', from: new Date(2013, 10, 26, 8, 0, 0), to: new Date(2013, 10, 28, 18, 0, 0)}
-                        ]}
-                    ];
+            getSampleData: function(one) {
+                if (one) {
+                    return [{
+                        'name': 'Project Management',
+                        'id': 5072,
+                        'data': {
+                            'isControlAccount': true,
+                            'parentCode': 5071,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': false,
+                            'budget': 0,
+                            'codeWBS': '100',
+                            'plan': {
+                            'from': '2016-12-04T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-01-10T23:00:00.000Z',
+                            'to': '2016-04-14T22:00:00.000Z'
+                            },
+                            'locked': false
+                        },
+                        'tasks': [{
+                            'name': 'Project Management',
+                            'id': 5072,
+                            'progress': 0,
+                            'from': '2016-12-04T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z',
+                            'base': {
+                            'from': '2016-12-04T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            },
+                            'milestones': [{
+                            'name': 'Project Closing',
+                            'id': 867,
+                            'data': {
+                                'plan': '2017-03-10'
+                            },
+                            'date': '2017-03-10'
+                            }, {
+                            'name': '2nt Trip to switzerland',
+                            'id': 866,
+                            'data': {
+                                'plan': '2017-03-07'
+                            },
+                            'date': '2017-03-07'
+                            }, {
+                            'name': 'Maintenance & Support Channel Set Up',
+                            'id': 865,
+                            'data': {
+                                'plan': '2017-03-03'
+                            },
+                            'date': '2017-03-03'
+                            }, {
+                            'name': '1st Trip to Switzerland',
+                            'id': 854,
+                            'data': {
+                                'plan': '2016-12-07'
+                            },
+                            'date': '2016-12-07'
+                            }, {
+                            'name': 'Project Kick Off',
+                            'id': 853,
+                            'data': {
+                                'plan': '2016-12-05'
+                            },
+                            'date': '2016-12-05'
+                            }]
+                        }]
+                        }]
+                }
+
+                return [{
+                        'name': 'TALAIA OpenPPM - Stoxx LTD',
+                        'id': 5071,
+                        'data': {
+                            'isControlAccount': false,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': false,
+                            'plan': {
+                            'from': '2016-12-04T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-01-10T23:00:00.000Z',
+                            'to': '2016-04-14T22:00:00.000Z'
+                            },
+                            'locked': false,
+                            'isProject': true
+                        },
+                        'dependencies': false,
+                        'children': [5072, 5073]
+                        }, {
+                        'name': 'Project Management',
+                        'id': 5072,
+                        'data': {
+                            'isControlAccount': true,
+                            'parentCode': 5071,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': false,
+                            'budget': 0,
+                            'codeWBS': '100',
+                            'plan': {
+                            'from': '2016-12-04T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-01-10T23:00:00.000Z',
+                            'to': '2016-04-14T22:00:00.000Z'
+                            },
+                            'locked': false
+                        },
+                        'tasks': [{
+                            'name': 'Project Management',
+                            'id': 5072,
+                            'progress': 0,
+                            'from': '2016-12-04T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z',
+                            'base': {
+                            'from': '2016-12-04T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            },
+                            'milestones': [{
+                            'name': 'Project Closing',
+                            'id': 867,
+                            'data': {
+                                'plan': '2017-03-10'
+                            },
+                            'date': '2017-03-10'
+                            }, {
+                            'name': '2nt Trip to switzerland',
+                            'id': 866,
+                            'data': {
+                                'plan': '2017-03-07'
+                            },
+                            'date': '2017-03-07'
+                            }, {
+                            'name': 'Maintenance & Support Channel Set Up',
+                            'id': 865,
+                            'data': {
+                                'plan': '2017-03-03'
+                            },
+                            'date': '2017-03-03'
+                            }, {
+                            'name': '1st Trip to Switzerland',
+                            'id': 854,
+                            'data': {
+                                'plan': '2016-12-07'
+                            },
+                            'date': '2016-12-07'
+                            }, {
+                            'name': 'Project Kick Off',
+                            'id': 853,
+                            'data': {
+                                'plan': '2016-12-05'
+                            },
+                            'date': '2016-12-05'
+                            }]
+                        }]
+                        }, {
+                        'name': 'TALAIA OpenPPM Pack 2 Services',
+                        'id': 5073,
+                        'data': {
+                            'isControlAccount': false,
+                            'parentCode': 5071,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': true,
+                            'codeWBS': '200',
+                            'locked': false
+                        },
+                        'children': [5074, 5075, 5076, 5080, 5084, 5085, 5088]
+                        }, {
+                        'name': 'Analysis & Consulting',
+                        'id': 5074,
+                        'data': {
+                            'isControlAccount': true,
+                            'parentCode': 5073,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': false,
+                            'budget': 0,
+                            'codeWBS': '210',
+                            'plan': {
+                            'from': '2016-12-05T23:00:00.000Z',
+                            'to': '2017-01-05T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-01-11T23:00:00.000Z',
+                            'to': '2016-02-11T23:00:00.000Z'
+                            },
+                            'locked': false
+                        },
+                        'tasks': [{
+                            'name': 'Analysis & Consulting',
+                            'id': 5074,
+                            'progress': 0,
+                            'from': '2016-12-05T23:00:00.000Z',
+                            'to': '2017-01-05T23:00:00.000Z',
+                            'base': {
+                            'from': '2016-12-05T23:00:00.000Z',
+                            'to': '2017-01-05T23:00:00.000Z'
+                            }
+                        }]
+                        }, {
+                        'name': 'Settings & Configuration',
+                        'id': 5075,
+                        'data': {
+                            'isControlAccount': true,
+                            'parentCode': 5073,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': false,
+                            'budget': 0,
+                            'codeWBS': '220',
+                            'plan': {
+                            'from': '2016-12-11T23:00:00.000Z',
+                            'to': '2017-03-02T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-01-17T23:00:00.000Z',
+                            'to': '2016-04-07T22:00:00.000Z'
+                            },
+                            'locked': false
+                        },
+                        'tasks': [{
+                            'name': 'Settings & Configuration',
+                            'id': 5075,
+                            'progress': 0,
+                            'from': '2016-12-11T23:00:00.000Z',
+                            'to': '2017-03-02T23:00:00.000Z',
+                            'base': {
+                            'from': '2016-12-11T23:00:00.000Z',
+                            'to': '2017-03-02T23:00:00.000Z'
+                            },
+                            'milestones': [{
+                            'name': 'Administration Module Configuration Completed',
+                            'id': 864,
+                            'data': {
+                                'plan': '2017-03-03'
+                            },
+                            'date': '2017-03-03'
+                            }, {
+                            'name': 'OPA Configuration Completed',
+                            'id': 860,
+                            'data': {
+                                'plan': '2017-02-08'
+                            },
+                            'date': '2017-02-08'
+                            }]
+                        }]
+                        }, {
+                        'name': 'Personalization & Adaptation',
+                        'id': 5076,
+                        'data': {
+                            'isControlAccount': true,
+                            'parentCode': 5073,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': false,
+                            'budget': 0,
+                            'codeWBS': '230',
+                            'plan': {
+                            'from': '2017-01-04T23:00:00.000Z',
+                            'to': '2017-02-02T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-02-10T23:00:00.000Z',
+                            'to': '2016-03-10T23:00:00.000Z'
+                            },
+                            'locked': false
+                        },
+                        'tasks': [{
+                            'name': 'Personalization & Adaptation',
+                            'id': 5076,
+                            'progress': 0,
+                            'from': '2017-01-04T23:00:00.000Z',
+                            'to': '2017-02-02T23:00:00.000Z',
+                            'base': {
+                            'from': '2017-01-04T23:00:00.000Z',
+                            'to': '2017-02-02T23:00:00.000Z'
+                            },
+                            'milestones': [{
+                            'name': 'Personalization Implemented',
+                            'id': 859,
+                            'data': {
+                                'plan': '2017-01-30'
+                            },
+                            'date': '2017-01-30'
+                            }, {
+                            'name': 'Personalizaton Validated',
+                            'id': 856,
+                            'data': {
+                                'plan': '2017-01-23'
+                            },
+                            'date': '2017-01-23'
+                            }, {
+                            'name': 'Personalization List Validated',
+                            'id': 855,
+                            'data': {
+                                'plan': '2017-01-16'
+                            },
+                            'date': '2017-01-16'
+                            }]
+                        }]
+                        }, {
+                        'name': 'Data Project Loads',
+                        'id': 5080,
+                        'data': {
+                            'isControlAccount': true,
+                            'parentCode': 5073,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': false,
+                            'budget': 0,
+                            'codeWBS': '240',
+                            'plan': {
+                            'from': '2017-02-05T23:00:00.000Z',
+                            'to': '2017-03-05T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-03-13T23:00:00.000Z',
+                            'to': '2016-04-10T22:00:00.000Z'
+                            },
+                            'locked': false
+                        },
+                        'tasks': [{
+                            'name': 'Data Project Loads',
+                            'id': 5080,
+                            'progress': 0,
+                            'from': '2017-02-05T23:00:00.000Z',
+                            'to': '2017-03-05T23:00:00.000Z',
+                            'base': {
+                            'from': '2017-02-05T23:00:00.000Z',
+                            'to': '2017-03-05T23:00:00.000Z'
+                            }
+                        }]
+                        }, {
+                        'name': 'Technical Infrastructure Deployment',
+                        'id': 5084,
+                        'data': {
+                            'isControlAccount': true,
+                            'parentCode': 5073,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': false,
+                            'budget': 0,
+                            'codeWBS': '250',
+                            'plan': {
+                            'from': '2017-01-22T23:00:00.000Z',
+                            'to': '2017-02-22T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-02-28T23:00:00.000Z',
+                            'to': '2016-03-30T22:00:00.000Z'
+                            },
+                            'locked': false
+                        },
+                        'tasks': [{
+                            'name': 'Technical Infrastructure Deployment',
+                            'id': 5084,
+                            'progress': 0,
+                            'from': '2017-01-22T23:00:00.000Z',
+                            'to': '2017-02-22T23:00:00.000Z',
+                            'base': {
+                            'from': '2017-01-22T23:00:00.000Z',
+                            'to': '2017-02-22T23:00:00.000Z'
+                            },
+                            'milestones': [{
+                            'name': 'Stoxx Ltd Production Infrastructure Set Up',
+                            'id': 861,
+                            'data': {
+                                'plan': '2017-02-20'
+                            },
+                            'date': '2017-02-20'
+                            }, {
+                            'name': 'Migration from local to Stoxx Infrastructure',
+                            'id': 858,
+                            'data': {
+                                'plan': '2017-02-06'
+                            },
+                            'date': '2017-02-06'
+                            }, {
+                            'name': 'Stoxx Ltd Set Up',
+                            'id': 857,
+                            'data': {
+                                'plan': '2017-02-02'
+                            },
+                            'date': '2017-02-02'
+                            }]
+                        }]
+                        }, {
+                        'name': 'TALAIA OpenPPM Training',
+                        'id': 5085,
+                        'data': {
+                            'isControlAccount': false,
+                            'parentCode': 5073,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': true,
+                            'codeWBS': '260',
+                            'locked': false
+                        },
+                        'children': [5086, 5087]
+                        }, {
+                        'name': 'User Training',
+                        'id': 5086,
+                        'data': {
+                            'isControlAccount': true,
+                            'parentCode': 5085,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': false,
+                            'budget': 0,
+                            'codeWBS': '261',
+                            'plan': {
+                            'from': '2017-03-07T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-04-12T22:00:00.000Z',
+                            'to': '2016-04-14T22:00:00.000Z'
+                            },
+                            'locked': false
+                        },
+                        'tasks': [{
+                            'name': 'User Training',
+                            'id': 5086,
+                            'progress': 0,
+                            'from': '2017-03-07T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z',
+                            'base': {
+                            'from': '2017-03-07T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            }
+                        }]
+                        }, {
+                        'name': 'Administration Training',
+                        'id': 5087,
+                        'data': {
+                            'isControlAccount': true,
+                            'parentCode': 5085,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': false,
+                            'budget': 0,
+                            'codeWBS': '262',
+                            'plan': {
+                            'from': '2017-03-07T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-04-12T22:00:00.000Z',
+                            'to': '2016-04-14T22:00:00.000Z'
+                            },
+                            'locked': false
+                        },
+                        'tasks': [{
+                            'name': 'Administration Training',
+                            'id': 5087,
+                            'progress': 0,
+                            'from': '2017-03-07T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z',
+                            'base': {
+                            'from': '2017-03-07T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            }
+                        }]
+                        }, {
+                        'name': 'Maintenance & Support',
+                        'id': 5088,
+                        'data': {
+                            'isControlAccount': false,
+                            'parentCode': 5073,
+                            'workPackage': true,
+                            'progress': 0,
+                            'canDelete': true,
+                            'codeWBS': '270',
+                            'locked': false,
+                            'plan': {
+                            'from': '2016-12-04T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            },
+                            'control': {
+                            'from': '2016-01-10T23:00:00.000Z',
+                            'to': '2016-04-14T22:00:00.000Z'
+                            }
+                        },
+                        'tasks': [{
+                            'name': 'Maintenance & Support',
+                            'id': 5088,
+                            'progress': 0,
+                            'from': '2016-12-04T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z',
+                            'base': {
+                            'from': '2016-12-04T23:00:00.000Z',
+                            'to': '2017-03-09T23:00:00.000Z'
+                            }
+                        }]
+                        }]
             },
             getSampleTimespans: function() {
                 return [

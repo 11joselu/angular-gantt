@@ -79,7 +79,7 @@ angular.module('angularGanttDemoApp')
             sideMode: 'TreeTable',
             daily: false,
             maxHeight: false,
-            width: false,
+            width: true,
             zoom: 1,
             columns: ['model.name', 'from', 'to'],
             treeTableColumns: ['from', 'to'],
@@ -204,30 +204,30 @@ angular.module('angularGanttDemoApp')
                         api.tasks.on.resizeEnd($scope, addEventName('tasks.on.resizeEnd', logTaskEvent));
                     }
 
-                    if (api.tasks.on.drawBegin) {
+                   /* if (api.tasks.on.drawBegin) {
                         api.tasks.on.drawBegin($scope, addEventName('tasks.on.drawBegin', logTaskEvent));
                         //api.tasks.on.draw($scope, addEventName('tasks.on.draw', logTaskEvent));
                         api.tasks.on.drawEnd($scope, addEventName('tasks.on.drawEnd', logTaskEvent));
-                    }
+                    }*/
 
                     api.rows.on.add($scope, addEventName('rows.on.add', logRowEvent));
                     api.rows.on.change($scope, addEventName('rows.on.change', logRowEvent));
                     api.rows.on.move($scope, addEventName('rows.on.move', logRowEvent));
                     api.rows.on.remove($scope, addEventName('rows.on.remove', logRowEvent));
 
-                    api.side.on.resizeBegin($scope, addEventName('labels.on.resizeBegin', logLabelsEvent));
+                    /*api.side.on.resizeBegin($scope, addEventName('labels.on.resizeBegin', logLabelsEvent));
                     //api.side.on.resize($scope, addEventName('labels.on.resize', logLabelsEvent));
                     api.side.on.resizeEnd($scope, addEventName('labels.on.resizeEnd', logLabelsEvent));
-
-                    api.timespans.on.add($scope, addEventName('timespans.on.add', logTimespanEvent));
+*/
+                    /*api.timespans.on.add($scope, addEventName('timespans.on.add', logTimespanEvent));
                     api.columns.on.generate($scope, logColumnsGenerateEvent);
-
+*/
                     api.rows.on.filter($scope, logRowsFilterEvent);
                     api.tasks.on.filter($scope, logTasksFilterEvent);
 
-                    api.data.on.change($scope, function(newData) {
+                    /*api.data.on.change($scope, function(newData) {
                         if (dataToRemove === undefined) {
-                            dataToRemove = [
+                           dataToRemove = [
                                 {'id': newData[2].id}, // Remove Kickoff row
                                 {
                                     'id': newData[0].id, 'tasks': [
@@ -242,14 +242,14 @@ angular.module('angularGanttDemoApp')
                                 } // Remove order basket from Sprint 2
                             ];
                         }
-                    });
+                    });*/
 
                     // When gantt is ready, load data.
                     // `data` attribute could have been used too.
                     $scope.load();
 
                     // Add some DOM events
-                    api.directives.on.new($scope, function(directiveName, directiveScope, element) {
+                    /*api.directives.on.new($scope, function(directiveName, directiveScope, element) {
                         if (directiveName === 'ganttTask') {
                             element.bind('click', function(event) {
                                 event.stopPropagation();
@@ -284,7 +284,7 @@ angular.module('angularGanttDemoApp')
                                 $scope.$digest();
                             });
                         }
-                    });
+                    });*/
 
                     api.tasks.on.rowChange($scope, function(task) {
                         $scope.live.row = task.row.model;
