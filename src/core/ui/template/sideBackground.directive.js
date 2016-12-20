@@ -7,7 +7,7 @@
 
             $scope.getMaxHeightCss = function() {
                 var css = {};
-
+                $scope.maxHeight = 300;
                 if ($scope.maxHeight) {
                     var bodyScrollBarHeight = $scope.gantt.scroll.isHScrollbarVisible() ? hScrollBarHeight : 0;
                     css['max-height'] = $scope.maxHeight - bodyScrollBarHeight - $scope.gantt.header.getHeight() + 'px';

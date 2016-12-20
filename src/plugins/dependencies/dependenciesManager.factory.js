@@ -18,7 +18,8 @@
             this.api.registerEvent('dependencies', 'onChild');
 
             this.plumb = jsPlumb.getInstance();
-            this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
+            debugger;
+            this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults || this.pluginScope.$ctrl.jsPlumbDefaults);
 
             this.dependenciesFrom = {};
             this.dependenciesTo = {};

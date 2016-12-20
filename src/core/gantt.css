@@ -453,3 +453,130 @@
     position: relative;
     top: -10px;
 }
+
+.gantt-task-info {
+    position: fixed;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    padding: 9px 12px;
+    z-index: 999;
+}
+
+.gantt-task-info-content {
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gantt-task-infoArrow:before,
+.gantt-task-infoArrowR:before {
+    position: absolute;
+    top: 100%;
+    width: 0px;
+    height: 0px;
+    border-top: 8px solid rgba(0, 0, 0, 0.1);
+    border-right: 8px solid transparent;
+    border-left: 8px solid transparent;
+    content: '';
+}
+
+.gantt-task-infoArrow:before {
+    left: 10px;
+}
+
+.gantt-task-infoArrowR:before {
+    right: 10px;
+}
+
+.gantt-task-infoArrow:after,
+.gantt-task-infoArrowR:after {
+    position: absolute;
+    top: 100%;
+    width: 0px;
+    height: 0px;
+    border-top: 7px solid #ffffff;
+    border-right: 7px solid transparent;
+    border-left: 7px solid transparent;
+    content: '';
+}
+
+.gantt-task-infoArrow:after {
+    left: 11px;
+}
+
+.gantt-task-infoArrowR:after {
+    right: 11px;
+}
+
+.gantt-task-tooltip-component {
+    background: red;
+    min-height: 10px;
+    min-width: 10px;
+    position: absolute;
+}
+
+.gantt-row-label-background {
+    position: absolute;
+    width: 100%;
+}
+
+.gantt-tree-body .gantt-row-label span {
+    margin: 0;
+}
+
+.gantt-tree-body .gantt-row-label a.gantt-tree-handle-button {
+    padding: 0;
+    position: relative;
+}
+
+.gantt-tree-body .gantt-row-label span.gantt-tree-handle {
+    padding: 0;
+    position: relative;
+}
+
+.gantt-tree-body .gantt-row-label span.gantt-label-text {
+    padding-left: 0;
+}
+
+.gantt-tree-header {
+    overflow: hidden;
+    position: relative;
+}
+
+.gantt-tree-body {
+    overflow: hidden;
+}
+
+.gantt-tree-header-row {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.gantt-tree-header-row span.gantt-label-text {
+    display: inline-block;
+    padding-top: 0.5em;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+.gantt-tree-body ol {
+    padding-left: 0;
+}
+
+.angular-ui-tree-handle {
+    cursor: inherit;
+    text-decoration: inherit;
+    font-weight: inherit;
+    min-height: inherit;
+    line-height: inherit;
+}
+
+.gantt-side-content-tree .gantt-tree-handle-button {
+    pointer-events: auto;
+}

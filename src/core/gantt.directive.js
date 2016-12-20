@@ -53,11 +53,26 @@
                 timeFramesMagnet: '=?',
                 data: '=?',
                 api: '=?',
-                options: '=?'
+                options: '=?',
+                progress: '=?',
+                baseline: '=?',
+                milestones: '=?'
             },
             controller: ['$scope', '$element', function($scope, $element) {
                 for (var option in $scope.options) {
                     $scope[option] = $scope.options[option];
+                }
+
+                if ($scope.progress === undefined) {
+                    $scope.progress = true;
+                }
+
+                if ($scope.baseline === undefined) {
+                    $scope.baseline = true;
+                }
+
+                if ($scope.milestones === undefined) {
+                    $scope.milestones = true;
                 }
 
                 // Disable animation if ngAnimate is present, as it drops down performance.
@@ -77,13 +92,5 @@
                 });
             }
         };
-    }])
-    .directive('logger', function() {
-        return {
-            restrict: 'A',
-            controller: ['$scope', function($scope) {
-                console.log($scope);
-            }]
-        };
-    });
+    }]);
 }());

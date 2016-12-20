@@ -50,10 +50,12 @@
         TaskGroup.prototype.setFromToByTask = function(task) {
             if (this.from === undefined ||task.model.from < this.from) {
                 this.from = task.model.from;
+                this.row.model.from = this.from;
             }
 
             if (this.to === undefined || task.model.to > this.to) {
                 this.to = task.model.to
+                this.row.model.to = this.to;
             }
         };
 

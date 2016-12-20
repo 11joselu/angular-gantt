@@ -4,7 +4,6 @@
         var builder = new Builder('ganttTreeBody', 'plugins/tree/treeBody.tmpl.html');
         builder.controller = function($scope) {
             var hScrollBarHeight = layout.getScrollBarHeight();
-
             $scope.getLabelsCss = function() {
                 var css = {};
 

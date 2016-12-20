@@ -207,7 +207,8 @@
         };
 
         $scope.nodeScopes = {};
-    }]).controller('GanttUiTreeController', ['$scope', function($scope) {
+    }])
+    .controller('GanttUiTreeController', ['$scope', function($scope) {
         var collapseAll = function() {
             $scope.$broadcast('angular-ui-tree:collapse-all');
         };
@@ -218,7 +219,8 @@
 
         $scope.gantt.api.registerMethod('tree', 'collapseAll', collapseAll, $scope);
         $scope.gantt.api.registerMethod('tree', 'expandAll', expandAll, $scope);
-    }]).controller('GanttTreeNodeController', ['$scope', function($scope) {
+    }])
+    .controller('GanttTreeNodeController', ['$scope', function($scope) {
         delete $scope.row._parentRow;
 
         if ($scope.$parentNodeScope) {

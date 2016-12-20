@@ -9,7 +9,7 @@
             function ControllerFn($scope, $element, $attrs, GanttComponentService) {
                 var self = this;
 
-                var getCss = function() {
+                this.getCss = function() {
                     var css = {};
                     var progress;
 
@@ -33,15 +33,7 @@
 
                     return css;
                 };
-
-                this.$postLink = function() {
-                    if (self.taskCMP.task.model.progress !== undefined) {
-                        $element.find('div').css(getCss());
-                    } else {
-                        $element.remove();
-                    }
-                };
             }],
-            template: ['<div class="gantt-task-progress"></div>'].join('') 
+            template: ['<div class="gantt-task-progress" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.progress" ng-style="$ctrl.getCss()"></div>'].join('') 
         });
 }());

@@ -1,8 +1,5 @@
 <div class="gantt unselectable" ng-cloak gantt-scroll-manager gantt-element-width-listener="ganttElementWidth">
-    
     <gantt-side>
-        <gantt-side-background>
-        </gantt-side-background>
         <gantt-side-content></gantt-side-content>
         <div gantt-resizer="gantt.side.$element" gantt-resizer-event-topic="side" gantt-resizer-enabled="{{$parent.gantt.options.value('allowSideResizing')}}" resizer-width="sideWidth" class="gantt-resizer">
             <div ng-show="$parent.gantt.options.value('allowSideResizing')" class="gantt-resizer-display"></div>
@@ -53,13 +50,13 @@
                         ng-repeat="task in row.visibleTasks track by task.model.id" 
                         task="task"
                         class="gantt-task">
-                        <gantt-task-progress-component></gantt-task-progress-component>
                         <gantt-task-milestones-component></gantt-task-milestones-component>
+                        <gantt-dependencies-component task="task"></gantt-dependencies-component>
                     </gantt-task-component>
-
+                    
                     <gantt-task-line-component
                         ng-repeat="task in row.visibleTasks track by task.model.id" 
-                        ng-if="!row.model.children"
+                        ng-if="!row.model.children && gantt.baseLine"
                         task="task">
                     </gantt-task-line-component>
 
@@ -172,11 +169,11 @@
     <!-- Side background template -->
     <script type="text/ng-template" id="template/ganttSideBackground.tmpl.html">
         <div class="gantt-side-background">
-            <div class="gantt-side-background-header" ng-style="{height: $parent.ganttHeaderHeight + 'px'}">
+            <div class="gantt-side-background-header">
                 <div ng-show="$parent.ganttHeaderHeight" class="gantt-header-row gantt-side-header-row"></div>
             </div>
             <div class="gantt-side-background-body" ng-style="getMaxHeightCss()">
-                <div gantt-vertical-scroll-receiver>
+                <div >
                     <div class="gantt-row gantt-row-height "
                         ng-class-odd="'gantt-row-odd'"
                         ng-class-even="'gantt-row-even'"
@@ -192,10 +189,9 @@
         </div>
     </script>
 
-
     <script type="text/ng-template" id="template/ganttTaskMilestoneItem.tmpl.html">
         <div class="task-milestones-container" tooltip-template="'template/milestoneTooltip.tmpl.html'" 
-            tooltip-placement="top-right">
+            tooltip-placement="top-right" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.milestones">
             <span class="gantt-task-milestone-item milestone-item-top"></span>
             <span class="gantt-task-milestone-item milestone-item-bottom"></span>
         </div>
@@ -206,5 +202,4 @@
         <p>{{::$ctrl.item.name}}</p>
         <span>{{::$ctrl.getDate()}}</span>
     </script>
-
 </div>

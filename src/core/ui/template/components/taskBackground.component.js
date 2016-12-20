@@ -13,5 +13,6 @@
                     }
                 };
             }],
+            template: '<gantt-task-progress-component></gantt-task-progress-component>'
         });
 }());

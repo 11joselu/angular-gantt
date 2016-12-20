@@ -2,6 +2,9 @@
     'use strict';
     angular.module('gantt')
         .component('ganttTaskMilestone', {
+            require: {
+                taskCMP: '^ganttTaskComponent'
+            },
             binding: {
                 item: '=',
                 task: '='
@@ -9,6 +12,7 @@
             controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
             function ControllerFn($scope, $element, $attrs, GanttComponentService) {
                 var self = this;
+                console.log(this);
 
                 this.simplifyMoment = function(d) {
                     return moment.isMoment(d) ? d.unix() : d;

@@ -18,7 +18,10 @@
 
                 this.$onInit = function() {
                    manager = this.task.rowsManager;
-                   toPaint = isDefined(this.task.model.base.from) && isDefined(this.task.model.base.to);
+                   
+                   if (this.task.model.base) {
+                       toPaint = isDefined(this.task.model.base.from) && isDefined(this.task.model.base.to);
+                   }
                    
                    if (toPaint) {
                        this.task.model.base.from = moment(this.task.model.base.from).startOf('day');

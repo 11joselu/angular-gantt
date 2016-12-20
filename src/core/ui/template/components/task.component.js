@@ -2,6 +2,9 @@
     'use strict';
     angular.module('gantt')
         .component('ganttTaskComponent', {
+            require: {
+                'ganttCMP': '^gantt'
+            },
             bindings: {
                 task: '='
             },
@@ -9,7 +12,6 @@
             controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
             function ControllerFn($scope, $element, $attrs, GanttComponentService) {
                 var self = this;
-                
                 this.$onInit = function() {
                     this.task.$element = $element;
                     this.task.$scope = $scope;

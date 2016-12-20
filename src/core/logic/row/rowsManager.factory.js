@@ -7,6 +7,7 @@
             this.gantt = gantt;
 
             this.rowsMap = {};
+            this.taskMap = {}; 
             this.rows = [];
             this.sortedRows = [];
             this.filteredRows = [];
@@ -152,7 +153,7 @@
                 this.customFilteredRows.push(row);
                 this.visibleRows.push(row);
 
-                if (row.model.data._indexMap) {
+                if (row.model.data && row.model.data._indexMap) {
                     this._indexMap = row.model.data._indexMap;
                     delete row.model.data._indexMap;
                 } else {
@@ -167,6 +168,10 @@
                 }
 
                 row.updateVisibleTasks();
+                for (var i = 0; i < row.tasks.length; i++) {
+                    var task = row.tasks[i];
+                    this.taskMap[task.model.id] = task;
+                }
             }
 
             if (isUpdate) {
@@ -250,7 +255,6 @@
 
         RowsManager.prototype.sortRows = function() {
             var expression = this.gantt.options.value('sortMode');
-
             if (expression !== undefined) {
                 var reverse = false;
                 if (angular.isString(expression) && expression.charAt(0) === '-') {
@@ -408,9 +412,8 @@
                 visibleTasks = visibleTasks.concat(row.visibleTasks);
                 tasks = tasks.concat(row.tasks);
             }
-
+            
             this.gantt.api.tasks.raise.displayed(tasks, filteredTasks, visibleTasks);
-
             var filterEvent = !angular.equals(oldFilteredTasks, filteredTasks);
 
             if (filterEvent) {
