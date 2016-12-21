@@ -21,7 +21,7 @@
     "angular-gantt": ">=1.2",
     "moment-range": "~2.1.0",
     "css-element-queries": "~0.3.0",
-    "jsPlumb": "~2.0.5",
+    "jsPlumb": "2.2.8",
     "angular-vs-repeat": "^1.1.7"
   },
   "overrides": {
@@ -35,6 +35,11 @@
       "main": [
         "./css/font-awesome.css",
         "./fonts/*"
+      ]
+    },
+    "jsPlumb": {
+      "main": [
+        "dist/js/jsPlumb-2.2.8.js"
       ]
     }
   },
