@@ -1,6 +1,6 @@
 (function() {
     'use strict';
-    angular.module('gantt').factory('GanttTask', ['moment', function(moment) {
+    angular.module('gantt').factory('GanttTask', ['moment', 'ganttUtils', function(moment, utils) {
         var Task = function(row, model) {
             this.rowsManager = row.rowsManager;
             this.row = row;
@@ -105,6 +105,24 @@
 
                     this.$element.toggleClass('gantt-task-milestone', this.isMilestone());
                 }
+            }
+        };
+
+        Task.prototype.calculateDuration = function() {
+
+            if (!this.row.model.data) {
+                this.row.model.data = {};
+            }
+
+            if (this.model.from) {
+                var days = utils.workingDaysBetweenDates(this.model.from.toDate(), this.model.to.toDate(), this.row.model);
+
+                if (this.row.model.data && this.row.model.data.isMilestonesGantt) {
+                    days = 0;
+                }
+
+                
+                this.row.model.data.duration = days;
             }
         };
 

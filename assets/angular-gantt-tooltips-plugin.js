@@ -100,6 +100,11 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 var mouseEnterX;
                 var mouseMoveHandler;
 
+                $scope.content = '{{task.model.name}}</br>'+
+                                    '<small>'+
+                                    '{{task.isMilestone() === true && getFromLabel() || getFromLabel() + \' - \' + getToLabel()}}'+
+                                    '</small>';
+
                 var getViewPortWidth = function() {
                     var d = $document[0];
                     return d.documentElement.clientWidth || d.documentElement.getElementById('body')[0].clientWidth;
@@ -161,15 +166,15 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                         rowTooltips = {enabled: rowTooltips};
                     }
 
-                    var enabled = utils.firstProperty([taskTooltips, rowTooltips], 'enabled', $scope.pluginScope.enabled);
+                    var enabled = utils.firstProperty([taskTooltips, rowTooltips], 'enabled', true);
                     if (enabled && !visible && mouseEnterX !== undefined && newValue) {
-                        var content = utils.firstProperty([taskTooltips, rowTooltips], 'content', $scope.pluginScope.content);
+                        var content = utils.firstProperty([taskTooltips, rowTooltips], 'content', $scope.content);
                         $scope.content = content;
 
                         if (showDelayed) {
                             showTooltipPromise = $timeout(function() {
                                 showTooltip(mouseEnterX);
-                            }, $scope.pluginScope.delay, false);
+                            }, 500, false);
                         } else {
                             showTooltip(mouseEnterX);
                         }
@@ -212,8 +217,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                         rowTooltips = {enabled: rowTooltips};
                     }
 
-                    var dateFormat = utils.firstProperty([taskTooltips, rowTooltips], 'dateFormat', $scope.pluginScope.dateFormat);
-                    return $scope.task.model.from.format(dateFormat);
+                    var dateFormat = utils.firstProperty([taskTooltips, rowTooltips], 'dateFormat', '');
+                    return $scope.task.model.from.format('MM DD');
                 };
 
                 $scope.getToLabel = function() {
@@ -245,7 +250,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     displayTooltip(false);
                 });
 
-                if ($scope.pluginScope.api.tasks.on.moveBegin) {
+/*                if ($scope.pluginScope.api.tasks.on.moveBegin) {
                     $scope.pluginScope.api.tasks.on.moveBegin($scope, function(task) {
                         if (task === $scope.task) {
                             displayTooltip(true);
@@ -269,7 +274,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                             displayTooltip(false);
                         }
                     });
-                }
+                }*/
 
                 if ($scope.task.isMoving) {
                     // Display tooltip because task has been moved to a new row

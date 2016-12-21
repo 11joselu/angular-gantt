@@ -70,7 +70,7 @@
                                     <a href="" bs-collapse-toggle>Options</a>
                                 </h4>
                             </div>
-                            <!--<div class="panel-collapse" bs-collapse-target>
+                           <!-- <div class="panel-collapse" bs-collapse-target>
                                 <div class="panel-body">
                                     <div class="container-fluid">
                                         <div class="row">
@@ -259,7 +259,7 @@
                                          current-date="options.currentDate"
                                          current-date-value="options.currentDateValue"
                                          headers="options.width && options.shortHeaders || options.longHeaders"
-                                         max-height="options.maxHeight && 300 || 0"
+                                         max-height="options.maxHeight && 600 || 0"
                                          time-frames="options.timeFrames"
                                          date-frames="options.dateFrames"
                                          time-frames-working-mode="options.timeFramesWorkingMode"
@@ -281,18 +281,9 @@
                                         </gantt-table>
                                         <gantt-groups enabled="options.groupDisplayMode === 'group' || options.groupDisplayMode === 'overview' || options.groupDisplayMode === 'promote'" display="options.groupDisplayMode"></gantt-groups>
                                         <gantt-tooltips></gantt-tooltips>
-                                        <gantt-bounds></gantt-bounds>
                                         <gantt-progress></gantt-progress>
-                                        <gantt-task-line></gantt-task-line>
-                                        <gantt-milestones></gantt-milestones>
                                         <gantt-sortable></gantt-sortable>
-                                        <gantt-movable enabled="!options.readOnly"></gantt-movable>
-                                        <gantt-draw-task
-                                            enabled="options.canDraw"
-                                            move-threshold="2"
-                                            task-factory="options.drawTaskFactory">
-                                        </gantt-draw-task>
-                                        <gantt-overlap></gantt-overlap>
+                                        <gantt-movable enabled="!options.readOnly" allow-row-switching="false"></gantt-movable>
                                         <gantt-resize-sensor></gantt-resize-sensor>
                                         <gantt-dependencies
                                             enabled="options.dependencies.enabled"

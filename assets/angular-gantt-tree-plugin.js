@@ -69,6 +69,17 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 
 (function(){
+  'use strict';
+  angular.module('gantt.tree').directive('ganttRowTreeNumeration', ['$compile', function($compile) {
+    return {
+      restrict: 'A',
+      replace: true,
+      template: '<span class="gantt-label-numeration" ng-style="{\'left\': (($parent.depth()-1) * -20) + \'px\'}">{{getRowIndex()}}  </span>',
+    }
+  }]);
+}());
+
+(function(){
     'use strict';
     angular.module('gantt.tree').directive('ganttRowTreeLabel', ['GanttDirectiveBuilder', function(Builder) {
         var builder = new Builder('ganttRowTreeLabel');
@@ -232,7 +243,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
         var expandRow = function(rowId) {
             var row;
-            if (typeof rowId === 'string') {
+            if (typeof rowId === 'string' || typeof  rowId === 'number') {
                 row = $scope.gantt.rowsManager.rowsMap[rowId];
             } else {
                 row = rowId;
@@ -249,7 +260,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
         var collapseRow = function(rowId) {
             var row;
-            if (typeof rowId === 'string') {
+            if (typeof rowId === 'string' || typeof  rowId === 'number') {
                 row = $scope.gantt.rowsManager.rowsMap[rowId];
             } else {
                 row = rowId;
@@ -297,7 +308,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
         };
 
         $scope.nodeScopes = {};
-    }]).controller('GanttUiTreeController', ['$scope', function($scope) {
+    }])
+    .controller('GanttUiTreeController', ['$scope', function($scope) {
         var collapseAll = function() {
             $scope.$broadcast('angular-ui-tree:collapse-all');
         };
@@ -308,7 +320,17 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
         $scope.gantt.api.registerMethod('tree', 'collapseAll', collapseAll, $scope);
         $scope.gantt.api.registerMethod('tree', 'expandAll', expandAll, $scope);
-    }]).controller('GanttTreeNodeController', ['$scope', function($scope) {
+    }])
+    .controller('GanttTreeNodeController', ['$scope', function($scope) {
+        delete $scope.row._parentRow;
+
+        if ($scope.$parentNodeScope) {
+
+            if ($scope.$parentNodeScope.row.model.id !== $scope.row.model.id) {
+                $scope.row._parentRow = $scope.$parentNodeScope.row;
+            }
+        }
+
         $scope.$parent.nodeScopes[$scope.row.model.id] = $scope;
         $scope.$on('$destroy', function() {
             delete $scope.$parent.nodeScopes[$scope.row.model.id];
@@ -338,6 +360,23 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             return !$scope.$parent.childrenRows || $scope.$parent.childrenRows.length === 0;
         };
 
+
+        $scope.isMilestone = function() {
+          if ($scope.row.model.tasks) {
+            return (angular.isDefined($scope.row.model.tasks[0].isMilestone) && $scope.row.model.tasks[0].isMilestone) || (angular.isDefined($scope.row.model.data.isMilestonesGantt) && $scope.row.model.data.isMilestonesGantt);
+          }
+
+          return false;
+        };
+
+        $scope.isControlAccount = function() {
+          return $scope.row.model.data.isControlAccount;
+        };
+
+        $scope.isWorkPackage = function() {
+          return $scope.row.model.data.workPackage;
+        };
+
         $scope.getValue = function() {
             return $scope.row.model.name;
         };
@@ -355,6 +394,12 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 content = '{{row.model.name}}';
             }
             return content;
+        };
+
+
+        $scope.getRowIndex = function() {
+
+            return $scope.row.rowIndex;
         };
 
         $scope.$watch('collapsed', function(newValue) {
@@ -377,7 +422,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
         var builder = new Builder('ganttTreeBody', 'plugins/tree/treeBody.tmpl.html');
         builder.controller = function($scope) {
             var hScrollBarHeight = layout.getScrollBarHeight();
-
             $scope.getLabelsCss = function() {
                 var css = {};
 

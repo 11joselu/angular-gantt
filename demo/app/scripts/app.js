@@ -10,7 +10,6 @@
  */
 angular.module('angularGanttDemoApp', [
     'gantt', // angular-gantt.
-    'gantt.sortable',
     'gantt.movable',
     'gantt.tooltips',
     'gantt.table',

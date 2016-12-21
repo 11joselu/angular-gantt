@@ -56,9 +56,10 @@
                     
                     <gantt-task-line-component
                         ng-repeat="task in row.visibleTasks track by task.model.id" 
-                        ng-if="!row.model.children && gantt.baseLine"
+                        ng-if="!row.model.children"
                         task="task">
                     </gantt-task-line-component>
+
 
                 </gantt-row-component>
 
@@ -191,7 +192,7 @@
 
     <script type="text/ng-template" id="template/ganttTaskMilestoneItem.tmpl.html">
         <div class="task-milestones-container" tooltip-template="'template/milestoneTooltip.tmpl.html'" 
-            tooltip-placement="top-right" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.milestones">
+            tooltip-placement="top-right" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.milestonesEnabled">
             <span class="gantt-task-milestone-item milestone-item-top"></span>
             <span class="gantt-task-milestone-item milestone-item-bottom"></span>
         </div>

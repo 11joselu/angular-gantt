@@ -34,6 +34,6 @@
                     return css;
                 };
             }],
-            template: ['<div class="gantt-task-progress" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.progress" ng-style="$ctrl.getCss()"></div>'].join('') 
+            template: ['<div class="gantt-task-progress" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.progressEnabled" ng-style="$ctrl.getCss()"></div>'].join('') 
         });
 }());

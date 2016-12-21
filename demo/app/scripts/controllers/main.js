@@ -78,7 +78,7 @@ angular.module('angularGanttDemoApp')
             sortMode: undefined,
             sideMode: 'TreeTable',
             daily: false,
-            maxHeight: false,
+            maxHeight: true,
             width: true,
             zoom: 1,
             columns: ['model.name', 'from', 'to'],
@@ -353,7 +353,8 @@ angular.module('angularGanttDemoApp')
 
         // Reload data action
         $scope.load = function() {
-            $scope.data = Sample.getSampleData();
+            $scope.data = Sample.getSampleData(true);
+            console.log($scope.data.length);
             dataToRemove = undefined;
 
             $scope.timespans = Sample.getSampleTimespans();

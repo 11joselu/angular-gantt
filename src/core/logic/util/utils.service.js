@@ -132,7 +132,7 @@
 
             workingDaysBetweenDates: function (startDate, endDate, model) {
 
-                if (model) {
+                if (model && model.data) {
                   if (model.data.isMilestonesGantt || (model.data.tasks && model.data.tasks[0].isMilestone)) {
                     return 0;
                   }

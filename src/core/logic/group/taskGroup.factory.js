@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('gantt').factory('GanttTaskGroup', [function() {
+    angular.module('gantt').factory('GanttTaskGroup', ['ganttUtils', function(utils) {
         var TaskGroup = function(row, pluginScope) {
             var self = this;
 
@@ -17,6 +17,16 @@
 
             self.left = row.rowsManager.gantt.getPositionByDate(self.from);
             self.width = row.rowsManager.gantt.getPositionByDate(self.to) - self.left;
+
+            // LINE FOR TALAIA
+            this.createModel();
+        };
+
+        TaskGroup.prototype.getContentElement = function() {
+            if (this.$element !== undefined) {
+                
+                return this.$element;
+            }
         };
 
         TaskGroup.prototype.addTaskByDescendants = function() {
@@ -44,6 +54,26 @@
                         this.to = task.model.to;
                     }
                 }
+            }
+        };
+
+        TaskGroup.prototype.createModel = function() {
+            this.model = this.row.model;
+            this.model.from = this.row.from;
+            this.model.to = this.row.to;
+
+            if (!this.row.model.data) {
+                this.row.model.data = {};
+            }
+
+            if (this.row.from) {
+                var days = utils.workingDaysBetweenDates(this.row.from.toDate(), this.row.to.toDate(), this.row.model);
+
+                if (this.row.model.data && this.row.model.data.isMilestonesGantt) {
+                days = 0;
+                }
+
+                this.row.model.data.duration = days;
             }
         };
 

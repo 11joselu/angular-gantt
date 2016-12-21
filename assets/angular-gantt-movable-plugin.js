@@ -57,6 +57,10 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     api.directives.on.new(scope, function(directiveName, taskScope, taskElement) {
                         if (directiveName === 'ganttTask') {
                             var windowElement = angular.element($window);
+                            
+                            taskScope.row = taskScope.row || taskScope.$ctrl.task.row;
+                            taskScope.task = taskScope.task || taskScope.$ctrl.task;
+
                             var ganttBodyElement = taskScope.row.rowsManager.gantt.body.$element;
                             var ganttScrollElement = taskScope.row.rowsManager.gantt.scroll.$element;
 
