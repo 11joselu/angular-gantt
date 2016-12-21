@@ -1,6 +1,7 @@
 (function() {
     'use strict';
-    angular.module('gantt.tooltips').directive('ganttTooltip', ['$log','$timeout', '$compile', '$document', '$templateCache', 'ganttDebounce', 'ganttSmartEvent', function($log, $timeout, $compile, $document, $templateCache, debounce, smartEvent) {
+    angular.module('gantt.tooltips').directive('ganttTooltip', ['$log','$timeout', '$compile', '$document', '$templateCache', 'ganttDebounce', 'ganttSmartEvent', 
+        function($log, $timeout, $compile, $document, $templateCache, debounce, smartEvent) {
         // This tooltip displays more information about a task
 
         return {
@@ -46,6 +47,10 @@
                         $element.css('left', (x - 20) + 'px');
                         $scope.isRightAligned = false;
                     }
+                };
+
+                this.getCss = function() {
+                    return {left}
                 };
 
                 var showTooltip = function(x) {
@@ -203,10 +208,7 @@
                     });
                 }*/
 
-                if ($scope.task.isMoving) {
-                    // Display tooltip because task has been moved to a new row
-                    displayTooltip(true, false);
-                }
+                
 
                 $scope.gantt.api.directives.raise.new('ganttTooltip', $scope, $element);
                 $scope.$on('$destroy', function() {

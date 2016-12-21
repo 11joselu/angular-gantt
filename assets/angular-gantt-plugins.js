@@ -2459,7 +2459,8 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 (function() {
     'use strict';
-    angular.module('gantt.tooltips').directive('ganttTooltip', ['$log','$timeout', '$compile', '$document', '$templateCache', 'ganttDebounce', 'ganttSmartEvent', function($log, $timeout, $compile, $document, $templateCache, debounce, smartEvent) {
+    angular.module('gantt.tooltips').directive('ganttTooltip', ['$log','$timeout', '$compile', '$document', '$templateCache', 'ganttDebounce', 'ganttSmartEvent', 
+        function($log, $timeout, $compile, $document, $templateCache, debounce, smartEvent) {
         // This tooltip displays more information about a task
 
         return {
@@ -2505,6 +2506,10 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                         $element.css('left', (x - 20) + 'px');
                         $scope.isRightAligned = false;
                     }
+                };
+
+                this.getCss = function() {
+                    return {left}
                 };
 
                 var showTooltip = function(x) {
@@ -2662,10 +2667,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     });
                 }*/
 
-                if ($scope.task.isMoving) {
-                    // Display tooltip because task has been moved to a new row
-                    displayTooltip(true, false);
-                }
+                
 
                 $scope.gantt.api.directives.raise.new('ganttTooltip', $scope, $element);
                 $scope.$on('$destroy', function() {
@@ -3078,11 +3080,26 @@ angular.module('gantt.labels.templates', []).run(['$templateCache', function($te
 }]);
 
 angular.module('gantt.line.templates', []).run(['$templateCache', function($templateCache) {
-
+    $templateCache.put('plugins/line/taskLine.tmpl.html',
+        '<div></div>\n' +
+        '');
 }]);
 
 angular.module('gantt.milestones.templates', []).run(['$templateCache', function($templateCache) {
-
+    $templateCache.put('plugins/milestones/milestones-item.tmpl.html',
+        '<div>\n' +
+        '    <span>{{::item.name}}</span>\n' +
+        '</div>\n' +
+        '');
+    $templateCache.put('plugins/milestones/milestones.tmpl.html',
+        '<div class="gantt-task-milestones" ng-repeat="milestone in task.model.milestones">\n' +
+        '    <gantt-task-milestone-item item="milestone"></gantt-task-milestone-item>\n' +
+        '</div>\n' +
+        '');
+    $templateCache.put('plugins/milestones/tooltip.tmpl.html',
+        '<p>{{::item.name}}</p>\n' +
+        '<span>{{::getDate}}</span>\n' +
+        '');
 }]);
 
 angular.module('gantt.movable.templates', []).run(['$templateCache', function($templateCache) {
@@ -3094,7 +3111,9 @@ angular.module('gantt.overlap.templates', []).run(['$templateCache', function($t
 }]);
 
 angular.module('gantt.progress.templates', []).run(['$templateCache', function($templateCache) {
-
+    $templateCache.put('plugins/progress/taskProgress.tmpl.html',
+        '<div ng-cloak class="gantt-task-progress" ng-style="getCss()" ng-class="getClasses()"></div>\n' +
+        '');
 }]);
 
 angular.module('gantt.resizeSensor.templates', []).run(['$templateCache', function($templateCache) {
