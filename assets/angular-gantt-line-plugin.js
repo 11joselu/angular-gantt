@@ -5,8 +5,8 @@ License: MIT
 Homepage: https://www.angular-gantt.com
 Github: https://github.com/angular-gantt/angular-gantt.git
 */
-angular.module('gantt.labels.templates', []).run(['$templateCache', function($templateCache) {
+angular.module('gantt.line.templates', []).run(['$templateCache', function($templateCache) {
 
 }]);
 
-//# sourceMappingURL=angular-gantt-labels-plugin.js.map
+//# sourceMappingURL=angular-gantt-line-plugin.js.map

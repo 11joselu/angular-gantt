@@ -54,25 +54,25 @@
                 data: '=?',
                 api: '=?',
                 options: '=?',
-                progress: '=?',
-                baseline: '=?',
-                milestones: '=?'
+                progressEnabled: '=?',
+                baselineEnabled: '=?',
+                milestonesEnabled: '=?'
             },
             controller: ['$scope', '$element', function($scope, $element) {
                 for (var option in $scope.options) {
                     $scope[option] = $scope.options[option];
                 }
 
-                if ($scope.progress === undefined) {
-                    $scope.progress = true;
+                if ($scope.progressEnabled === undefined) {
+                    $scope.progressEnabled = true;
                 }
 
-                if ($scope.baseline === undefined) {
-                    $scope.baseline = true;
+                if ($scope.baselineEnabled === undefined) {
+                    $scope.baselineEnabled = true;
                 }
 
-                if ($scope.milestones === undefined) {
-                    $scope.milestones = true;
+                if ($scope.milestonesEnabled === undefined) {
+                    $scope.milestonesEnabled = true;
                 }
 
                 // Disable animation if ngAnimate is present, as it drops down performance.

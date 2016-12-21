@@ -204,7 +204,7 @@
                         });
 
                         api.groups.on.displayed(scope, function(groups) {
-                            manager.setGroups(groups);
+                            manager.setGroups([groups]);
                         });
 
                         api.groups.on.viewChange(scope, function(group) {

@@ -47,6 +47,9 @@
 
                 $scope.$watchGroup(['$ctrl.simplifyMoment($ctrl.task.model.from)', '$ctrl.simplifyMoment($ctrl.task.model.to)'], function() {
                     self.task.updatePosAndSize();
+
+                    // LINE FOR TALAIA
+                    // self.task.calculateDuration();
                 });
 
                  this.$onDestroy = function() {

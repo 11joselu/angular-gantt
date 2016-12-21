@@ -2,6 +2,9 @@
     'use strict';
     angular.module('gantt')
         .component('ganttTaskLineComponent', {
+            require: {
+                'ganttCMP': '^gantt'
+            },
             bindings: {
                 task: '='
             },
@@ -27,25 +30,24 @@
                        this.task.model.base.from = moment(this.task.model.base.from).startOf('day');
                        this.task.model.base.to = moment(this.task.model.base.to).endOf('day');
                    }
-
-                   
                 };
 
-                this.$postLink = function() {
-                    if (!toPaint) {
-                        return;
+                this.getCss = function() {
+                    var css = {};
+                    if (this.task.model.base) {
+                        var left = manager.gantt.getPositionByDate(this.task.model.base.from);
+                        var width = manager.gantt.getPositionByDate(this.task.model.base.to);
+                        
+                        css = {
+                            left: left + 'px',
+                            width: width - left + 'px'
+                        };
                     }
 
-                    var left = manager.gantt.getPositionByDate(this.task.model.base.from);
-                    var width = manager.gantt.getPositionByDate(this.task.model.base.to);
-                    $element.find('div').css({
-                        left: left + 'px',
-                        width: width - left + 'px'
-                    });
-                    
+                    return css; 
                 };
             }],
-            template: ['<div class="gantt-task-base-line"></div>'].join('')
+            template: ['<div class="gantt-task-base-line" ng-style="$ctrl.getCss()" ng-if="$ctrl.ganttCMP.gantt.$scope.baselineEnabled"></div>'].join('')
         
         });
 }());
