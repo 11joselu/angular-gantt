@@ -6,7 +6,21 @@
         var tracker = {
             _dependenciesFrom: {},
             _dependenciesTo: {},
+            tasks: {},
             groups: {}
+        };
+        var hasInitContainer = false;
+
+        tracker.setContainer = function(containerElement) {
+            if (!hasInitContainer) {
+                hasInitContainer = true;
+                tracker._jsPlumb = jsPlumb.getInstance();
+                tracker._jsPlumb.setContainer(containerElement);
+            }
+        };
+
+        tracker.getPlumbInstance = function() {
+            return tracker._jsPlumb;
         };
 
         tracker.addDependency = function(dependency) {
@@ -114,10 +128,6 @@
         };
 
         tracker.addTask = function(task, manager) {
-            if (!this.tasks) {
-                this.tasks = manager.taskMap;
-            }
-
             if (!(task.model.id in this.tasks)) {
                 this.tasks[task.model.id] = task;
             }
@@ -126,12 +136,12 @@
 
         tracker.addTaskGroup = function(taskGroup, manager) {
             if (!(taskGroup.model.id in this.groups)) {
-                this.groups[task.model.id] = taskGroup;
+                this.groups[taskGroup.model.id] = taskGroup;
             }
         };
 
         tracker.getAllTask = function() {
-            return angular.merge(this.tasks, this.groups);
+            return angular.extend(this.tasks, this.groups);
         };
 
         tracker.getFromDependenciesObject = function() {

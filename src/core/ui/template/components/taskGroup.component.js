@@ -6,8 +6,8 @@
             require: {
               rowCMP: '^ganttRowComponent'  
             },
-            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 'GanttHierarchy',  'GanttTaskGroup',
-            function ControllerFn($scope, $element, $attrs, GanttComponentService, Hierarchy, TaskGroup) {
+            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 'GanttHierarchy',  'GanttTaskGroup', 'ganttDom',
+            function ControllerFn($scope, $element, $attrs, GanttComponentService, Hierarchy, TaskGroup, dom) {
                 var self = this;
 
                 var updateTaskGroup = function() {
@@ -17,6 +17,7 @@
                     self.rowCMP.row.setFromToByValues(self.taskGroup.from, self.taskGroup.to);
                     $element.css({'left': self.taskGroup.left + 'px', 'width': self.taskGroup.width + 'px'});
                     self.taskGroup.$element = $element;
+                    console.log(dom.isElementVisible($element));
 
                     self.rowCMP.ganttInstance.api.groups.raise.displayed(self.taskGroup);
                     self.rowCMP.ganttInstance.api.groups.raise.viewChange(self.taskGroup);
@@ -41,6 +42,10 @@
                     this.hierarchy.refresh(this.gantt.rowsManager.filteredRows);
                 };
 
+                this.$onDestroy = function() {
+                console.log(self.rowCMP.ganttInstance.api.groups.raise);
+                };
+
                 $scope.$watch('$ctrl.gantt.rowsManager.filteredRows', updateTaskGroup);
             }],
             template:  [
@@ -48,6 +53,7 @@
                         '<div class="gantt-task-group-right-main"></div>',
                         '<div class="gantt-task-group-left-symbol"></div>',
                         '<div class="gantt-task-group-right-symbol"></div>',
+                        '<gantt-dependencies-component task="$ctrl.taskGroup" ng-if="$ctrl.taskGroup"></gantt-dependencies-component>'
                         ].join('')
         
         });

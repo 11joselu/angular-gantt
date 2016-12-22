@@ -14,7 +14,7 @@
             },
 
             raiseDestroyDirective: function(directiveName, $scope, $element, $attrs, controller) {
-                $scope.gantt.api.directives.raise.new(directiveName, $scope, $element, $attrs, controller);
+                $scope.gantt.api.directives.raise.destroy(directiveName, $scope, $element, $attrs, controller);
             },
 
             raiseAll: function(directiveName, $scope, $element, $attrs, controller) {

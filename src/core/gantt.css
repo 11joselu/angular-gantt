@@ -580,3 +580,7 @@
 .gantt-side-content-tree .gantt-tree-handle-button {
     pointer-events: auto;
 }
+
+.jsplumb-endpoint.start-endpoint.target-endpoint {
+    z-index: 10 !important;
+}

@@ -3,13 +3,14 @@
     angular.module('gantt')
         .component('ganttDependenciesComponent', {
             require: {
-                ganttCMP: '^gantt'
+                ganttCMP: '^gantt',
+                ganttBody: '^ganttBody'
             },
             bindings: {
                 task: '='
             },
-            controller: ['$scope', '$element', 'ganttDebounce', 'GanttDependenciesTaskManager', 'GanttDependenciesChecker', 
-            function($scope, $element, debounce, DependenciesTaskManager, DependenciesChecker) {
+            controller: ['$scope', '$element', 'ganttDebounce', 'DependenciesTracker', 'GanttDependenciesTaskManager', 'GanttDependenciesChecker', 
+            function($scope, $element, debounce, Tracker, DependenciesTaskManager, DependenciesChecker) {
                 var manager, checker, api;
                 var watcher;
                 var self = this;
@@ -92,28 +93,19 @@
                         }
                     ];
                     
+                    Tracker.setContainer(this.ganttBody.$element);                    
                     manager = new DependenciesTaskManager(this.ganttCMP.gantt, $scope, api);
                     checker = new DependenciesChecker(manager, $scope, api);
                 };
 
                 var isTask = function(task) {
-                    console.log(task)
-                    return true;
+                    return !task.row.model.children;
                 };
 
                 this.$postLink = function() {
-                    manager.setTasks(this.task, isTask());
+                    manager.removeAll(this.task);
+                    manager.setTasks(this.task, isTask(this.task));
                     
-                    api.directives.on.new($scope, function(directiveName, directiveScope, directiveElement) {
-                        if (directiveName === 'ganttBody') {
-                            manager.plumb.setContainer(directiveElement);
-                        }
-                    });
-
-                    api.tasks.on.add($scope, function(task) {
-                        manager.addDependenciesFromTask(task, true);
-                    });
-
                     api.tasks.on.remove($scope, function(task) {
                         manager.removeDependenciesFromTask(task);
                     });
@@ -122,14 +114,13 @@
                         manager.addDependenciesFromTask(self.task);
                     }));
 
-
                     watcher = $scope.$watchGroup(['$ctrl.task.width', '$ctrl.task.left'], function(values, oldValue) {
                         manager.plumb.revalidate(self.task.$element[0]);
                     });
                 };
 
                 this.$onDestroy = function() {
-                    //manager.clearEndpoints(self.task);
+                    manager.removeAll(this.task);
                     watcher();
                 };
 

@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('gantt').factory('GanttDependenciesTaskManager', ['GanttDependency', 'GanttDependenciesEvents', 'GanttDependencyTaskMouseHandler', 'DependenciesTracker', function(Dependency, DependenciesEvents, TaskMouseHandler, Tracker) {
+    angular.module('gantt').factory('GanttDependenciesTaskManager', ['GanttDependency', 'ganttDom', 'GanttDependenciesEvents', 'GanttDependencyTaskMouseHandler', 'DependenciesTracker', function(Dependency, dom, DependenciesEvents, TaskMouseHandler, Tracker) {
         var DependenciesManager = function(gantt, pluginScope, api) {
             this.gantt = gantt;
             this.rowsManager = gantt.rowsManager;
@@ -17,7 +17,7 @@
             this.api.registerEvent('dependencies', 'refresh');
             this.api.registerEvent('dependencies', 'updateJsPlumb');
 
-            this.plumb = jsPlumb.getInstance();
+            this.plumb = Tracker.getPlumbInstance();
             this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
 
             this.rowsManager.dependenciesFrom = {};
@@ -46,7 +46,6 @@
          * @param task
          */
         DependenciesManager.prototype.addDependenciesFromTask = function(task) {
-            console.log(Tracker.getAllTask());
             if (this.pluginScope.enabled && hasDependencies(task)) {
                 var taskDependencies = task.model.dependencies;
                 
@@ -184,10 +183,18 @@
         };
 
         var taskDependencyAcction = function(tasks, release) {
+            var isTaskVisible = function(task) {
+                if (task === undefined || task.$element === undefined) {
+                    return false;
+                }
+                var element = task.$element[0];
+                return dom.isElementVisible(element);
+            };
+
             for (var key in tasks) {
                 var task = tasks[key];
 
-                if (!hasReadOnly(task)) {
+                if (!hasReadOnly(task) && isTaskVisible(task)) {
                     if (release) {
                         task.dependencies.mouseHandler.release();
                     } else {
@@ -272,8 +279,6 @@
         };
 
         DependenciesManager.prototype.setTasks = function(task, isTask) {
-            removeTaskMouseHandler(task);
-            removeTaskEndpoint.call(this, task);
             if (isTaskEnabled(task)) {
                 addTaskMouseHandler.call(this, task);
                 addTaskEndpoints.call(this, task);
@@ -285,6 +290,11 @@
                 }
 
             }
+        };
+
+        DependenciesManager.prototype.removeAll = function(task) {
+            removeTaskMouseHandler(task);
+            removeTaskEndpoint.call(this, task);
         };
 
         DependenciesManager.prototype.removeGroup = function(taskGroup) {
