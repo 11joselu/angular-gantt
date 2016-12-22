@@ -212,7 +212,8 @@
          class="gantt-task-info"
          ng-if="$ctrl.displayed"
          ng-class="$ctrl.isRightAligned ? 'gantt-task-infoArrowR' : 'gantt-task-infoArrow'"
-         ng-style="{top: $ctrl.taskRect.top + 'px', marginTop: 2 * (-$ctrl.elementHeight - 8) + 'px'}">
+         ng-style="{top: $ctrl.taskRect.top + 'px', marginTop: 2 * (-$ctrl.elementHeight - 8) + 'px'}"
+         ng-init="$ctrl.updatePosition()">
             <div class="gantt-task-info-content">
                 {{$ctrl.taskCMP.task.model.name}}</br>
                 <small>{{$ctrl.taskCMP.task.isMilestone() === true ? $ctrl.getFromLabel() : $ctrl.getFromLabel()  + " - " + $ctrl.getToLabel()}}

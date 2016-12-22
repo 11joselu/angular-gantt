@@ -5,7 +5,7 @@
     'use strict';
 
     module.exports = function(grunt) {
-        var plugins = ['table', 'tree', 'sortable', 'movable', 'drawtask', 'tooltips',
+        var plugins = ['table', 'tree', 'sortable', 'movable', 'drawtask',
              'resizeSensor', 'dependencies'];
 
         var coverage = grunt.option('coverage');

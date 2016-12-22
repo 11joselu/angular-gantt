@@ -24,10 +24,6 @@
                     // Set defaults, add provider to customize default values
                     self.enabled = true;
                     self.dateFormat = 'MMM DD, HH:mm';
-                    self.content = '{{$ctrl.taskCMP.task.model.name}}</br>'+
-                                    '<small>'+
-                                    '{{$ctrl.taskCMP.task.isMilestone() === true && $ctrl.getFromLabel() || $ctrl.getFromLabel() + \' - \' + $ctrl.getToLabel()}}'+
-                                    '</small>';
                     self.delay = 500;
 
                     api = self.ganttCMP.gantt.api;
@@ -56,7 +52,17 @@
                     });
                 };
 
+                self.updatePosition = function() {
+                    var childElement = $element.find('article');
+                    childElement.css('left', (mouseEnterX - 20 - $element[0].offsetWidth) + 'px');
+                }
+
                 self.$onDestroy = function() {
+                    task.getContentElement().unbind('mousemove');
+
+                    task.getContentElement().unbind('mouseenter');
+
+                    task.getContentElement().unbind('mouseleave');
                 };
 
                 self.getFromLabel = function() {
@@ -98,13 +104,14 @@
 
                 var updateTooltip = function(x) {
                     var childElement = $element.find('article');
+                    var timeout;
                     // Check if info is overlapping with view port
                     if (x + $element[0].offsetWidth > getViewPortWidth()) {
-                        childElement.css('left', (x + 20 - $element[0].offsetWidth) + 'px');
                         self.isRightAligned = true;
+                        childElement.css('left', (x + 20 - $element[0].offsetWidth) + 'px');
                     } else {
-                        childElement.css('left', (x - 20) + 'px');
                         self.isRightAligned = false;
+                        childElement.css('left', (x - 20) + 'px');
                     }
                 };
 
@@ -155,8 +162,6 @@
 
                     var enabled = self.enabled;
                     if (enabled && !visible && mouseEnterX !== undefined && newValue) {
-                        var content = self.content;
-                        self.content = content;
 
                         if (showDelayed) {
                             showTooltipPromise = $timeout(function() {
