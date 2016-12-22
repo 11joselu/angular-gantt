@@ -50,6 +50,9 @@
                         ng-repeat="task in row.visibleTasks track by task.model.id" 
                         task="task"
                         class="gantt-task">
+                        
+                        <gantt-task-tooltip-component></gantt-task-tooltip-component>
+
                         <gantt-task-milestones-component></gantt-task-milestones-component>
                         <gantt-dependencies-component task="task"></gantt-dependencies-component>
                     </gantt-task-component>
@@ -202,5 +205,21 @@
     <script type="text/ng-template" id="template/milestoneTooltip.tmpl.html">
         <p>{{::$ctrl.item.name}}</p>
         <span>{{::$ctrl.getDate()}}</span>
+    </script>
+
+    <script type="text/ng-template" id="template/ganttTaskTooltip.tmpl.html">
+        <article ng-cloak
+         class="gantt-task-info"
+         ng-if="$ctrl.displayed"
+         ng-class="$ctrl.isRightAligned ? 'gantt-task-infoArrowR' : 'gantt-task-infoArrow'"
+         ng-style="{top: $ctrl.taskRect.top + 'px', marginTop: 2 * (-$ctrl.elementHeight - 8) + 'px'}"
+         ng-init="$ctrl.updatePosition()">
+            <div class="gantt-task-info-content">
+                {{$ctrl.taskCMP.task.model.name}}</br>
+                <small>{{$ctrl.taskCMP.task.isMilestone() === true ? $ctrl.getFromLabel() : $ctrl.getFromLabel()  + " - " + $ctrl.getToLabel()}}
+                </small>
+            </div>
+        </article>
+
     </script>
 </div>

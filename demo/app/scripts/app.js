@@ -11,7 +11,6 @@
 angular.module('angularGanttDemoApp', [
     'gantt', // angular-gantt.
     'gantt.movable',
-    'gantt.tooltips',
     'gantt.table',
     'gantt.tree',
     'gantt.dependencies',
