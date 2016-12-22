@@ -24,7 +24,6 @@
 
                 var addListener = function() {
                     self.rowCMP.ganttInstance.api.tasks.on.viewChange($scope, updateTaskGroup);
-                    console.log(self.taskGroup);
                 };
 
 
