@@ -68,6 +68,25 @@
             },
             isElementVisible: function(element) {
                 return element.offsetParent !== undefined && element.offsetParent !== null;
+            },
+            isTaskGroupVisible: function(api, fromDate, toDate) {
+                var isShowing = true;
+                var dateRanges = api.columns.getDateRange(true);
+
+                if (dateRanges) {
+                    var firstDate = dateRanges[0];
+                    var lastDate = dateRanges[1];
+
+                    if (firstDate.diff(toDate) > 0) {
+                        isShowing = false;
+                    }
+
+                    if (lastDate.diff(fromDate) < 0) {
+                        isShowing = false;
+                    }
+                }
+
+                return isShowing;
             }
         };
     }]);

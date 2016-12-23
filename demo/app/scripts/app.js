@@ -13,7 +13,7 @@ angular.module('angularGanttDemoApp', [
     'gantt.movable',
     'gantt.table',
     'gantt.tree',
-    'gantt.dependencies',
+    //'gantt.dependencies',
     'gantt.resizeSensor',
     'ngAnimate',
     'mgcrea.ngStrap'

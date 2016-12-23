@@ -39,7 +39,7 @@ angular.module('angularGanttDemoApp')
                         ]},
                         {name: 'Development', children: ['Sprint 1', 'Sprint 2', 'Sprint 3', 'Sprint 4'], content: '<i class="fa fa-file-code-o" ng-click="scope.handleRowIconClick(row.model)"></i> {{row.model.name}}'},
                         {name: 'Sprint 1', tooltips: false, tasks: [
-                            {id: 'Product list view', name: 'Product list view', color: '#F1C232', from: new Date(2013, 9, 21, 8, 0, 0), to: new Date(2013, 9, 25, 15, 0, 0),
+                            {id: 'Product list view', name: 'Product list view', color: '#F1C232', from: new Date(2013, 11, 21, 8, 0, 0), to: new Date(2013, 11, 25, 15, 0, 0),
                                 progress: 25, dependencies: [{to: 'Order basket'}, {from: 'Finalize concept'}]}
                         ]},
                         {name: 'Sprint 2', tasks: [
@@ -510,7 +510,7 @@ angular.module('angularGanttDemoApp')
                     }]
                 }
 
-                if (!one && suicide) {
+                if (!base && suicide) {
                     return [{
                             "name": "ARTE Project",
                             "id": 15345,

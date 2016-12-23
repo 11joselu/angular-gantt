@@ -13,12 +13,6 @@
             self.tasks = [];
             self.to = undefined;
             self.from = undefined;
-            this.addTaskByDescendants();
-
-            self.left = row.rowsManager.gantt.getPositionByDate(self.from);
-            self.width = row.rowsManager.gantt.getPositionByDate(self.to) - self.left;
-
-            // LINE FOR TALAIA
             this.createModel();
         };
 
@@ -57,6 +51,14 @@
             }
         };
 
+        TaskGroup.prototype.generateValues = function() {
+            this.addTaskByDescendants();
+
+            this.left = this.row.rowsManager.gantt.getPositionByDate(this.from);
+            this.width = this.row.rowsManager.gantt.getPositionByDate(this.to) - this.left;
+            this.createModel();
+        };
+
         TaskGroup.prototype.createModel = function() {
             this.model = this.row.model;
             this.model.from = this.row.from;
@@ -78,12 +80,12 @@
         };
 
         TaskGroup.prototype.setFromToByTask = function(task) {
-            if (this.from === undefined ||task.model.from < this.from) {
+            if (this.from === undefined || this.from > task.model.from) {
                 this.from = task.model.from;
                 this.row.model.from = this.from;
             }
 
-            if (this.to === undefined || task.model.to > this.to) {
+            if (this.to === undefined || this.to < task.model.to) {
                 this.to = task.model.to
                 this.row.model.to = this.to;
             }

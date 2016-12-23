@@ -120,6 +120,7 @@
                 };
 
                 this.$onDestroy = function() {
+                    console.log('called');
                     manager.removeAll(this.task);
                     watcher();
                 };
