@@ -6,10 +6,7 @@
                 'taskCMP': '^ganttTaskComponent'
             },
             transclude: true,
-            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
-            function ControllerFn($scope, $element, $attrs, GanttComponentService) {
-                var self = this;
-
+            controller: [function ControllerFn() {
                 this.$onInit = function() {
                     this.task = this.taskCMP.task;
                 };
@@ -22,6 +19,6 @@
                     '</div>',
                 '</div>'
             ].join('')
-        
+
         });
 }());

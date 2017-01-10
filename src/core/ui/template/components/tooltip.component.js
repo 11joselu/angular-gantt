@@ -6,17 +6,50 @@
                 taskCMP: '^ganttTaskComponent',
                 ganttCMP: '^gantt'
             },
-            controller: ['$scope', '$element', '$log','$timeout', '$compile', '$document', '$templateCache', 'ganttDebounce', 'ganttSmartEvent', 
+            controller: ['$scope', '$element', '$log', '$timeout', '$compile', '$document', '$templateCache', 'ganttDebounce', 'ganttSmartEvent',
             function ControllerFn($scope, $element, $log, $timeout, $compile, $document, $templateCache, debounce, smartEvent) {
                 var self = this;
                 var bodyElement = angular.element($document[0].body);
-                var parentElement = undefined;
+                var parentElement;
                 var showTooltipPromise;
-                var visible = undefined;
+                var visible;
                 var mouseEnterX;
                 var mouseMoveHandler;
-                var api = undefined;
-                var task = undefined;
+                var api;
+                var task;
+
+                var displayTooltip = function(newValue, showDelayed) {
+                    if (showTooltipPromise) {
+                        $timeout.cancel(showTooltipPromise);
+                    }
+
+                    var taskTooltips = task.model.tooltips;
+                    var rowTooltips = task.row.model.tooltips;
+
+                    if (typeof(taskTooltips) === 'boolean') {
+                        taskTooltips = {enabled: taskTooltips};
+                    }
+
+                    if (typeof(rowTooltips) === 'boolean') {
+                        rowTooltips = {enabled: rowTooltips};
+                    }
+
+                    var enabled = self.enabled;
+                    if (enabled && !visible && mouseEnterX !== undefined && newValue) {
+
+                        if (showDelayed) {
+                            showTooltipPromise = $timeout(function() {
+                                showTooltip(mouseEnterX);
+                            }, 500, false);
+                        } else {
+                            showTooltip(mouseEnterX);
+                        }
+                    } else if (!newValue) {
+                        if (!task.active) {
+                            hideTooltip();
+                        }
+                    }
+                };
 
                 self.$onInit = function() {
                     // Init task
@@ -28,7 +61,7 @@
 
                     api = self.ganttCMP.gantt.api;
                     parentElement = task.$element;
-                    visible = false;  
+                    visible = false;
                 };
 
                 self.$postLink = function() {
@@ -104,7 +137,6 @@
 
                 var updateTooltip = function(x) {
                     var childElement = $element.find('article');
-                    var timeout;
                     // Check if info is overlapping with view port
                     if (x + $element[0].offsetWidth > getViewPortWidth()) {
                         self.isRightAligned = true;
@@ -142,39 +174,6 @@
                     $scope.$evalAsync(function() {
                         self.displayed = false;
                     });
-                };
-
-                var displayTooltip = function(newValue, showDelayed) {
-                    if (showTooltipPromise) {
-                        $timeout.cancel(showTooltipPromise);
-                    }
-
-                    var taskTooltips = task.model.tooltips;
-                    var rowTooltips = task.row.model.tooltips;
-
-                    if (typeof(taskTooltips) === 'boolean') {
-                        taskTooltips = {enabled: taskTooltips};
-                    }
-
-                    if (typeof(rowTooltips) === 'boolean') {
-                        rowTooltips = {enabled: rowTooltips};
-                    }
-
-                    var enabled = self.enabled;
-                    if (enabled && !visible && mouseEnterX !== undefined && newValue) {
-
-                        if (showDelayed) {
-                            showTooltipPromise = $timeout(function() {
-                                showTooltip(mouseEnterX);
-                            }, 500, false);
-                        } else {
-                            showTooltip(mouseEnterX);
-                        }
-                    } else if (!newValue) {
-                        if (!task.active) {
-                            hideTooltip();
-                        }
-                    }
                 };
 
                 mouseMoveHandler = smartEvent($scope, bodyElement, 'mousemove', debounce(function(e) {

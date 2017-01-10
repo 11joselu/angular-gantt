@@ -11,7 +11,7 @@
         };
         var hasInitContainer = false;
 
-        tracker.setContainer = function(containerElement) {
+        tracker.setContainer = function(containerElement, api) {
             if (!hasInitContainer) {
                 hasInitContainer = true;
                 tracker._jsPlumb = jsPlumb.getInstance();
@@ -25,10 +25,8 @@
 
         tracker.addDependency = function(dependency) {
             var fromTaskId = dependency.getFromTaskId();
-            var fromTask = dependency.getFromTask();
             var toTaskId = dependency.getToTaskId();
-            var toTask = dependency.getToTask();
-            
+
             if (!(fromTaskId in this._dependenciesFrom)) {
                 this._dependenciesFrom[fromTaskId] = [];
             }
@@ -44,7 +42,7 @@
                 this._dependenciesTo[toTaskId].push(dependency);
             }
 
-            dependency;
+            return dependency;
         };
 
         tracker.getTaskDependencies = function(task) {
@@ -127,14 +125,14 @@
             return dependencies;
         };
 
-        tracker.addTask = function(task, manager) {
+        tracker.addTask = function(task) {
             if (!(task.model.id in this.tasks)) {
                 this.tasks[task.model.id] = task;
             }
 
         };
 
-        tracker.addTaskGroup = function(taskGroup, manager) {
+        tracker.addTaskGroup = function(taskGroup) {
             if (!(taskGroup.model.id in this.groups)) {
                 this.groups[taskGroup.model.id] = taskGroup;
             }

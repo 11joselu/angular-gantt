@@ -196,7 +196,7 @@
                     return {
                       index: str.replace(/[a-zA-Z]/g, ''),
                       lag: lag
-                    }
+                    };
                   });
             }
         };

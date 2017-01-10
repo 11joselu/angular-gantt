@@ -5,7 +5,7 @@
             <div ng-show="$parent.gantt.options.value('allowSideResizing')" class="gantt-resizer-display"></div>
         </div>
     </gantt-side>
-    
+
     <gantt-scrollable-header>
         <gantt-header gantt-element-height-listener="$parent.ganttHeaderHeight">
             <gantt-header-columns>
@@ -30,36 +30,36 @@
                     <gantt-time-frame ng-repeat="timeFrame in column.visibleTimeFrames"></gantt-time-frame>
                 </gantt-column>
             </gantt-body-columns>
-            
+
             <div ng-if="gantt.columnsManager.visibleColumns == 0" style="background-color: #808080"></div>
-            
+
             <gantt-body-rows>
-                <gantt-row-component class="gantt-row gantt-row-height gantt-block" 
+                <gantt-row-component class="gantt-row gantt-row-height gantt-block"
                     ng-repeat="row in gantt.rowsManager.visibleRows"
                     row="row"
                     gantt-instance="gantt"
                     ng-class-odd="'gantt-row-odd'"
                     ng-class-even="'gantt-row-even'">
-                    
-                    <gantt-task-group-component 
-                        class="gantt-task-group" 
+
+                    <gantt-task-group-component
+                        class="gantt-task-group"
                         ng-if="row.model.children">
                         <gantt-task-group-plugins></gantt-task-group-plugins>
                     </gantt-task-group-component>
 
                     <gantt-task-component
-                        ng-repeat="task in row.visibleTasks track by task.model.id" 
+                        ng-repeat="task in row.visibleTasks track by task.model.id"
                         task="task"
                         class="gantt-task">
-                        
+
                         <gantt-task-tooltip-component></gantt-task-tooltip-component>
 
                         <gantt-task-milestones-component></gantt-task-milestones-component>
-                        <!--<gantt-dependencies-component task="task"></gantt-dependencies-component>-->
+                        <gantt-dependencies-component task="task"></gantt-dependencies-component>
                     </gantt-task-component>
-                    
+
                     <gantt-task-line-component
-                        ng-repeat="task in row.visibleTasks track by task.model.id" 
+                        ng-repeat="task in row.visibleTasks track by task.model.id"
                         ng-if="!row.model.children"
                         task="task">
                     </gantt-task-line-component>
@@ -195,7 +195,7 @@
     </script>
 
     <script type="text/ng-template" id="template/ganttTaskMilestoneItem.tmpl.html">
-        <div class="task-milestones-container" tooltip-template="'template/milestoneTooltip.tmpl.html'" 
+        <div class="task-milestones-container" tooltip-template="'template/milestoneTooltip.tmpl.html'"
             tooltip-placement="top-right" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.milestonesEnabled">
             <span class="gantt-task-milestone-item milestone-item-top"></span>
             <span class="gantt-task-milestone-item milestone-item-bottom"></span>

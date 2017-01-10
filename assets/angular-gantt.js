@@ -2026,6 +2026,1127 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 (function() {
     'use strict';
+
+    angular.module('gantt').factory('GanttDependenciesChecker', [function() {
+        /**
+         * Creates a new DependenciesChecker object.
+         *
+         * @constructor
+         */
+        var GanttDependenciesChecker = function(manager) {
+            function handleTaskConflict(conflictsList, task) {
+                if (!(task.model.id in conflictsList) && task.$element) {
+                    task.$element.addClass('gantt-task-conflict');
+                    conflictsList[task.model.id] = task;
+                }
+            }
+
+            function handleTaskNonConflict(conflictsList, allTasks) {
+                for (var i = 0, l = allTasks.length; i < l; i++) {
+                    var task = allTasks[i];
+                    if (!(task.model.id in conflictsList) && task.$element) {
+                        task.$element.removeClass('gantt-task-conflict');
+                    }
+                }
+            }
+
+            /**
+             * Refresh the conflict status of given tasks.
+             *
+             * @param tasks
+             */
+            this.refresh = function(tasks) {
+                var allTasks = tasks.slice(0);
+                var conflictsList = [];
+
+                for (var i = 0; i < tasks.length; i++) {
+                    var taskDependencies = manager.getTaskDependencies(tasks[i]);
+
+                    for (var j = 0; j < taskDependencies.length; j++) {
+                        var dependency = taskDependencies[j];
+
+                        var fromTask = dependency.getFromTask();
+                        var toTask = dependency.getToTask();
+
+                        if (!(fromTask in allTasks)) {
+                            allTasks.push(fromTask);
+                        }
+
+                        if (!(toTask in allTasks)) {
+                            allTasks.push(toTask);
+                        }
+
+                        if (fromTask.model.to > toTask.model.from) {
+                            handleTaskConflict(conflictsList, fromTask);
+                            handleTaskConflict(conflictsList, toTask);
+                        }
+                    }
+                }
+
+                handleTaskNonConflict(conflictsList, allTasks);
+            };
+
+            this.removeConflictClass = function(task) {
+                task.$element.removeClass('gantt-task-conflict');
+            };
+
+            /**
+             * Remove the conflict status of given tasks.
+             *
+             * @param tasks
+             */
+            this.clear = function(tasks) {
+                var allTasks = tasks.slice(0);
+                handleTaskNonConflict([], allTasks);
+            };
+
+        };
+        return GanttDependenciesChecker;
+    }]);
+}());
+
+(function() {
+    'use strict';
+
+    angular.module('gantt').factory('GanttDependenciesEvents', [function() {
+        /**
+         * Creates a new DependenciesEvents object.
+         *
+         * @param manager DependenciesManager object
+         * @constructor
+         */
+        var DependenciesEvents = function(manager) {
+            var self = this;
+
+            this.manager = manager;
+
+            // Deny the start of a drag when in readonly
+            var denyDragWhenReadOnly = function () {
+                return !self.manager.pluginScope.readOnly;
+            };
+
+            this.manager.plumb.bind('beforeDrag', denyDragWhenReadOnly);
+            this.manager.plumb.bind('beforeStartDetach', denyDragWhenReadOnly);
+
+            // Deny drop on the same task.
+            var denyDropOnSameTask = function(params) {
+                return params.sourceId !== params.targetId;
+            };
+
+            this.manager.plumb.bind('beforeDrop', denyDropOnSameTask);
+
+
+            // Notify the manager that a connection is being created.
+            this.manager.plumb.bind('connectionDrag', function(connection) {
+                self.manager.setDraggingConnection(connection);
+            });
+
+            this.manager.plumb.bind('connectionDragStop', function() {
+                self.manager.setDraggingConnection(undefined);
+            });
+
+            this.manager.plumb.bind('beforeDrop', function() {
+                self.manager.setDraggingConnection(undefined);
+                return true;
+            });
+
+            var isChildTask = function(sourceModel, targetEndpoint) {
+                var isChild = false;
+
+                if (sourceModel.children && sourceModel.children.length > 0) {
+                    var toTask = targetEndpoint.$task;
+                    if (sourceModel.children.indexOf(toTask.model.id) >= 0 || sourceModel.children.indexOf(toTask.model.name) >= 0) {
+                        isChild = true;
+                    }
+                }
+
+                return isChild;
+            };
+
+            var createConnection = function(info, mouseEvent) {
+
+
+                if (mouseEvent) {
+                    var oldDependency;
+                    if (info.connection.$dependency) {
+                        oldDependency = info.connection.$dependency;
+                    }
+
+                    var sourceEndpoint = info.sourceEndpoint;
+                    var targetEndpoint = info.targetEndpoint;
+
+                    var sourceModel = sourceEndpoint.$task.model;
+
+                    if (isChildTask(sourceModel, targetEndpoint)) {
+                        sourceEndpoint.detachFrom(targetEndpoint);
+                        return;
+                    }
+
+                    var dependenciesModel = sourceModel.dependencies;
+                    if (dependenciesModel === undefined) {
+                        dependenciesModel = [];
+                        sourceModel.dependencies = dependenciesModel;
+                    }
+
+                    var connectionModel = {to: targetEndpoint.$task.model.id};
+                    dependenciesModel.push(connectionModel);
+
+                    if (oldDependency) {
+                        oldDependency.removeFromTaskModel();
+                        self.manager.removeDependency(oldDependency, true); // Connection will be disconnected later by jsPlumb.
+                    }
+
+                    var dependency = self.manager.addDependency(sourceEndpoint.$task, connectionModel);
+                    info.connection.$dependency = dependency;
+                    dependency.connection = info.connection;
+
+                    self.manager.api.dependencies.raise.add(dependency);
+
+                }
+            };
+
+            var updateConnection = function(info, mouseEvent) {
+                if (mouseEvent) {
+                    var oldDependency;
+                    if (info.connection.$dependency) {
+                        oldDependency = info.connection.$dependency;
+                    }
+
+                    var sourceEndpoint = info.newSourceEndpoint;
+                    var targetEndpoint = info.newTargetEndpoint;
+
+                    var sourceModel = sourceEndpoint.$task.model;
+
+                    if (isChildTask(sourceModel, targetEndpoint)) {
+                        sourceEndpoint.detachFrom(targetEndpoint);
+                        return;
+                    }
+
+                    var dependenciesModel = sourceModel.dependencies;
+                    if (dependenciesModel === undefined) {
+                        dependenciesModel = [];
+                        sourceModel.dependencies = dependenciesModel;
+                    }
+
+                    var connectionModel = {to: targetEndpoint.$task.model.id};
+                    dependenciesModel.push(connectionModel);
+
+                    if (oldDependency) {
+                        oldDependency.removeFromTaskModel();
+                        self.manager.removeDependency(oldDependency, true); // Connection will be disconnected later by jsPlumb.
+                    }
+
+                    var dependency = self.manager.addDependency(sourceEndpoint.$task, connectionModel);
+                    info.connection.$dependency = dependency;
+                    dependency.connection = info.connection;
+
+                    self.manager.api.dependencies.raise.change(dependency, oldDependency);
+                }
+            };
+
+            var deleteConnection = function(info, mouseEvent) {
+                if (mouseEvent) {
+                    var dependency = info.connection.$dependency;
+
+                    dependency.removeFromTaskModel();
+                    self.manager.removeDependency(dependency, true); // Connection will be disconnected later by jsPlumb.
+                    self.manager.api.dependencies.raise.remove(dependency);
+                }
+            };
+
+            this.manager.plumb.bind('connectionMoved', updateConnection);
+            this.manager.plumb.bind('connection', createConnection);
+            this.manager.plumb.bind('connectionDetached', deleteConnection);
+
+        };
+        return DependenciesEvents;
+    }]);
+}());
+
+(function() {
+    'use strict';
+
+    angular.module('gantt').factory('GanttDependenciesTaskManager', ['GanttDependency', 'ganttDom', 'GanttDependenciesEvents', 'GanttDependencyTaskMouseHandler', 'DependenciesTracker', function(Dependency, dom, DependenciesEvents, TaskMouseHandler, Tracker) {
+        var DependenciesManager = function(gantt, pluginScope, api) {
+            this.gantt = gantt;
+            this.rowsManager = gantt.rowsManager;
+            this.pluginScope = pluginScope.$ctrl;
+            this.api = api;
+
+            this.plumb = Tracker.getPlumbInstance();
+            this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
+
+            this.rowsManager.dependenciesFrom = {};
+            this.rowsManager.dependenciesTo = {};
+            this.task = null;
+
+            this.events = new DependenciesEvents(this);
+        };
+
+        var hasDependencies = function(task) {
+            var taskDependencies = task.model.dependencies;
+
+            return taskDependencies !== undefined && taskDependencies;
+        };
+
+        var hasReadOnly = function(task) {
+            var data = task.row.model.data;
+
+            return (data)? data.readOnly : false;
+        };
+
+
+        /**
+         * Add all dependencies defined from a task. Dependencies will be added only if plugin is enabled.
+         *
+         * @param task
+         */
+        DependenciesManager.prototype.addDependenciesFromTask = function(task) {
+            if (this.pluginScope.enabled && hasDependencies(task)) {
+                var taskDependencies = task.model.dependencies;
+
+                if (!angular.isArray(taskDependencies)) {
+                    taskDependencies = [taskDependencies];
+                    task.model.dependencies = taskDependencies;
+                }
+
+                for (var i = 0; i < taskDependencies.length; i++) {
+                    var dependency = this.addDependency(task, taskDependencies[i]);
+
+                    if (dependency) {
+                        dependency.connect();
+                    }
+                }
+            }
+        };
+
+        /**
+        * Add definition of a dependency.
+        *
+        * @param task Task defining the dependency.
+        * @param model Model object for the dependency.
+        * @param allowPartial if true, dependency linking to a missing task will still be added.
+        */
+        DependenciesManager.prototype.addDependency = function(task, model) {
+            var dependency = new Dependency(this, task, model);
+            Tracker.addDependency(dependency);
+
+            return dependency;
+        };
+
+        DependenciesManager.prototype.getTask = function(id) {
+            var task = Tracker.getTaskByID(id);
+
+            if (!task) {
+                Tracker.getTaskGroupByID(id);
+            }
+
+            return task;
+        };
+
+        DependenciesManager.prototype.getTaskDependencies = function(task) {
+            return Tracker.getTaskDependencies(task);
+        };
+
+        /**
+         * Remove definition of a dependency
+         *
+         * @param dependency Dependency object
+         * @param keepConnection if true, dependency will not be disconnected.
+         */
+        DependenciesManager.prototype.removeDependency = function(dependency, keepConnection) {
+            var fromDependencies = Tracker.getDependenciesFromByID(dependency.getFromTaskId());
+            var fromRemove = [];
+            var i = 0;
+
+            if (fromDependencies) {
+                for (i = 0; i < fromDependencies.length; i++) {
+                    if (dependency === fromDependencies[i]) {
+                        fromRemove.push(dependency);
+                    }
+                }
+            }
+
+            var toDependencies = Tracker.getDependenciesToByID(dependency.getToTaskId());
+            var toRemove = [];
+
+            if (toDependencies) {
+                for (i = 0; i < toDependencies.length; i++) {
+                    if (dependency === toDependencies[i]) {
+                        toRemove.push(dependency);
+                    }
+                }
+            }
+
+            for (i = 0; i < fromRemove.length; i++) {
+                if (!keepConnection) {
+                    fromRemove[i].disconnect();
+                }
+                fromDependencies.splice(fromDependencies.indexOf(dependency), 1);
+            }
+
+            for (i = 0; i < toRemove.length; i++) {
+                if (!keepConnection) {
+                    toRemove[i].disconnect();
+                }
+                toDependencies.splice(toDependencies.indexOf(dependency), 1);
+            }
+
+            if (Tracker.getDependenciesFromByID(dependency.getFromTaskId()) &&
+            Tracker.getDependenciesFromByID(dependency.getFromTaskId()).length === 0) {
+                Tracker.deleteFromDependencyByID(dependency.getFromTaskId());
+            }
+
+            if (Tracker.getDependenciesToByID(dependency.getToTaskId()) &&
+            Tracker.getDependenciesToByID(dependency.getToTaskId()).length === 0) {
+                Tracker.deleteToDependencyByID(dependency.getToTaskId());
+            }
+        };
+
+        /**
+         * Remove all dependencies defined for a task.
+         *
+         * @param task
+         * @param keepConnection if true, dependency will not be disconnected.
+         */
+        DependenciesManager.prototype.removeDependenciesFromTask = function(task, keepConnection) {
+            var dependencies = this.getTaskDependencies(task);
+
+            if (dependencies) {
+                for (var i = 0; i < dependencies.length; i++) {
+                    if (!keepConnection) {
+                        dependencies[i].disconnect();
+                    }
+
+                    this.removeDependency(dependencies[i], keepConnection);
+                }
+            }
+        };
+
+        DependenciesManager.prototype.getFromTaskDependencies = function(task) {
+            return Tracker.getFromTaskDependenciesByTask(task);
+        };
+
+        DependenciesManager.prototype.getToTaskDependencies = function(task) {
+            return Tracker.getToTaskDependenciesByTask(task);
+        };
+
+        DependenciesManager.prototype.addTask = function(task) {
+            Tracker.addTask(task);
+        };
+
+        DependenciesManager.prototype.addTaskGroup = function(taskGroup) {
+            Tracker.addTaskGroup(taskGroup);
+        };
+
+        var taskDependencyAcction = function(tasks, release) {
+            var isTaskVisible = function(task) {
+                if (task === undefined || task.$element === undefined) {
+                    return false;
+                }
+                var element = task.$element[0];
+                return dom.isElementVisible(element);
+            };
+
+            for (var key in tasks) {
+                var task = tasks[key];
+
+                if (!hasReadOnly(task) && isTaskVisible(task)) {
+                    if (release) {
+                        task.dependencies.mouseHandler.release();
+                    } else {
+                        task.dependencies.mouseHandler.install();
+                    }
+                }
+
+            }
+
+        };
+
+         DependenciesManager.prototype.setDraggingConnection = function(connection) {
+             var allTasks = Tracker.getAllTask();
+             if (connection) {
+                 this.draggingConnection = connection;
+                taskDependencyAcction(allTasks, true);
+             } else {
+                 this.draggingConnection = undefined;
+                 taskDependencyAcction(allTasks);
+             }
+
+         };
+
+         var addTaskEndpoints = function(task) {
+            if (!task.dependencies) {
+                task.dependencies = {};
+            }
+
+            task.dependencies.endpoints = [];
+
+            if (this.pluginScope.endpoints && task.$element) {
+                for (var i = 0; i < this.pluginScope.endpoints.length; i++) {
+                    var endpointObject = this.plumb.addEndpoint(task.$element, this.pluginScope.endpoints[i]);
+                    endpointObject.setVisible(false, true, true); // hide endpoint
+                    endpointObject.$task = task;
+                    task.dependencies.endpoints.push(endpointObject);
+                }
+            }
+
+         };
+
+        var removeTaskEndpoint = function(task) {
+            if (task.dependencies && task.dependencies.endpoints) {
+                for (var i = 0; i < task.dependencies.endpoints.length; i++) {
+                    var endpointObject = task.dependencies.endpoints[i];
+                    this.plumb.deleteEndpoint(endpointObject);
+                    endpointObject.$task = undefined;
+                }
+
+                task.dependencies.endpoints = undefined;
+            }
+        };
+
+        var addTaskMouseHandler = function(task) {
+            if (!task.dependencies) {
+                task.dependencies = {};
+            }
+
+            if (!this.pluginScope.readOnly && !hasReadOnly(task)) {
+                task.dependencies.mouseHandler = new TaskMouseHandler(this, task);
+                task.dependencies.mouseHandler.install();
+            }
+        };
+
+        var removeTaskMouseHandler = function(task) {
+            if (task.dependencies && task.dependencies.mouseHandler) {
+                task.dependencies.mouseHandler.release();
+                task.dependencies.mouseHandler = undefined;
+            }
+        };
+
+        var isTaskEnabled = function(task) {
+            var rowDependencies = task.row.model.dependencies;
+            if (rowDependencies !== undefined) {
+                return rowDependencies !== false;
+            }
+            var taskDependencies = task.model.dependencies;
+            if (taskDependencies !== undefined) {
+                return taskDependencies !== false;
+            }
+            return true;
+        };
+
+        DependenciesManager.prototype.setTasks = function(task, isTask) {
+            if (isTaskEnabled(task)) {
+                addTaskMouseHandler.call(this, task);
+                addTaskEndpoints.call(this, task);
+
+                if (isTask) {
+                    Tracker.addTask(task, this.rowsManager);
+                } else {
+                    Tracker.addTaskGroup(task, this.rowsManager);
+                }
+
+            }
+        };
+
+        DependenciesManager.prototype.removeAll = function(task) {
+            removeTaskMouseHandler(task);
+            removeTaskEndpoint.call(this, task);
+        };
+
+        DependenciesManager.prototype.removeGroup = function(taskGroup) {
+            if (taskGroup.dependencies) {
+                removeTaskMouseHandler(taskGroup);
+                removeTaskEndpoint.call(this, taskGroup);
+            }
+        };
+
+        DependenciesManager.prototype.setGroup = function(taskGroup) {
+            removeTaskMouseHandler(taskGroup);
+            removeTaskEndpoint.call(this, taskGroup);
+
+            if (isTaskEnabled(taskGroup)) {
+                addTaskMouseHandler.call(this, taskGroup);
+                addTaskEndpoints.call(this, taskGroup);
+            }
+        };
+
+
+        var disconnectTaskDependencies = function(task) {
+            var dependencies = this.getTaskDependencies(task);
+            if (dependencies) {
+                for (var i = 0; i < dependencies.length; i++) {
+                    dependencies[i].disconnect();
+                }
+            }
+
+            return dependencies;
+        };
+
+        var connectTaskDependencies = function(task) {
+            var dependencies = this.getTaskDependencies(task);
+            if (dependencies) {
+                for (var i = 0; i < dependencies.length; i++) {
+                    dependencies[i].connect();
+                }
+            }
+
+            return dependencies;
+        };
+
+        DependenciesManager.prototype.setTask = function(task) {
+            this.plumb.setSuspendDrawing(true);
+            try {
+                var oldTask = Tracker.getTaskByID(task.model.id);
+                var isTask = true;
+
+                if (!oldTask) {
+                    oldTask = Tracker.getTaskGroupByID(task.model.id);
+                    isTask = false;
+                }
+
+                if (oldTask !== undefined) {
+                    disconnectTaskDependencies.call(this, oldTask);
+                    removeTaskMouseHandler(oldTask);
+                    removeTaskEndpoint.call(this, oldTask);
+                }
+
+                if (isTaskEnabled(task)) {
+                    if (isTask) {
+                        Tracker.addTask(task);
+                    } else {
+                        Tracker.addTaskGroup(task);
+                    }
+
+                    addTaskEndpoints.call(this, task);
+                    addTaskMouseHandler.call(this, task);
+                    connectTaskDependencies.call(this, task);
+                }
+            } finally {
+                this.plumb.setSuspendDrawing(false, true);
+            }
+        };
+
+        var getSourceEndpoints = function(task) {
+            return task.dependencies.endpoints.filter(function(endpoint) {
+                return endpoint.isSource;
+            });
+        };
+
+        var getTargetEndpoints = function(task) {
+            return task.dependencies.endpoints.filter(function(endpoint) {
+                return endpoint.isTarget;
+            });
+        };
+
+        /**
+         * Connects two tasks together using source endpoint from fromTask and target endpoint from toTask.
+         *
+         * @param fromTask
+         * @param toTask
+         * @param model
+         * @returns connection object
+         */
+         DependenciesManager.prototype.connect = function(fromTask, toTask, model) {
+            var sourceEndpoints = getSourceEndpoints(fromTask);
+            var targetEndpoints = getTargetEndpoints(toTask);
+            if (sourceEndpoints && targetEndpoints) {
+                var sourceEndpoint;
+                var targetEndpoint;
+
+                if (model.connectParameters && model.connectParameters.sourceEndpointIndex) {
+                    sourceEndpoint = sourceEndpoints[model.connectParameters.sourceEndpointIndex];
+                } else {
+                    sourceEndpoint = sourceEndpoints[0];
+                }
+
+                if (model.connectParameters && model.connectParameters.targetEndpointIndex) {
+                    targetEndpoint = targetEndpoints[model.connectParameters.targetEndpointIndex];
+                } else {
+                    targetEndpoint = targetEndpoints[0];
+                }
+
+                var connection = this.plumb.connect({
+                    source: sourceEndpoint,
+                    target: targetEndpoint
+                }, model.connectParameters);
+
+                return connection;
+            }
+        };
+
+        /**
+         * Get all defined dependencies.
+         *
+         * @returns {Array}
+         */
+        DependenciesManager.prototype.getDependencies = function() {
+            return Tracker.getDependencies();
+        };
+
+        DependenciesManager.prototype.refresh = function(tasks) {
+            this.plumb.setSuspendDrawing(true);
+            var self = this;
+            try {
+                var tasksDependencies;
+                var i;
+
+                if (tasks && !angular.isArray(tasks)) {
+                    tasks = [tasks];
+                }
+
+                if (!tasks) {
+                    tasks = Tracker.getAllTask();
+                    tasksDependencies = this.getDependencies();
+                } else {
+                    tasksDependencies = [];
+                    angular.forEach(tasks, function(task) {
+                        var taskDependencies = self.getTaskDependencies(task);
+                        angular.forEach(taskDependencies, function(taskDependency) {
+                            if (!(taskDependency in tasksDependencies)) {
+                                tasksDependencies.push(taskDependency);
+                            }
+                        });
+                    });
+                }
+
+                for (i = 0; i < tasksDependencies.length; i++) {
+                    this.removeDependency(tasksDependencies[i]);
+                }
+
+                angular.forEach(tasks, function(task) {
+                    this.addDependenciesFromTask(task);
+                });
+
+            }  finally {
+                self.plumb.setSuspendDrawing(false, true);
+            }
+        };
+
+
+        return DependenciesManager;
+    }]);
+}());
+
+(function() {
+    'use strict';
+
+    angular.module('gantt')
+        .factory('DependenciesTracker', [function() {
+        var tracker = {
+            _dependenciesFrom: {},
+            _dependenciesTo: {},
+            tasks: {},
+            groups: {}
+        };
+        var hasInitContainer = false;
+
+        tracker.setContainer = function(containerElement, api) {
+            if (!hasInitContainer) {
+                hasInitContainer = true;
+                tracker._jsPlumb = jsPlumb.getInstance();
+                tracker._jsPlumb.setContainer(containerElement);
+            }
+        };
+
+        tracker.getPlumbInstance = function() {
+            return tracker._jsPlumb;
+        };
+
+        tracker.addDependency = function(dependency) {
+            var fromTaskId = dependency.getFromTaskId();
+            var toTaskId = dependency.getToTaskId();
+
+            if (!(fromTaskId in this._dependenciesFrom)) {
+                this._dependenciesFrom[fromTaskId] = [];
+            }
+            if (!(toTaskId in this._dependenciesTo)) {
+                this._dependenciesTo[toTaskId] = [];
+            }
+
+            if (fromTaskId) {
+                this._dependenciesFrom[fromTaskId].push(dependency);
+            }
+
+            if (toTaskId) {
+                this._dependenciesTo[toTaskId].push(dependency);
+            }
+
+            return dependency;
+        };
+
+        tracker.getTaskDependencies = function(task) {
+            var dependencies = [];
+
+            if (task) {
+                var fromDependencies = this._dependenciesFrom[task.model.id];
+
+                if (fromDependencies) {
+                    dependencies = dependencies.concat(fromDependencies);
+                }
+
+                var toDependencies = this._dependenciesTo[task.model.id];
+
+                if (toDependencies) {
+                    dependencies = dependencies.concat(toDependencies);
+                }
+            }
+
+            return dependencies;
+        };
+
+        tracker.getDependenciesFromByID = function(id) {
+            return this._dependenciesFrom[id];
+        };
+
+        tracker.getDependenciesToByID = function(id) {
+            return this._dependenciesTo[id];
+        };
+
+        tracker.deleteFromDependencyByID = function(id) {
+            delete this._dependenciesFrom[id];
+        };
+
+        tracker.deleteToDependencyByID = function(id) {
+            delete this._dependenciesTo[id];
+        };
+
+        tracker.getFromTaskDependenciesByTask = function(task) {
+            var dependencies = [];
+
+            if (task) {
+                var fromDependencies = this._dependenciesFrom[task.model.id];
+
+                if (fromDependencies) {
+                    dependencies = dependencies.concat(fromDependencies);
+                }
+
+            }
+
+            return dependencies;
+        };
+
+        tracker.getDependencies = function() {
+            var allDependencies = [];
+
+            angular.forEach(this._dependenciesFrom, function(dependencies) {
+                for (var i = 0; i < dependencies.length; i++) {
+                    if (!(dependencies[i] in allDependencies)) {
+                        allDependencies.push(dependencies[i]);
+                    }
+                }
+            });
+
+            return allDependencies;
+        };
+
+        tracker.getToTaskDependenciesByTask = function(task) {
+            var dependencies = [];
+
+            if (task) {
+                var fromDependencies = this._dependenciesTo[task.model.id];
+
+                if (fromDependencies) {
+                    dependencies = dependencies.concat(fromDependencies);
+                }
+
+            }
+
+            return dependencies;
+        };
+
+        tracker.addTask = function(task) {
+            if (!(task.model.id in this.tasks)) {
+                this.tasks[task.model.id] = task;
+            }
+
+        };
+
+        tracker.addTaskGroup = function(taskGroup) {
+            if (!(taskGroup.model.id in this.groups)) {
+                this.groups[taskGroup.model.id] = taskGroup;
+            }
+        };
+
+        tracker.getAllTask = function() {
+            return angular.extend(this.tasks, this.groups);
+        };
+
+        tracker.getFromDependenciesObject = function() {
+            return this._dependenciesFrom;
+        };
+
+        tracker.getTaskByID = function(id) {
+            return this.tasks[id];
+        };
+
+        tracker.getTaskGroupByID = function(id) {
+            return this.groups[id];
+        };
+
+
+        return tracker;
+    }]);
+})();
+
+(function() {
+    'use strict';
+
+    angular.module('gantt').factory('GanttDependency', ['ganttUtils', 'ganttDom', function(utils, dom) {
+        /**
+         * Constructor of Dependency object.
+         * 
+         * @param manager Dependency manager used by this dependency
+         * @param task Task declaring the dependency
+         * @param model model of the dependency
+         *
+         * @constructor
+         *
+         * @see https://jsplumbtoolkit.com/community/apidocs/classes/jsPlumb.html#method_connect
+         */
+        var Dependency = function(manager, task, model) {
+            var self = this;
+
+            this.manager = manager;
+            this.task = task;
+            this.model = model;
+            this.connection = undefined;
+            this.fallbackEndpoints = [];
+
+            /**
+             * Check if this dependency is connected.
+             *
+             * @returns {boolean}
+             */
+            this.isConnected = function() {
+                if (this.connection) {
+                    return true;
+                }
+                return false;
+            };
+
+            /**
+             * Disconnect this dependency.
+             */
+            this.disconnect = function() {
+                if (this.connection) {
+                    if (this.connection.endpoints) {
+                        this.manager.plumb.detach(this.connection);
+                    }
+                    this.connection.$dependency = undefined;
+                    this.connection = undefined;
+                }
+
+                this.deleteFallbackEndpoints();
+            };
+
+            this.deleteFallbackEndpoints = function() {
+                if (this.fallbackEndpoints) {
+                    for (var i=0; i<this.fallbackEndpoints.length; i++) {
+                        self.manager.plumb.deleteEndpoint(this.fallbackEndpoints[i]);
+                    }
+                    this.fallbackEndpoints = [];
+                }
+            };
+
+            this.getFromTaskId = function() {
+                if (this.model.from !== undefined) {
+                    return this.model.from;
+                }
+                return this.task.model.id;
+            };
+
+            this.getToTaskId = function() {
+                if (this.model.to !== undefined) {
+                    return this.model.to;
+                }
+                return this.task.model.id;
+            };
+
+            this.getFromTask = function() {
+                if (this.model.from !== undefined) {
+                    return this.manager.getTask(this.model.from);
+                }
+                return this.task;
+            };
+
+            this.getToTask = function() {
+                if (this.model.to !== undefined) {
+                    return this.manager.getTask(this.model.to);
+                }
+                return this.task;
+            };
+
+            this.removeFromTaskModel = function() {
+                var modelIndex = utils.angularIndexOf(this.task.model.dependencies, this.model);
+                if (modelIndex >= 0) {
+                    this.task.model.dependencies.splice(modelIndex, 1);
+                }
+                return modelIndex;
+            };
+
+            var isTaskVisible = function(task) {
+                if (task === undefined || task.$element === undefined) {
+                    return false;
+                }
+                var element = task.$element[0];
+                return dom.isElementVisible(element);
+            };
+
+            /**
+             * Connect this dependency if both elements are available.
+             *
+             * @returns {boolean}
+             */
+            this.connect = function() {
+                var fromTask = this.getFromTask();
+                var toTask = this.getToTask();
+                if (!isTaskVisible(fromTask)) {
+                    fromTask = undefined;
+                }
+
+                if (!isTaskVisible(toTask)) {
+                    toTask = undefined;
+                }
+
+                if (fromTask && toTask) {
+                    var connection = this.manager.connect(fromTask, toTask, this.model);
+                    if (connection) {
+                        connection.$dependency = this;
+                        this.connection = connection;
+                        return true;
+                    }
+                }
+
+                this.deleteFallbackEndpoints();
+                if (fromTask !== undefined) {
+                    var toFallbackEndpoint = this.manager.pluginScope.fallbackEndpoints[1];
+                    this.fallbackEndpoints.push(this.manager.plumb.addEndpoint(fromTask.$element, toFallbackEndpoint));
+                }
+                if (toTask !== undefined) {
+                    var fromFallbackEndpoint = this.manager.pluginScope.fallbackEndpoints[0];
+                    this.fallbackEndpoints.push(this.manager.plumb.addEndpoint(toTask.$element, fromFallbackEndpoint));
+                }
+                return false;
+            };
+        };
+        return Dependency;
+    }]);
+}());
+
+(function() {
+    'use strict';
+
+    angular.module('gantt').factory('GanttDependencyTaskMouseHandler', ['$timeout', function($timeout) {
+        var TaskMouseHandler = function(manager, task) {
+            var self = this;
+
+            this.manager = manager;
+            this.task = task;
+            this.installed = false;
+            this.elementHandlers = [];
+
+            this.display = true;
+            this.hideEndpointsPromise = undefined;
+
+            /**
+             * Handler for a single DOM element.
+             *
+             * @param element
+             * @constructor
+             */
+            var ElementHandler = function(element) {
+                this.element = element;
+
+                this.mouseExitHandler = function() {
+                    $timeout.cancel(self.hideEndpointsPromise);
+                    self.hideEndpointsPromise = $timeout(self.hideEndpoints, 1000, false);
+                };
+
+                this.mouseEnterHandler = function() {
+                    $timeout.cancel(self.hideEndpointsPromise);
+                    self.displayEndpoints();
+                };
+
+                this.install = function() {
+                    this.element.bind('mouseenter', this.mouseEnterHandler);
+                    this.element.bind('mouseleave', this.mouseExitHandler);
+                };
+
+                this.release = function() {
+                    this.element.unbind('mouseenter', this.mouseEnterHandler);
+                    this.element.unbind('mouseleave', this.mouseExitHandler);
+                    $timeout.cancel(self.hideEndpointsPromise);
+                };
+
+            };
+
+
+
+            /**
+             * Install mouse handler for this task, and hide all endpoints.
+             */
+            this.install = function() {
+                if (!self.installed) {
+                    self.hideEndpoints();
+
+                    if (self.task.getContentElement()) {
+                        self.elementHandlers.push(new ElementHandler(self.task.getContentElement()));
+                        angular.forEach(self.task.dependencies.endpoints, function(endpoint) {
+                            self.elementHandlers.push(new ElementHandler(angular.element(endpoint.canvas)));
+                        });
+
+                        angular.forEach(self.elementHandlers, function(elementHandler) {
+                            elementHandler.install();
+                        });
+
+                        self.installed = true;
+                    }
+                }
+            };
+
+            /**
+             * Release mouse handler for this task, and display all endpoints.
+             */
+            this.release = function() {
+                if (self.installed) {
+                    angular.forEach(self.elementHandlers, function(elementHandler) {
+                        elementHandler.release();
+                    });
+
+                    self.elementHandlers = [];
+
+                    self.displayEndpoints();
+                    self.installed = false;
+                }
+            };
+
+            /**
+             * Display all endpoints for this task.
+             */
+            this.displayEndpoints = function() {
+                self.display = true;
+                angular.forEach(self.task.dependencies.endpoints, function(endpoint) {
+                    endpoint.setVisible(true, true, true);
+                });
+            };
+
+            /**
+             * Hide all endpoints for this task.
+             */
+            this.hideEndpoints = function() {
+                angular.forEach(self.task.dependencies.endpoints, function(endpoint) {
+                    endpoint.setVisible(false, true, true);
+                });
+                self.display = false;
+            };
+        };
+        return TaskMouseHandler;
+    }]);
+}());
+
+(function() {
+    'use strict';
     angular.module('gantt').factory('Gantt', [
         'GanttApi', 'GanttOptions', 'GanttCalendar', 'GanttScroll', 'GanttBody', 'GanttRowHeader', 'GanttHeader', 'GanttSide', 'GanttObjectModel', 'GanttRowsManager', 'GanttColumnsManager', 'GanttTimespansManager', 'GanttCurrentDateManager', 'ganttArrays', 'moment', '$document', '$timeout',
         function(GanttApi, Options, Calendar, Scroll, Body, RowHeader, Header, Side, ObjectModel, RowsManager, ColumnsManager, TimespansManager, CurrentDateManager, arrays, moment, $document, $timeout) {
@@ -2424,18 +3545,12 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             self.tasks = [];
             self.to = undefined;
             self.from = undefined;
-            this.addTaskByDescendants();
-
-            self.left = row.rowsManager.gantt.getPositionByDate(self.from);
-            self.width = row.rowsManager.gantt.getPositionByDate(self.to) - self.left;
-
-            // LINE FOR TALAIA
             this.createModel();
         };
 
         TaskGroup.prototype.getContentElement = function() {
             if (this.$element !== undefined) {
-                
+
                 return this.$element;
             }
         };
@@ -2468,6 +3583,14 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             }
         };
 
+        TaskGroup.prototype.generateValues = function() {
+            this.addTaskByDescendants();
+
+            this.left = this.row.rowsManager.gantt.getPositionByDate(this.from);
+            this.width = this.row.rowsManager.gantt.getPositionByDate(this.to) - this.left;
+            this.createModel();
+        };
+
         TaskGroup.prototype.createModel = function() {
             this.model = this.row.model;
             this.model.from = this.row.from;
@@ -2489,13 +3612,13 @@ Github: https://github.com/angular-gantt/angular-gantt.git
         };
 
         TaskGroup.prototype.setFromToByTask = function(task) {
-            if (this.from === undefined ||task.model.from < this.from) {
+            if (this.from === undefined || this.from > task.model.from) {
                 this.from = task.model.from;
                 this.row.model.from = this.from;
             }
 
-            if (this.to === undefined || task.model.to > this.to) {
-                this.to = task.model.to
+            if (this.to === undefined || this.to < task.model.to) {
+                this.to = task.model.to;
                 this.row.model.to = this.to;
             }
         };
@@ -2846,14 +3969,14 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 (function() {
     'use strict';
-    angular.module('gantt').factory('GanttRowsManager', ['GanttRow', 'ganttArrays', '$filter', '$timeout', 'moment', function(Row, arrays, $filter, $timeout, moment) {
+    angular.module('gantt').factory('GanttRowsManager', ['GanttRow', 'ganttArrays', '$filter', '$timeout', 'moment', 'DependenciesTracker', function(Row, arrays, $filter, $timeout, moment, Tracker) {
         var RowsManager = function(gantt) {
             var self = this;
 
             this.gantt = gantt;
 
             this.rowsMap = {};
-            this.taskMap = {}; 
+            this.taskMap = {};
             this.rows = [];
             this.sortedRows = [];
             this.filteredRows = [];
@@ -2942,8 +4065,20 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
 
             this.gantt.api.registerEvent('rows', 'filter');
+            this.gantt.api.registerEvent('dependencies', 'add');
+            this.gantt.api.registerEvent('dependencies', 'change');
+            this.gantt.api.registerEvent('dependencies', 'remove');
+            this.gantt.api.registerEvent('dependencies', 'checker');
+            this.gantt.api.registerEvent('dependencies', 'checked');
+            this.gantt.api.registerEvent('dependencies', 'onChild');
+            this.gantt.api.registerEvent('dependencies', 'refresh');
+            this.gantt.api.registerEvent('dependencies', 'updateJsPlumb');
 
             this.updateVisibleObjects();
+
+            this.gantt.api.dependencies.on.checker(this.gantt.$scope, function() {
+                self.gantt.api.dependencies.raise.checked(Tracker.getDependencies());
+            })
         };
 
         RowsManager.prototype.resetNonModelLists = function() {
@@ -3014,7 +4149,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 }
 
                 row.updateVisibleTasks();
-                for (var i = 0; i < row.tasks.length; i++) {
+                for (i = 0; i < row.tasks.length; i++) {
                     var task = row.tasks[i];
                     this.taskMap[task.model.id] = task;
                 }
@@ -3258,7 +4393,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 visibleTasks = visibleTasks.concat(row.visibleTasks);
                 tasks = tasks.concat(row.tasks);
             }
-            
+
             this.gantt.api.tasks.raise.displayed(tasks, filteredTasks, visibleTasks);
             var filterEvent = !angular.equals(oldFilteredTasks, filteredTasks);
 
@@ -4123,7 +5258,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             },
 
             raiseDestroyDirective: function(directiveName, $scope, $element, $attrs, controller) {
-                $scope.gantt.api.directives.raise.new(directiveName, $scope, $element, $attrs, controller);
+                $scope.gantt.api.directives.raise.destroy(directiveName, $scope, $element, $attrs, controller);
             },
 
             raiseAll: function(directiveName, $scope, $element, $attrs, controller) {
@@ -4473,7 +5608,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     return {
                       index: str.replace(/[a-zA-Z]/g, ''),
                       lag: lag
-                    }
+                    };
                   });
             }
         };
@@ -4964,9 +6099,10 @@ Github: https://github.com/angular-gantt/angular-gantt.git
     'use strict';
     angular.module('gantt').directive('ganttBody', ['GanttDirectiveBuilder', function(Builder) {
         var builder = new Builder('ganttBody');
-        builder.controller = function($scope, $element) {
+        builder.controller = function($scope, $element, $attrs, ctrl) {
             $scope.gantt.body.$element = $element;
             $scope.gantt.body.$scope = $scope;
+            ctrl.$element = $element[0];
         };
         return builder.build();
     }]);
@@ -5077,6 +6213,137 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 (function(){
     'use strict';
     angular.module('gantt')
+        .component('ganttDependenciesComponent', {
+            require: {
+                ganttCMP: '^gantt',
+                ganttBody: '^ganttBody'
+            },
+            bindings: {
+                task: '='
+            },
+            controller: ['$scope', '$element', 'ganttDebounce', 'DependenciesTracker', 'GanttDependenciesTaskManager', 'GanttDependenciesChecker',
+            function($scope, $element, debounce, Tracker, DependenciesTaskManager, DependenciesChecker) {
+                var manager, checker, api;
+                var watcher;
+                var self = this;
+
+                function createLeftOverlay() {
+                    return angular.element('<span><span class="gantt-endpoint-overlay start-endpoint arrow-right"></span></span>');
+                }
+
+                function createRightOverlay() {
+                    return angular.element('<span><span class="gantt-endpoint-overlay end-endpoint arrow-right"></span></span>');
+                }
+
+                function createLeftFallbackOverlay() {
+                    return angular.element('<span><span class="gantt-endpoint-overlay start-endpoint fallback-endpoint"></span></span>');
+                }
+
+                function createRightFallbackOverlay() {
+                    return angular.element('<span><span class="gantt-endpoint-overlay end-endpoint fallback-endpoint"></span></span>');
+                }
+
+                this.$onInit = function() {
+                    api = this.ganttCMP.gantt.api;
+                    this.$scope = $scope;
+                    this.hierarchy = true;
+                    this.conflictChecker = false;
+                    this.readOnly = false;
+                    this.enabled = true;
+
+                    this.jsPlumbDefaults = {
+                        Endpoint: ['Dot', {radius: 4}],
+                        EndpointStyle: {fillStyle: '#456', strokeStyle: '#456', lineWidth: 1},
+                        Connector: 'Flowchart',
+                        ConnectionOverlays: [['Arrow', {location: 1, length: 12, width: 12}]]
+                    };
+
+                    this.endpoints = [
+                        {
+                        anchor: 'Left',
+                        isSource: false,
+                        isTarget: true,
+                        maxConnections: -1,
+                        cssClass: 'gantt-endpoint start-endpoint target-endpoint',
+                        overlays: [
+                            ['Custom', {create: createLeftOverlay}]
+                        ]
+
+                        }, {
+                            anchor: 'Right',
+                            isSource: true,
+                            isTarget: false,
+                            maxConnections: -1,
+                            cssClass: 'gantt-endpoint end-endpoint source-endpoint',
+                            overlays: [
+                                ['Custom', {create: createRightOverlay}]
+                            ]
+                        }
+                    ];
+
+                    this.fallbackEndpoints = [
+                        {
+                            endpoint: 'Blank',
+                            anchor: 'Left',
+                            isSource: false,
+                            isTarget: true,
+                            maxConnections: 0,
+                            cssClass: 'gantt-endpoint start-endpoint fallback-endpoint',
+                            overlays: [
+                                ['Custom', {create: createLeftFallbackOverlay}]
+                            ]
+                        }, {
+                            endpoint: 'Blank',
+                            anchor: 'Right',
+                            isSource: true,
+                            isTarget: false,
+                            maxConnections: 0,
+                            cssClass: 'gantt-endpoint end-endpoint fallback-endpoint',
+                            overlays: [
+                                ['Custom', {create: createRightFallbackOverlay}]
+                            ]
+                        }
+                    ];
+
+                    Tracker.setContainer(this.ganttBody.$element);
+                    manager = new DependenciesTaskManager(this.ganttCMP.gantt, $scope, api);
+                    checker = new DependenciesChecker(manager, $scope, api);
+                };
+
+                var isTask = function(task) {
+                    return !task.row.model.children;
+                };
+
+                this.$postLink = function() {
+                    manager.removeAll(this.task);
+                    manager.setTasks(this.task, isTask(this.task));
+
+                    api.tasks.on.remove($scope, function(task) {
+                        manager.removeDependenciesFromTask(task);
+                    });
+
+                    api.tasks.on.displayed($scope, debounce(function() {
+                        manager.addDependenciesFromTask(self.task);
+                    }));
+
+                    watcher = $scope.$watchGroup(['$ctrl.task.width', '$ctrl.task.left'], function() {
+                        manager.plumb.revalidate(self.task.$element[0]);
+                    });
+                };
+
+                this.$onDestroy = function() {
+                    manager.removeAll(this.task);
+                    watcher();
+                };
+
+
+            }]
+        });
+}());
+
+(function(){
+    'use strict';
+    angular.module('gantt')
         .component('ganttTaskMilestone', {
             require: {
                 taskCMP: '^ganttTaskComponent'
@@ -5085,10 +6352,9 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 item: '=',
                 task: '='
             },
-            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
-            function ControllerFn($scope, $element, $attrs, GanttComponentService) {
+            controller: ['$scope', '$element', '$attrs',
+            function ControllerFn($scope, $element, $attrs) {
                 var self = this;
-                console.log(this);
 
                 this.simplifyMoment = function(d) {
                     return moment.isMoment(d) ? d.unix() : d;
@@ -5115,6 +6381,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             templateUrl: 'template/ganttTaskMilestoneItem.tmpl.html'
         });
 }());
+
 (function(){
     'use strict';
     angular.module('gantt')
@@ -5260,33 +6527,39 @@ Github: https://github.com/angular-gantt/angular-gantt.git
         .component('ganttTaskGroupComponent', {
             bindings: {},
             require: {
-              rowCMP: '^ganttRowComponent'  
+              rowCMP: '^ganttRowComponent'
             },
-            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 'GanttHierarchy',  'GanttTaskGroup',
-            function ControllerFn($scope, $element, $attrs, GanttComponentService, Hierarchy, TaskGroup) {
+            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 'GanttHierarchy',  'GanttTaskGroup', 'ganttDom',
+            function ControllerFn($scope, $element, $attrs, GanttComponentService, Hierarchy, TaskGroup, dom) {
                 var self = this;
 
                 var updateTaskGroup = function() {
-                    self.taskGroup = new TaskGroup(self.rowCMP.row, self);
+                    if(!self.taskGroup) {
+                        self.taskGroup = new TaskGroup(self.rowCMP.row, self);
+                    } else {
+                        self.taskGroup.from = undefined;
+                        self.taskGroup.to = undefined;
+                    }
 
+                    self.taskGroup.generateValues();
                     self.rowCMP.row.setFromTo();
                     self.rowCMP.row.setFromToByValues(self.taskGroup.from, self.taskGroup.to);
                     $element.css({'left': self.taskGroup.left + 'px', 'width': self.taskGroup.width + 'px'});
                     self.taskGroup.$element = $element;
-
+                    self.isVisible = dom.isTaskGroupVisible(self.gantt.api, self.taskGroup.from, self.taskGroup.to);
                     self.rowCMP.ganttInstance.api.groups.raise.displayed(self.taskGroup);
                     self.rowCMP.ganttInstance.api.groups.raise.viewChange(self.taskGroup);
                 };
 
                 var addListener = function() {
                     self.rowCMP.ganttInstance.api.tasks.on.viewChange($scope, updateTaskGroup);
-                    console.log(self.taskGroup);
                 };
 
 
                 this.$onInit = function() {
                     this.hierarchy = new Hierarchy();
                     this.gantt = this.rowCMP.ganttInstance;
+                    this.isVisible = true;
                 };
 
                 this.$postLink = function() {
@@ -5305,10 +6578,12 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                         '<div class="gantt-task-group-right-main"></div>',
                         '<div class="gantt-task-group-left-symbol"></div>',
                         '<div class="gantt-task-group-right-symbol"></div>',
+                        '<gantt-dependencies-component task="$ctrl.taskGroup" ng-if="$ctrl.taskGroup && $ctrl.isVisible"></gantt-dependencies-component>'
                         ].join('')
-        
+
         });
 }());
+
 (function(){
     'use strict';
     angular.module('gantt')
@@ -5319,9 +6594,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             bindings: {
                 task: '='
             },
-            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
-            function ControllerFn($scope, $element, $attrs, GanttComponentService) {
-                var self = this;
+            controller: [function ControllerFn() {
                 var toPaint = false;
                 var manager = null;
 
@@ -5332,11 +6605,11 @@ Github: https://github.com/angular-gantt/angular-gantt.git
 
                 this.$onInit = function() {
                    manager = this.task.rowsManager;
-                   
+
                    if (this.task.model.base) {
                        toPaint = isDefined(this.task.model.base.from) && isDefined(this.task.model.base.to);
                    }
-                   
+
                    if (toPaint) {
                        this.task.model.base.from = moment(this.task.model.base.from).startOf('day');
                        this.task.model.base.to = moment(this.task.model.base.to).endOf('day');
@@ -5348,20 +6621,21 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     if (this.task.model.base) {
                         var left = manager.gantt.getPositionByDate(this.task.model.base.from);
                         var width = manager.gantt.getPositionByDate(this.task.model.base.to);
-                        
+
                         css = {
                             left: left + 'px',
                             width: width - left + 'px'
                         };
                     }
 
-                    return css; 
+                    return css;
                 };
             }],
             template: ['<div class="gantt-task-base-line" ng-style="$ctrl.getCss()" ng-if="$ctrl.ganttCMP.gantt.$scope.baselineEnabled"></div>'].join('')
-        
+
         });
 }());
+
 (function(){
     'use strict';
     angular.module('gantt')
@@ -5370,10 +6644,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 'taskCMP': '^ganttTaskComponent'
             },
             transclude: true,
-            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
-            function ControllerFn($scope, $element, $attrs, GanttComponentService) {
-                var self = this;
-
+            controller: [function ControllerFn() {
                 this.$onInit = function() {
                     this.task = this.taskCMP.task;
                 };
@@ -5386,9 +6657,10 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     '</div>',
                 '</div>'
             ].join('')
-        
+
         });
 }());
+
 (function(){
     'use strict';
     angular.module('gantt')
@@ -5396,8 +6668,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             require: {
                 'taskCMP': '^ganttTaskComponent'
             },
-            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
-            function ControllerFn($scope, $element, $attrs, GanttComponentService) {
+            controller: [function ControllerFn() {
                 var self = this;
 
                 this.getCss = function() {
@@ -5425,9 +6696,10 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     return css;
                 };
             }],
-            template: ['<div class="gantt-task-progress" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.progressEnabled" ng-style="$ctrl.getCss()"></div>'].join('') 
+            template: ['<div class="gantt-task-progress" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.progressEnabled" ng-style="$ctrl.getCss()"></div>'].join('')
         });
 }());
+
 (function(){
     'use strict';
     angular.module('gantt')
@@ -5436,17 +6708,50 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                 taskCMP: '^ganttTaskComponent',
                 ganttCMP: '^gantt'
             },
-            controller: ['$scope', '$element', '$log','$timeout', '$compile', '$document', '$templateCache', 'ganttDebounce', 'ganttSmartEvent', 
+            controller: ['$scope', '$element', '$log', '$timeout', '$compile', '$document', '$templateCache', 'ganttDebounce', 'ganttSmartEvent',
             function ControllerFn($scope, $element, $log, $timeout, $compile, $document, $templateCache, debounce, smartEvent) {
                 var self = this;
                 var bodyElement = angular.element($document[0].body);
-                var parentElement = undefined;
+                var parentElement;
                 var showTooltipPromise;
-                var visible = undefined;
+                var visible;
                 var mouseEnterX;
                 var mouseMoveHandler;
-                var api = undefined;
-                var task = undefined;
+                var api;
+                var task;
+
+                var displayTooltip = function(newValue, showDelayed) {
+                    if (showTooltipPromise) {
+                        $timeout.cancel(showTooltipPromise);
+                    }
+
+                    var taskTooltips = task.model.tooltips;
+                    var rowTooltips = task.row.model.tooltips;
+
+                    if (typeof(taskTooltips) === 'boolean') {
+                        taskTooltips = {enabled: taskTooltips};
+                    }
+
+                    if (typeof(rowTooltips) === 'boolean') {
+                        rowTooltips = {enabled: rowTooltips};
+                    }
+
+                    var enabled = self.enabled;
+                    if (enabled && !visible && mouseEnterX !== undefined && newValue) {
+
+                        if (showDelayed) {
+                            showTooltipPromise = $timeout(function() {
+                                showTooltip(mouseEnterX);
+                            }, 500, false);
+                        } else {
+                            showTooltip(mouseEnterX);
+                        }
+                    } else if (!newValue) {
+                        if (!task.active) {
+                            hideTooltip();
+                        }
+                    }
+                };
 
                 self.$onInit = function() {
                     // Init task
@@ -5454,15 +6759,11 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     // Set defaults, add provider to customize default values
                     self.enabled = true;
                     self.dateFormat = 'MMM DD, HH:mm';
-                    self.content = '{{$ctrl.taskCMP.task.model.name}}</br>'+
-                                    '<small>'+
-                                    '{{$ctrl.taskCMP.task.isMilestone() === true && $ctrl.getFromLabel() || $ctrl.getFromLabel() + \' - \' + $ctrl.getToLabel()}}'+
-                                    '</small>';
                     self.delay = 500;
 
                     api = self.ganttCMP.gantt.api;
                     parentElement = task.$element;
-                    visible = false;  
+                    visible = false;
                 };
 
                 self.$postLink = function() {
@@ -5486,7 +6787,17 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     });
                 };
 
+                self.updatePosition = function() {
+                    var childElement = $element.find('article');
+                    childElement.css('left', (mouseEnterX - 20 - $element[0].offsetWidth) + 'px');
+                }
+
                 self.$onDestroy = function() {
+                    task.getContentElement().unbind('mousemove');
+
+                    task.getContentElement().unbind('mouseenter');
+
+                    task.getContentElement().unbind('mouseleave');
                 };
 
                 self.getFromLabel = function() {
@@ -5530,11 +6841,11 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     var childElement = $element.find('article');
                     // Check if info is overlapping with view port
                     if (x + $element[0].offsetWidth > getViewPortWidth()) {
-                        childElement.css('left', (x + 20 - $element[0].offsetWidth) + 'px');
                         self.isRightAligned = true;
+                        childElement.css('left', (x + 20 - $element[0].offsetWidth) + 'px');
                     } else {
-                        childElement.css('left', (x - 20) + 'px');
                         self.isRightAligned = false;
+                        childElement.css('left', (x - 20) + 'px');
                     }
                 };
 
@@ -5567,41 +6878,6 @@ Github: https://github.com/angular-gantt/angular-gantt.git
                     });
                 };
 
-                var displayTooltip = function(newValue, showDelayed) {
-                    if (showTooltipPromise) {
-                        $timeout.cancel(showTooltipPromise);
-                    }
-
-                    var taskTooltips = task.model.tooltips;
-                    var rowTooltips = task.row.model.tooltips;
-
-                    if (typeof(taskTooltips) === 'boolean') {
-                        taskTooltips = {enabled: taskTooltips};
-                    }
-
-                    if (typeof(rowTooltips) === 'boolean') {
-                        rowTooltips = {enabled: rowTooltips};
-                    }
-
-                    var enabled = self.enabled;
-                    if (enabled && !visible && mouseEnterX !== undefined && newValue) {
-                        var content = self.content;
-                        self.content = content;
-
-                        if (showDelayed) {
-                            showTooltipPromise = $timeout(function() {
-                                showTooltip(mouseEnterX);
-                            }, 500, false);
-                        } else {
-                            showTooltip(mouseEnterX);
-                        }
-                    } else if (!newValue) {
-                        if (!task.active) {
-                            hideTooltip();
-                        }
-                    }
-                };
-
                 mouseMoveHandler = smartEvent($scope, bodyElement, 'mousemove', debounce(function(e) {
                     if (!visible) {
                         mouseEnterX = e.clientX;
@@ -5627,6 +6903,7 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             templateUrl: 'template/ganttTaskTooltip.tmpl.html'
         });
 }());
+
 (function(){
     'use strict';
     angular.module('gantt').directive('ganttHeader', ['GanttDirectiveBuilder', function(Builder) {
@@ -6020,6 +7297,25 @@ Github: https://github.com/angular-gantt/angular-gantt.git
             },
             isElementVisible: function(element) {
                 return element.offsetParent !== undefined && element.offsetParent !== null;
+            },
+            isTaskGroupVisible: function(api, fromDate, toDate) {
+                var isShowing = true;
+                var dateRanges = api.columns.getDateRange(true);
+
+                if (dateRanges) {
+                    var firstDate = dateRanges[0];
+                    var lastDate = dateRanges[1];
+
+                    if (firstDate.diff(toDate) > 0) {
+                        isShowing = false;
+                    }
+
+                    if (lastDate.diff(fromDate) < 0) {
+                        isShowing = false;
+                    }
+                }
+
+                return isShowing;
             }
         };
     }]);
@@ -6258,7 +7554,7 @@ angular.module('gantt.templates', []).run(['$templateCache', function($templateC
         '            <div ng-show="$parent.gantt.options.value(\'allowSideResizing\')" class="gantt-resizer-display"></div>\n' +
         '        </div>\n' +
         '    </gantt-side>\n' +
-        '    \n' +
+        '\n' +
         '    <gantt-scrollable-header>\n' +
         '        <gantt-header gantt-element-height-listener="$parent.ganttHeaderHeight">\n' +
         '            <gantt-header-columns>\n' +
@@ -6283,35 +7579,36 @@ angular.module('gantt.templates', []).run(['$templateCache', function($templateC
         '                    <gantt-time-frame ng-repeat="timeFrame in column.visibleTimeFrames"></gantt-time-frame>\n' +
         '                </gantt-column>\n' +
         '            </gantt-body-columns>\n' +
-        '            \n' +
+        '\n' +
         '            <div ng-if="gantt.columnsManager.visibleColumns == 0" style="background-color: #808080"></div>\n' +
-        '            \n' +
+        '\n' +
         '            <gantt-body-rows>\n' +
-        '                <gantt-row-component class="gantt-row gantt-row-height gantt-block" \n' +
+        '                <gantt-row-component class="gantt-row gantt-row-height gantt-block"\n' +
         '                    ng-repeat="row in gantt.rowsManager.visibleRows"\n' +
         '                    row="row"\n' +
         '                    gantt-instance="gantt"\n' +
         '                    ng-class-odd="\'gantt-row-odd\'"\n' +
         '                    ng-class-even="\'gantt-row-even\'">\n' +
-        '                    \n' +
-        '                    <gantt-task-group-component \n' +
-        '                        class="gantt-task-group" \n' +
+        '\n' +
+        '                    <gantt-task-group-component\n' +
+        '                        class="gantt-task-group"\n' +
         '                        ng-if="row.model.children">\n' +
+        '                        <gantt-task-group-plugins></gantt-task-group-plugins>\n' +
         '                    </gantt-task-group-component>\n' +
         '\n' +
         '                    <gantt-task-component\n' +
-        '                        ng-repeat="task in row.visibleTasks track by task.model.id" \n' +
+        '                        ng-repeat="task in row.visibleTasks track by task.model.id"\n' +
         '                        task="task"\n' +
         '                        class="gantt-task">\n' +
-        '                        \n' +
+        '\n' +
         '                        <gantt-task-tooltip-component></gantt-task-tooltip-component>\n' +
         '\n' +
         '                        <gantt-task-milestones-component></gantt-task-milestones-component>\n' +
         '                        <gantt-dependencies-component task="task"></gantt-dependencies-component>\n' +
         '                    </gantt-task-component>\n' +
-        '                    \n' +
+        '\n' +
         '                    <gantt-task-line-component\n' +
-        '                        ng-repeat="task in row.visibleTasks track by task.model.id" \n' +
+        '                        ng-repeat="task in row.visibleTasks track by task.model.id"\n' +
         '                        ng-if="!row.model.children"\n' +
         '                        task="task">\n' +
         '                    </gantt-task-line-component>\n' +
@@ -6447,7 +7744,7 @@ angular.module('gantt.templates', []).run(['$templateCache', function($templateC
         '    </script>\n' +
         '\n' +
         '    <script type="text/ng-template" id="template/ganttTaskMilestoneItem.tmpl.html">\n' +
-        '        <div class="task-milestones-container" tooltip-template="\'template/milestoneTooltip.tmpl.html\'" \n' +
+        '        <div class="task-milestones-container" tooltip-template="\'template/milestoneTooltip.tmpl.html\'"\n' +
         '            tooltip-placement="top-right" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.milestonesEnabled">\n' +
         '            <span class="gantt-task-milestone-item milestone-item-top"></span>\n' +
         '            <span class="gantt-task-milestone-item milestone-item-bottom"></span>\n' +
@@ -6465,7 +7762,8 @@ angular.module('gantt.templates', []).run(['$templateCache', function($templateC
         '         class="gantt-task-info"\n' +
         '         ng-if="$ctrl.displayed"\n' +
         '         ng-class="$ctrl.isRightAligned ? \'gantt-task-infoArrowR\' : \'gantt-task-infoArrow\'"\n' +
-        '         ng-style="{top: $ctrl.taskRect.top + \'px\', marginTop: 2 * (-$ctrl.elementHeight - 8) + \'px\'}">\n' +
+        '         ng-style="{top: $ctrl.taskRect.top + \'px\', marginTop: 2 * (-$ctrl.elementHeight - 8) + \'px\'}"\n' +
+        '         ng-init="$ctrl.updatePosition()">\n' +
         '            <div class="gantt-task-info-content">\n' +
         '                {{$ctrl.taskCMP.task.model.name}}</br>\n' +
         '                <small>{{$ctrl.taskCMP.task.isMilestone() === true ? $ctrl.getFromLabel() : $ctrl.getFromLabel()  + " - " + $ctrl.getToLabel()}}\n' +

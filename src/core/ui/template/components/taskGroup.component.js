@@ -4,7 +4,7 @@
         .component('ganttTaskGroupComponent', {
             bindings: {},
             require: {
-              rowCMP: '^ganttRowComponent'  
+              rowCMP: '^ganttRowComponent'
             },
             controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 'GanttHierarchy',  'GanttTaskGroup', 'ganttDom',
             function ControllerFn($scope, $element, $attrs, GanttComponentService, Hierarchy, TaskGroup, dom) {
@@ -48,10 +48,6 @@
                     this.hierarchy.refresh(this.gantt.rowsManager.filteredRows);
                 };
 
-                this.$onDestroy = function() {
-                    console.log(self.rowCMP.ganttInstance.api.groups.raise);
-                };
-
                 $scope.$watch('$ctrl.gantt.rowsManager.filteredRows', updateTaskGroup);
             }],
             template:  [
@@ -61,6 +57,6 @@
                         '<div class="gantt-task-group-right-symbol"></div>',
                         '<gantt-dependencies-component task="$ctrl.taskGroup" ng-if="$ctrl.taskGroup && $ctrl.isVisible"></gantt-dependencies-component>'
                         ].join('')
-        
+
         });
 }());

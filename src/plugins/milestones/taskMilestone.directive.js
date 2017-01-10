@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   angular.module('gantt.milestones')
-    .directive('ganttTaskMilestones', ['moment', function(moment) {
+    .directive('ganttTaskMilestones', ['moment', '$templateCache', function(moment, $templateCache) {
       return {
         restrict: 'E',
         templateUrl: function(tElement, tAttrs) {

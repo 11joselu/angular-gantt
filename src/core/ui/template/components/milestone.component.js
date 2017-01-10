@@ -9,10 +9,9 @@
                 item: '=',
                 task: '='
             },
-            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
-            function ControllerFn($scope, $element, $attrs, GanttComponentService) {
+            controller: ['$scope', '$element', '$attrs',
+            function ControllerFn($scope, $element, $attrs) {
                 var self = this;
-                console.log(this);
 
                 this.simplifyMoment = function(d) {
                     return moment.isMoment(d) ? d.unix() : d;

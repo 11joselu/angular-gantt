@@ -18,7 +18,7 @@
 
         TaskGroup.prototype.getContentElement = function() {
             if (this.$element !== undefined) {
-                
+
                 return this.$element;
             }
         };
@@ -86,7 +86,7 @@
             }
 
             if (this.to === undefined || this.to < task.model.to) {
-                this.to = task.model.to
+                this.to = task.model.to;
                 this.row.model.to = this.to;
             }
         };

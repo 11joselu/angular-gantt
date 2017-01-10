@@ -43,7 +43,22 @@
                 return true;
             });
 
+            var isChildTask = function(sourceModel, targetEndpoint) {
+                var isChild = false;
+
+                if (sourceModel.children && sourceModel.children.length > 0) {
+                    var toTask = targetEndpoint.$task;
+                    if (sourceModel.children.indexOf(toTask.model.id) >= 0 || sourceModel.children.indexOf(toTask.model.name) >= 0) {
+                        isChild = true;
+                    }
+                }
+
+                return isChild;
+            };
+
             var createConnection = function(info, mouseEvent) {
+
+
                 if (mouseEvent) {
                     var oldDependency;
                     if (info.connection.$dependency) {
@@ -54,6 +69,11 @@
                     var targetEndpoint = info.targetEndpoint;
 
                     var sourceModel = sourceEndpoint.$task.model;
+
+                    if (isChildTask(sourceModel, targetEndpoint)) {
+                        sourceEndpoint.detachFrom(targetEndpoint);
+                        return;
+                    }
 
                     var dependenciesModel = sourceModel.dependencies;
                     if (dependenciesModel === undefined) {
@@ -89,6 +109,11 @@
                     var targetEndpoint = info.newTargetEndpoint;
 
                     var sourceModel = sourceEndpoint.$task.model;
+
+                    if (isChildTask(sourceModel, targetEndpoint)) {
+                        sourceEndpoint.detachFrom(targetEndpoint);
+                        return;
+                    }
 
                     var dependenciesModel = sourceModel.dependencies;
                     if (dependenciesModel === undefined) {

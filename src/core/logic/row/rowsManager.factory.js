@@ -1,13 +1,13 @@
 (function() {
     'use strict';
-    angular.module('gantt').factory('GanttRowsManager', ['GanttRow', 'ganttArrays', '$filter', '$timeout', 'moment', function(Row, arrays, $filter, $timeout, moment) {
+    angular.module('gantt').factory('GanttRowsManager', ['GanttRow', 'ganttArrays', '$filter', '$timeout', 'moment', 'DependenciesTracker', function(Row, arrays, $filter, $timeout, moment, Tracker) {
         var RowsManager = function(gantt) {
             var self = this;
 
             this.gantt = gantt;
 
             this.rowsMap = {};
-            this.taskMap = {}; 
+            this.taskMap = {};
             this.rows = [];
             this.sortedRows = [];
             this.filteredRows = [];
@@ -96,8 +96,20 @@
 
 
             this.gantt.api.registerEvent('rows', 'filter');
+            this.gantt.api.registerEvent('dependencies', 'add');
+            this.gantt.api.registerEvent('dependencies', 'change');
+            this.gantt.api.registerEvent('dependencies', 'remove');
+            this.gantt.api.registerEvent('dependencies', 'checker');
+            this.gantt.api.registerEvent('dependencies', 'checked');
+            this.gantt.api.registerEvent('dependencies', 'onChild');
+            this.gantt.api.registerEvent('dependencies', 'refresh');
+            this.gantt.api.registerEvent('dependencies', 'updateJsPlumb');
 
             this.updateVisibleObjects();
+
+            this.gantt.api.dependencies.on.checker(this.gantt.$scope, function() {
+                self.gantt.api.dependencies.raise.checked(Tracker.getDependencies());
+            })
         };
 
         RowsManager.prototype.resetNonModelLists = function() {
@@ -168,7 +180,7 @@
                 }
 
                 row.updateVisibleTasks();
-                for (var i = 0; i < row.tasks.length; i++) {
+                for (i = 0; i < row.tasks.length; i++) {
                     var task = row.tasks[i];
                     this.taskMap[task.model.id] = task;
                 }
@@ -412,7 +424,7 @@
                 visibleTasks = visibleTasks.concat(row.visibleTasks);
                 tasks = tasks.concat(row.tasks);
             }
-            
+
             this.gantt.api.tasks.raise.displayed(tasks, filteredTasks, visibleTasks);
             var filterEvent = !angular.equals(oldFilteredTasks, filteredTasks);
 

@@ -8,15 +8,6 @@
             this.pluginScope = pluginScope.$ctrl;
             this.api = api;
 
-            this.api.registerEvent('dependencies', 'add');
-            this.api.registerEvent('dependencies', 'change');
-            this.api.registerEvent('dependencies', 'remove');
-            this.api.registerEvent('dependencies', 'checker');
-            this.api.registerEvent('dependencies', 'checked');
-            this.api.registerEvent('dependencies', 'onChild');
-            this.api.registerEvent('dependencies', 'refresh');
-            this.api.registerEvent('dependencies', 'updateJsPlumb');
-
             this.plumb = Tracker.getPlumbInstance();
             this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
 
@@ -29,13 +20,13 @@
 
         var hasDependencies = function(task) {
             var taskDependencies = task.model.dependencies;
-            
+
             return taskDependencies !== undefined && taskDependencies;
         };
 
         var hasReadOnly = function(task) {
             var data = task.row.model.data;
-            
+
             return (data)? data.readOnly : false;
         };
 
@@ -48,12 +39,12 @@
         DependenciesManager.prototype.addDependenciesFromTask = function(task) {
             if (this.pluginScope.enabled && hasDependencies(task)) {
                 var taskDependencies = task.model.dependencies;
-                
+
                 if (!angular.isArray(taskDependencies)) {
                     taskDependencies = [taskDependencies];
                     task.model.dependencies = taskDependencies;
                 }
-                
+
                 for (var i = 0; i < taskDependencies.length; i++) {
                     var dependency = this.addDependency(task, taskDependencies[i]);
 
@@ -79,7 +70,7 @@
         };
 
         DependenciesManager.prototype.getTask = function(id) {
-            var task = Tracker.getTaskByID(id); 
+            var task = Tracker.getTaskByID(id);
 
             if (!task) {
                 Tracker.getTaskGroupByID(id);
@@ -101,9 +92,10 @@
         DependenciesManager.prototype.removeDependency = function(dependency, keepConnection) {
             var fromDependencies = Tracker.getDependenciesFromByID(dependency.getFromTaskId());
             var fromRemove = [];
+            var i = 0;
 
             if (fromDependencies) {
-                for (var i = 0; i < fromDependencies.length; i++) {
+                for (i = 0; i < fromDependencies.length; i++) {
                     if (dependency === fromDependencies[i]) {
                         fromRemove.push(dependency);
                     }
@@ -114,21 +106,21 @@
             var toRemove = [];
 
             if (toDependencies) {
-                for (var i = 0; i < toDependencies.length; i++) {
+                for (i = 0; i < toDependencies.length; i++) {
                     if (dependency === toDependencies[i]) {
                         toRemove.push(dependency);
                     }
                 }
             }
 
-            for (var i = 0; i < fromRemove.length; i++) {
+            for (i = 0; i < fromRemove.length; i++) {
                 if (!keepConnection) {
                     fromRemove[i].disconnect();
                 }
                 fromDependencies.splice(fromDependencies.indexOf(dependency), 1);
             }
 
-            for (var i = 0; i < toRemove.length; i++) {
+            for (i = 0; i < toRemove.length; i++) {
                 if (!keepConnection) {
                     toRemove[i].disconnect();
                 }
@@ -137,7 +129,7 @@
 
             if (Tracker.getDependenciesFromByID(dependency.getFromTaskId()) &&
             Tracker.getDependenciesFromByID(dependency.getFromTaskId()).length === 0) {
-                Tracker.deleteFromDependencyByID(dependency.getFromTaskId())
+                Tracker.deleteFromDependencyByID(dependency.getFromTaskId());
             }
 
             if (Tracker.getDependenciesToByID(dependency.getToTaskId()) &&
@@ -155,7 +147,7 @@
         DependenciesManager.prototype.removeDependenciesFromTask = function(task, keepConnection) {
             var dependencies = this.getTaskDependencies(task);
 
-            if (dependendencies) {
+            if (dependencies) {
                 for (var i = 0; i < dependencies.length; i++) {
                     if (!keepConnection) {
                         dependencies[i].disconnect();
@@ -175,11 +167,11 @@
         };
 
         DependenciesManager.prototype.addTask = function(task) {
-            Track.addTask(task);
+            Tracker.addTask(task);
         };
 
         DependenciesManager.prototype.addTaskGroup = function(taskGroup) {
-            Track.addTaskGroup(taskGroup);
+            Tracker.addTaskGroup(taskGroup);
         };
 
         var taskDependencyAcction = function(tasks, release) {
@@ -204,7 +196,7 @@
 
             }
 
-        }
+        };
 
          DependenciesManager.prototype.setDraggingConnection = function(connection) {
              var allTasks = Tracker.getAllTask();
@@ -319,7 +311,7 @@
             var dependencies = this.getTaskDependencies(task);
             if (dependencies) {
                 for (var i = 0; i < dependencies.length; i++) {
-                    dependendencies[i].disconnect();
+                    dependencies[i].disconnect();
                 }
             }
 
@@ -333,7 +325,7 @@
                     dependencies[i].connect();
                 }
             }
-            
+
             return dependencies;
         };
 
@@ -360,7 +352,7 @@
                     } else {
                         Tracker.addTaskGroup(task);
                     }
-                
+
                     addTaskEndpoints.call(this, task);
                     addTaskMouseHandler.call(this, task);
                     connectTaskDependencies.call(this, task);
@@ -439,32 +431,32 @@
                 }
 
                 if (!tasks) {
-                    tasks = Track.getAllTask();
+                    tasks = Tracker.getAllTask();
                     tasksDependencies = this.getDependencies();
                 } else {
                     tasksDependencies = [];
                     angular.forEach(tasks, function(task) {
                         var taskDependencies = self.getTaskDependencies(task);
                         angular.forEach(taskDependencies, function(taskDependency) {
-                            if (!taskDependency in tasksDependencies) {
+                            if (!(taskDependency in tasksDependencies)) {
                                 tasksDependencies.push(taskDependency);
                             }
                         });
                     });
                 }
 
-                for (var i = 0; i < tasksDependencies.length; i++) {
-                    this.removeDependency(taskDependencies[i]);
+                for (i = 0; i < tasksDependencies.length; i++) {
+                    this.removeDependency(tasksDependencies[i]);
                 }
 
                 angular.forEach(tasks, function(task) {
                     this.addDependenciesFromTask(task);
                 });
-                
+
             }  finally {
                 self.plumb.setSuspendDrawing(false, true);
             }
-        }; 
+        };
 
 
         return DependenciesManager;

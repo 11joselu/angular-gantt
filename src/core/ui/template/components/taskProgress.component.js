@@ -5,8 +5,7 @@
             require: {
                 'taskCMP': '^ganttTaskComponent'
             },
-            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
-            function ControllerFn($scope, $element, $attrs, GanttComponentService) {
+            controller: [function ControllerFn() {
                 var self = this;
 
                 this.getCss = function() {
@@ -34,6 +33,6 @@
                     return css;
                 };
             }],
-            template: ['<div class="gantt-task-progress" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.progressEnabled" ng-style="$ctrl.getCss()"></div>'].join('') 
+            template: ['<div class="gantt-task-progress" ng-if="$ctrl.taskCMP.ganttCMP.gantt.$scope.progressEnabled" ng-style="$ctrl.getCss()"></div>'].join('')
         });
 }());
