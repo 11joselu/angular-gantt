@@ -11,6 +11,7 @@
                 var self = this;
 
                 var updateTaskGroup = function() {
+                    self.refresh();
                     if(!self.taskGroup) {
                         self.taskGroup = new TaskGroup(self.rowCMP.row, self);
                     } else {

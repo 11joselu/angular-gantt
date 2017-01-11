@@ -52,6 +52,7 @@
         };
 
         TaskGroup.prototype.generateValues = function() {
+            this.descendants = this.pluginScope.hierarchy.descendants(this.row);
             this.addTaskByDescendants();
 
             this.left = this.row.rowsManager.gantt.getPositionByDate(this.from);

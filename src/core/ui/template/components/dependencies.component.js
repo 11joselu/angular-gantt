@@ -96,6 +96,7 @@
                     Tracker.setContainer(this.ganttBody.$element);
                     manager = new DependenciesTaskManager(this.ganttCMP.gantt, $scope, api);
                     checker = new DependenciesChecker(manager, $scope, api);
+                    Tracker.initEvents(manager);
                 };
 
                 var isTask = function(task) {
@@ -110,12 +111,13 @@
                         manager.removeDependenciesFromTask(task);
                     });
 
-                    api.tasks.on.displayed($scope, debounce(function() {
-                        manager.addDependenciesFromTask(self.task);
-                    }));
+                    api.dependencies.on.refresh($scope, function() {
+                        manager.refresh();
+                    });
 
                     watcher = $scope.$watchGroup(['$ctrl.task.width', '$ctrl.task.left'], function() {
                         manager.plumb.revalidate(self.task.$element[0]);
+                        manager.refresh();
                     });
                 };
 

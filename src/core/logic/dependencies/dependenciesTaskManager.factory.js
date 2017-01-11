@@ -11,11 +11,7 @@
             this.plumb = Tracker.getPlumbInstance();
             this.plumb.importDefaults(this.pluginScope.jsPlumbDefaults);
 
-            this.rowsManager.dependenciesFrom = {};
-            this.rowsManager.dependenciesTo = {};
-            this.task = null;
-
-            this.events = new DependenciesEvents(this);
+            this.events = Tracker.getEvents();
         };
 
         var hasDependencies = function(task) {
@@ -450,7 +446,7 @@
                 }
 
                 angular.forEach(tasks, function(task) {
-                    this.addDependenciesFromTask(task);
+                    self.addDependenciesFromTask(task);
                 });
 
             }  finally {
