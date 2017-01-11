@@ -47,7 +47,6 @@
 
                 for (var i = 0; i < taskDependencies.length; i++) {
                     var dependency = this.addDependency(task, taskDependencies[i]);
-
                     if (dependency) {
                         dependency.connect();
                     }
@@ -271,6 +270,7 @@
         };
 
         DependenciesManager.prototype.setTasks = function(task, isTask) {
+            this.removeAll(task);
             if (isTaskEnabled(task)) {
                 addTaskMouseHandler.call(this, task);
                 addTaskEndpoints.call(this, task);
@@ -450,7 +450,7 @@
                 }
 
                 angular.forEach(tasks, function(task) {
-                    this.addDependenciesFromTask(task);
+                    self.addDependenciesFromTask(task);
                 });
 
             }  finally {

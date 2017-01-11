@@ -478,6 +478,11 @@
                     defaultFrom = this.rows[i].from;
                 }
             }
+
+            if (defaultFrom) {
+                defaultFrom = defaultFrom.clone().add(-1, 'month');
+            }
+
             return defaultFrom;
         };
 
@@ -488,6 +493,11 @@
                     defaultTo = this.rows[i].to;
                 }
             }
+
+            if (defaultTo) {
+                defaultTo = defaultTo.clone().add(1, 'week');
+            }
+
             return defaultTo;
         };
 

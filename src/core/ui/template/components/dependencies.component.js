@@ -41,9 +41,9 @@
 
                     this.jsPlumbDefaults = {
                         Endpoint: ['Dot', {radius: 4}],
-                        EndpointStyle: {fillStyle: '#456', strokeStyle: '#456', lineWidth: 1},
                         Connector: 'Flowchart',
-                        ConnectionOverlays: [['Arrow', {location: 1, length: 12, width: 12}]]
+                        ConnectionOverlays: [['Arrow', {location: 1, length: 12, width: 12}]],
+                        EndpointStyles : [{ fill:"red" }, { fill:"red" }]
                     };
 
                     this.endpoints = [
@@ -103,19 +103,20 @@
                 };
 
                 this.$postLink = function() {
-                    manager.removeAll(this.task);
                     manager.setTasks(this.task, isTask(this.task));
+                    manager.addDependenciesFromTask(self.task);
 
                     api.tasks.on.remove($scope, function(task) {
                         manager.removeDependenciesFromTask(task);
                     });
 
-                    api.tasks.on.displayed($scope, debounce(function() {
-                        manager.addDependenciesFromTask(self.task);
-                    }));
-
                     watcher = $scope.$watchGroup(['$ctrl.task.width', '$ctrl.task.left'], function() {
                         manager.plumb.revalidate(self.task.$element[0]);
+                        manager.refresh();
+                    });
+
+                    api.dependencies.on.refresh($scope, function() {
+                        manager.refresh();
                     });
                 };
 
