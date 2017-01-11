@@ -39,11 +39,12 @@
                     this.readOnly = false;
                     this.enabled = true;
 
-                    this.jsPlumbDefaults = {
-                        Endpoint: ['Dot', {radius: 4}],
+                    this.jsPlumbDefaults = this.task.jsPlumbDefaults || {
+                        Endpoint: ['Dot', {radius: 2.4}],
+                        EndpointStyle: {fillStyle: '#456', strokeStyle: '#456', lineWidth: 0.5},
+                        PaintStyle:{lineWidth:2, strokeStyle:"#979797"},
                         Connector: 'Flowchart',
-                        ConnectionOverlays: [['Arrow', {location: 1, length: 12, width: 12}]],
-                        EndpointStyles : [{ fill:"red" }, { fill:"red" }]
+                        ConnectionOverlays: [['Arrow', { location:1, length:12, width:12}]]
                     };
 
                     this.endpoints = [
