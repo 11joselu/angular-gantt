@@ -2,7 +2,7 @@
     'use strict';
 
     angular.module('gantt')
-        .factory('DependenciesTracker', [function() {
+        .factory('DependenciesTracker', ['GanttDependenciesEvents', function(DependenciesEvents) {
         var tracker = {
             _dependenciesFrom: {},
             _dependenciesTo: {},
@@ -10,6 +10,7 @@
             groups: {}
         };
         var hasInitContainer = false;
+        var hasInitEvents = false;
 
         tracker.setContainer = function(containerElement, api) {
             if (!hasInitContainer) {
@@ -22,6 +23,17 @@
         tracker.getPlumbInstance = function() {
             return tracker._jsPlumb;
         };
+
+        tracker.initEvents = function(manager) {
+            if (!hasInitEvents) {
+                hasInitEvents = true;
+                tracker._events = new DependenciesEvents(manager);
+            }
+        };
+
+        tracker.getEvents = function() {
+            return tracker._events;
+        }
 
         tracker.addDependency = function(dependency) {
             var fromTaskId = dependency.getFromTaskId();

@@ -58,7 +58,6 @@
 
             var createConnection = function(info, mouseEvent) {
 
-
                 if (mouseEvent) {
                     var oldDependency;
                     if (info.connection.$dependency) {
@@ -94,7 +93,6 @@
                     dependency.connection = info.connection;
 
                     self.manager.api.dependencies.raise.add(dependency);
-
                 }
             };
 
