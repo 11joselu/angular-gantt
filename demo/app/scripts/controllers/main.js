@@ -404,6 +404,7 @@ angular.module('angularGanttDemoApp')
                     ]
                 }
             ]
+            //$scope.data = Sample.getSampleData();
             $scope.data = data;
             dataToRemove = undefined;
 

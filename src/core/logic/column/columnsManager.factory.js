@@ -251,6 +251,19 @@
             return columns[0] === undefined ? columns[1]: columns[0];
         };
 
+        ColumnsManager.prototype.updateToColumns = function(unit) {
+            var firstColumn = this.getFirstColumn();
+            var lastColumn = this.getLastColumn();
+            this.columns = ColumnGenerator.generate(this.columnBuilder, firstColumn.date.add(-0.4, unit), lastColumn.endDate.add(5, unit), this.gantt.options.value('viewScale'), this.getColumnsWidth());
+            this.headers = HeadersGenerator.generate(this);
+
+            this.previousColumns = [];
+            this.nextColumns = [];
+            this.updateColumnsMeta();
+
+            this.gantt.api.columns.raise.generate(this.columns, this.headers);
+        };
+
         ColumnsManager.prototype.updateColumnsWidths = function(columns,  headers, previousColumns, nextColumns) {
             var columnWidth = this.gantt.options.value('columnWidth');
             var expandToFit = this.gantt.options.value('expandToFit');

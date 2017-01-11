@@ -476,6 +476,7 @@
             for (var i = 0; i < this.rows.length; i++) {
                 if (defaultFrom === undefined || this.rows[i].from < defaultFrom) {
                     defaultFrom = this.rows[i].from;
+                    this.gantt.firstDate = this.rows[i].from;
                 }
             }
 
@@ -491,10 +492,12 @@
             for (var i = 0; i < this.rows.length; i++) {
                 if (defaultTo === undefined || this.rows[i].to > defaultTo) {
                     defaultTo = this.rows[i].to;
+                    this.gantt.lastDate = this.rows[i].to;
                 }
             }
 
             if (defaultTo) {
+
                 defaultTo = defaultTo.clone().add(1, 'week');
             }
 

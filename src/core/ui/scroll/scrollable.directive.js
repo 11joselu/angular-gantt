@@ -52,6 +52,29 @@
                 var direction;
                 var date;
 
+                var viewScale = $scope.gantt.options.value('viewScale');
+                viewScale = viewScale.trim();
+
+                if (viewScale.charAt(viewScale.length - 1) === 's') {
+                    viewScale = viewScale.substring(0, viewScale.length - 1);
+                }
+
+                var viewScaleValue;
+                var viewScaleUnit;
+                var splittedViewScale;
+
+                if (viewScale) {
+                    splittedViewScale = viewScale.split(' ');
+                }
+                if (splittedViewScale && splittedViewScale.length > 1) {
+                    viewScaleValue = parseFloat(splittedViewScale[0]);
+                    viewScaleUnit = splittedViewScale[splittedViewScale.length - 1];
+                } else {
+                    viewScaleValue = 1;
+                    viewScaleUnit = viewScale;
+                }
+
+
                 $scope.gantt.scroll.cachedScrollLeft = currentScrollLeft;
                 $scope.gantt.columnsManager.updateVisibleColumns();
                 $scope.gantt.rowsManager.updateVisibleObjects();
@@ -75,6 +98,12 @@
                         autoExpandColumns(el, date, direction);
                     }, 300);
                 } else {
+                    var scrollWidth = el.scrollWidth - 1;
+
+                    if ((el.offsetWidth + currentScrollLeft) >= scrollWidth / 1.02) {
+                        $scope.gantt.columnsManager.updateToColumns(viewScaleUnit);
+                    }
+
                     $scope.gantt.api.scroll.raise.scroll(currentScrollLeft);
                 }
             }, 5));

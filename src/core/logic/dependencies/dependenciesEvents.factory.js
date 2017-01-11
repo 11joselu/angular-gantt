@@ -56,6 +56,42 @@
                 return isChild;
             };
 
+            var isCircularDependency = function(sourceModel, targetEndpoint) {
+                var toTask = targetEndpoint.$task;
+
+                var isDependency = isAlreadyDependency(toTask.model.dependencies, sourceModel);
+
+                return isDependency;
+            };
+
+            var isAlreadyDependency = function(dependencies, model) {
+                if (!dependencies) {
+                    return false;
+                }
+
+                return dependencies.some(function(dependency) {
+                    var exitFrom = dependency.from === model.id || dependency.from === model.name;
+                    var existTo = dependency.to === model.id || dependency.to === model.name;
+
+                    return exitFrom || existTo;
+                });
+            };
+
+            var isParent = function(sourceModel, targetEndpoint) {
+                var toTask = targetEndpoint.$task;
+                var isChild = false;
+
+                if (toTask.model.children) {
+                    isChild = toTask.model.children.indexOf(sourceModel.id) >= 0;
+
+                    if (!isChild) {
+                        isChild = toTask.model.children.indexOf(sourceModel.name) >= 0;
+                    }
+                }
+
+                return isChild;
+            };
+
             var createConnection = function(info, mouseEvent) {
 
                 if (mouseEvent) {
@@ -70,6 +106,16 @@
                     var sourceModel = sourceEndpoint.$task.model;
 
                     if (isChildTask(sourceModel, targetEndpoint)) {
+                        sourceEndpoint.detachFrom(targetEndpoint);
+                        return;
+                    }
+
+                    if (isCircularDependency(sourceModel, targetEndpoint)) {
+                        sourceEndpoint.detachFrom(targetEndpoint);
+                        return;
+                    }
+
+                    if (isParent(sourceModel, targetEndpoint)) {
                         sourceEndpoint.detachFrom(targetEndpoint);
                         return;
                     }
@@ -109,6 +155,16 @@
                     var sourceModel = sourceEndpoint.$task.model;
 
                     if (isChildTask(sourceModel, targetEndpoint)) {
+                        sourceEndpoint.detachFrom(targetEndpoint);
+                        return;
+                    }
+
+                    if (isCircularDependency(sourceModel, targetEndpoint)) {
+                        sourceEndpoint.detachFrom(targetEndpoint);
+                        return;
+                    }
+
+                    if (isParent(sourceModel, targetEndpoint)) {
                         sourceEndpoint.detachFrom(targetEndpoint);
                         return;
                     }

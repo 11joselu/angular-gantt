@@ -9,7 +9,7 @@
                 task: '='
             },
             transclude: true,
-            controller: ['$scope', '$element', '$attrs', 'GanttComponentService', 
+            controller: ['$scope', '$element', '$attrs', 'GanttComponentService',
             function ControllerFn($scope, $element, $attrs, GanttComponentService) {
                 var self = this;
                 this.$onInit = function() {
@@ -49,13 +49,13 @@
                     self.task.updatePosAndSize();
 
                     // LINE FOR TALAIA
-                    // self.task.calculateDuration();
+                    self.task.calculateDuration();
                 });
 
                  this.$onDestroy = function() {
                     GanttComponentService.raiseDestroyDirective('ganttTask', $scope, $element, $attrs, ControllerFn);
                 };
-                
+
             }],
             template: [
                         '<gantt-task-background-component class="gantt-task-background"></gantt-task-background-component>',
@@ -63,6 +63,6 @@
                         '<gantt-task-content-component class="gantt-task-content"></gantt-task-content-component>',
                         '<ng-transclude></ng-transclude>'
                       ].join('')
-        
+
         });
 }());
